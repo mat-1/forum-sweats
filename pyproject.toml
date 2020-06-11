@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "forum-sweats"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+aiohttp = "^3.6"
+discord = "^1.0"
+motor = "^2.1"
+dnspython = "^1.16"
+bs4 = "^0.0.1"
+cloudscraper = "^1.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
