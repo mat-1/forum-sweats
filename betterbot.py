@@ -58,7 +58,7 @@ class BetterBot():
 		except ValueError:
 			return
 
-	async def parse_args(self, parsing_left, func, ctx):
+	async def parse_args(self, parsing_left, func, ctx, ignore_extra=True):
 		'''
 		Parses the command arguments
 		'''
@@ -91,6 +91,9 @@ class BetterBot():
 					if isinstance(cmd_arg, str):
 						cmd_arg = cmd_arg.strip()
 					return_args.append(cmd_arg)
+		if parsing_left.strip():
+			if not ignore_extra:
+				raise Exception('Extra data left')
 		return return_args
 
 	async def process_commands(self, message):
@@ -117,9 +120,14 @@ class BetterBot():
 					return
 			ctx = Context(message, prefix=prefix)
 			if parsing_left:
-				return_args = await self.parse_args(parsing_left, func, ctx)
+				try:
+					return_args = await self.parse_args(parsing_left, func, ctx, ignore_extra=pad_none)
+				except Exception:
+					print('nope')
+					continue
 			else:
 				return_args = []
+			print(return_args, parsing_left)
 			for attempt in range(10):
 				try:
 					return await func(ctx, *return_args)
@@ -145,6 +153,12 @@ Member
 def get_channel_members(channel_id):
 	try:
 		return discordbot.client.get_channel(channel_id).members
+	except:
+		return [discordbot.client.get_channel(channel_id).recipient]
+
+def get_guild_members(channel_id):
+	try:
+		return discordbot.client.get_guild(channel_id).members
 	except:
 		return [discordbot.client.get_channel(channel_id).recipient]
 
@@ -182,7 +196,7 @@ def check_mention(ctx, arg):
 def check_name_with_discrim(ctx, arg):
 	member = discord.utils.find(
 		lambda m: str(m).lower() == arg.lower(),
-		get_channel_members(ctx.channel.id)
+		get_guild_members(ctx.guild.id)
 	)
 	return member
 
@@ -190,7 +204,7 @@ def check_name_with_discrim(ctx, arg):
 def check_name_without_discrim(ctx, arg):
 	member = discord.utils.find(
 		lambda m: m.name.lower == arg.lower(),
-		get_channel_members(ctx.channel.id)
+		get_guild_members(ctx.guild.id)
 	)
 	return member
 
@@ -198,7 +212,7 @@ def check_name_without_discrim(ctx, arg):
 def check_nickname(ctx, arg):
 	member = discord.utils.find(
 		lambda m: m.display_name.lower() == arg.lower(),
-		get_channel_members(ctx.channel.id)
+		get_guild_members(ctx.guild.id)
 	)
 	return member
 
@@ -206,7 +220,7 @@ def check_nickname(ctx, arg):
 def check_name_starts_with(ctx, arg):
 	member = discord.utils.find(
 		lambda m: m.name.lower().startswith(arg.lower()),
-		get_channel_members(ctx.channel.id)
+		get_guild_members(ctx.guild.id)
 	)
 	return member
 
@@ -214,7 +228,7 @@ def check_name_starts_with(ctx, arg):
 def check_nickname_starts_with(ctx, arg):
 	member = discord.utils.find(
 		lambda m: m.display_name.lower().startswith(arg.lower()),
-		get_channel_members(ctx.channel.id)
+		get_guild_members(ctx.guild.id)
 	)
 	return member
 
@@ -222,7 +236,7 @@ def check_nickname_starts_with(ctx, arg):
 def check_name_contains(ctx, arg):
 	member = discord.utils.find(
 		lambda m: arg.lower() in m.name.lower(),
-		get_channel_members(ctx.channel.id)
+		get_guild_members(ctx.guild.id)
 	)
 	return member
 
@@ -230,7 +244,7 @@ def check_name_contains(ctx, arg):
 def check_nickname_contains(ctx, arg):
 	member = discord.utils.find(
 		lambda m: arg.lower() in m.display_name.lower(),
-		get_channel_members(ctx.channel.id)
+		get_guild_members(ctx.guild.id)
 	)
 	return member
 

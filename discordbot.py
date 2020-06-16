@@ -5,6 +5,8 @@ import json
 import db
 import time
 import asyncio
+import forums
+
 
 prefix = '!'
 betterbot = BetterBot(
@@ -15,8 +17,16 @@ betterbot = BetterBot(
 with open('roles.json', 'r') as f:
 	roles = json.loads(f.read())
 
-def get_role_id(guild_id, rank_name):
-	return roles.get(str(guild_id), {}).get(rank_name)
+def get_role_id(guild_id, role_name):
+	return roles.get(str(guild_id), {}).get(role_name)
+
+def has_role(member_id, guild_id, role_name):
+	'Checks if a member has a role from roles.json'
+	guild = client.get_guild(guild_id)
+	member = guild.get_member(member_id)
+
+	role_id = get_role_id(guild_id, role_name)
+	return any([role_id == role.id for role in member.roles])
 
 client = discord.Client()
 
@@ -27,19 +37,21 @@ async def start_bot():
 @client.event
 async def on_ready():
 	print('ready')
+	await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
+
 	await client.change_presence(
 		activity=discord.Game(name='e')
 	)
 	active_mutes = await db.get_active_mutes()
+	print('active_mutes', active_mutes)
 	for muted_id in active_mutes:
-		mute_end = active_mutes[muted_id]
-		await unmute_user(muted_id, mute_end)
+		asyncio.ensure_future(unmute_user(muted_id, True))
 
 @client.event
 async def on_member_join(member):
 	mute_end = await db.get_mute_end(member.id)
 	if mute_end and mute_end > time.time():
-		await mute_user(member, time.time() - mute_end, member.guild.id)
+		await mute_user(member, mute_end - time.time(), member.guild.id)
 
 @client.event
 async def on_message(message):
@@ -72,13 +84,25 @@ async def mute_user(member, length, guild_id=None):
 
 	await member.add_roles(muted_role)
 	await member.remove_roles(member_role)
-	await db.set_mute_end(
-		member.id,
-		time.time() + length,
-		{
+	
+	unmute_time = await db.get_mute_end(member.id)
+	unmute_in = unmute_time - time.time()
+
+	muted_before = False
+	
+	if unmute_in < 0:
+		extra_data = {
 			'sweat': sweat_role in member.roles,
 			'og': og_role in member.roles,
 		}
+	else:
+		extra_data = await db.get_mute_data(member.id)
+		muted_before = True
+
+	await db.set_mute_end(
+		member.id,
+		time.time() + length,
+		extra_data
 	)
 
 	if sweat_role in member.roles:
@@ -87,19 +111,47 @@ async def mute_user(member, length, guild_id=None):
 	if og_role in member.roles:
 		await member.remove_roles(og_role)
 
+	gulag = client.get_channel(720073985412562975)
+	if not muted_before:
+		await gulag.send(f'Welcome to gulag, <@{member.id}>.')
+	else:
+		mute_remaining = int(length)
+		mute_remaining_minutes = int(mute_remaining // 60)
+		mute_remaining_hours = int(mute_remaining_minutes // 60)
+		if mute_remaining_hours >= 2:
+			mute_str = f'{mute_remaining_hours} hours'
+		elif mute_remaining_hours == 1:
+			mute_str = f'one hour'
+		elif mute_remaining_minutes >= 2:
+			mute_str = f'{mute_remaining_minutes} minutes'
+		elif mute_remaining_minutes == 1:
+			mute_str = f'one minute'
+		elif mute_remaining == 1:
+			mute_str = f'one second'
+		else:
+			mute_str = f'{mute_remaining} seconds'
 
+		await gulag.send(f'<@{member.id}>, your mute is now {mute_str}')
 
-	await unmute_user(member.id, length)
+	await unmute_user(member.id, wait=True)
 
-async def unmute_user(user_id, unmute_in=0):
+async def unmute_user(user_id, wait=False, gulag_message=True):
 	'Unmutes a user after a certain amount of seconds pass'
-	if unmute_in > 0:
+	if wait:
+		print('unmuting in...')
+		unmute_time = await db.get_mute_end(user_id)
+		unmute_in = unmute_time - time.time()
+		print('unmute_in', unmute_in)
 		await asyncio.sleep(unmute_in)
+		if (await db.get_mute_end(user_id) != unmute_time):
+			return print('Mute seems to have been extended.')
+	print('now unmuting')
 
 	mute_data = await db.get_mute_data(user_id)
 
 	for guild in client.guilds:
 		member = guild.get_member(user_id)
+		if not member: continue
 
 		muted_role_id = get_role_id(guild.id, 'muted')
 		muted_role = guild.get_role(muted_role_id)
@@ -123,7 +175,11 @@ async def unmute_user(user_id, unmute_in=0):
 			await member.add_roles(og_role)
 
 
-	await db.set_mute_end(member.id, time.time())
+	await db.set_mute_end(user_id, time.time())
+
+	if gulag_message:
+		gulag = client.get_channel(720073985412562975)
+		await gulag.send(f'<@{user_id}> has left gulag.')
 
 	
 

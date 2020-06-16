@@ -63,6 +63,7 @@ async def set_mute_end(user_id, end_time, extra_data={}):
 	}
 	for data in extra_data:
 		set_data[f'muted_data.{data}'] = extra_data[data]
+	set_data['muted'] = end_time > time.time()
 	await member_data.update_one(
 		{
 			'discord': user_id
@@ -72,6 +73,18 @@ async def set_mute_end(user_id, end_time, extra_data={}):
 		},
 		upsert=True
 	)
+
+async def get_is_muted(user_id):
+	data = await member_data.find_one(
+		{
+			'discord': int(user_id)
+		}
+	)
+	if data:
+		return data.get('muted', False)
+	else:
+		return 0
+
 
 async def get_mute_end(user_id):
 	data = await member_data.find_one(
@@ -134,3 +147,28 @@ async def clear_infractions(user_id, date):
 		}
 	})
 	return r.deleted_count
+
+async def set_rock(user_id):
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$set': {
+				'last_rock': time.time()
+			}
+		},
+		upsert=True
+	)
+
+
+async def get_rock(user_id):
+	data = await member_data.find_one(
+		{
+			'discord': int(user_id)
+		}
+	)
+	if data:
+		return data.get('last_rock', 0)
+	else:
+		return 0

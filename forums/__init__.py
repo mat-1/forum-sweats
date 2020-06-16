@@ -1,9 +1,11 @@
 
-# hypixel forums.py v0.2
+# hypixel forums.py v0.7
 
 from bs4 import BeautifulSoup
 import time
 from . import aiocloudscraper
+import aiohttp
+import asyncio
 
 ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0'
 
@@ -20,6 +22,9 @@ User data:
 
 async def login(email, password):
 	r = await s.get('https://hypixel.net/login')
+	if r.status == 429:
+		await asyncio.sleep(1)
+		return await login(email, password)
 	login_html = await r.text()
 	soup = BeautifulSoup(login_html, features='html5lib')
 	_xfToken_el = soup.find(attrs={'name': '_xfToken'})
@@ -151,6 +156,11 @@ async def get_member(member_id):
 	member_data.update(member_about_data)
 
 	r = await s.get(f'https://hypixel.net/members/{member_id}/')
+
+	if r.status == 429:
+		await asyncio.sleep(5)
+		return await get_member(member_id)
+
 	member_html = await r.text()
 	soup = BeautifulSoup(member_html, features='html5lib')
 	try:
@@ -163,17 +173,25 @@ async def get_member(member_id):
 	except AttributeError:
 		positive_reactions_count = 0
 
+	member_id = member_about_data['id']
+
+	icon_url = f'https://hypixel.net/data/avatars/l/{str(member_id)[:-3]}/{member_id}.jpg'
+
 	member_data.update({
 		'messages': message_count,
 		'reactions': {
 			'positive_total': positive_reactions_count
-		}
+		},
+		'avatar_url': icon_url
 	})
 
 	return member_data
 
 async def get_member_about(member_id):
 	r = await s.get(f'https://hypixel.net/members/{member_id}/about')
+	if r.status == 429:
+		await asyncio.sleep(1)
+		return await get_member_about(member_id)
 	member_about_html = await r.text()
 	soup = BeautifulSoup(member_about_html, features='html5lib')
 	
@@ -199,3 +217,49 @@ async def get_member_about(member_id):
 		'name': forum_username,
 		'follower_count': follower_count,
 	}
+
+async def search_members(query):
+	r = await s.get(f'https://hypixel.net/')
+	if r.status == 429:
+		await asyncio.sleep(1)
+		return await search_members(query)
+	forum_index_html = await r.text()
+	soup = BeautifulSoup(forum_index_html, features='html5lib')
+
+	_xfToken_el = soup.find(attrs={'name': '_xfToken'})
+	_xfToken = _xfToken_el['value'].replace(',', '%2C')
+
+	url = f'https://hypixel.net/index.php?members/find&q={query}&_xfToken={_xfToken}&_xfResponseType=json'
+
+	r = await s.get(url)
+	if r.status == 429:
+		await asyncio.sleep(2)
+		return await search_members(query)
+
+	try:
+		data = await r.json()
+	except aiohttp.client_exceptions.ContentTypeError:
+		pass
+	if 'results' not in data:
+		await asyncio.sleep(2)
+		return await search_members(query)
+	results = data['results']
+
+	results_clean = []
+
+	for result in results:
+		name = result['text']
+		icon_html = result['iconHtml']
+		icon_soup = BeautifulSoup(icon_html, features='html5lib')
+		member_id = int(icon_soup.find(class_='avatar')['data-user-id'])
+		results_clean.append({
+			'id': member_id,
+			'name': name
+		})
+	return results_clean
+
+async def member_id_from_name(username):
+	results = await search_members(username)
+	for result in results:
+		if username.lower() == result['name'].lower():
+			return result['id']
