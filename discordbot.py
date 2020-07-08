@@ -6,7 +6,7 @@ import db
 import time
 import asyncio
 import forums
-
+from datetime import datetime, timedelta
 
 prefix = '!'
 betterbot = BetterBot(
@@ -49,9 +49,19 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
+	if datetime.now() - member.created_at < timedelta(days=7):
+		await member.send('You were kicked from Forum Sweats because your Discord account is too new. This is an anti-spam measure, and you will be able to join the server after your account is at least week old.')
+		await member.kick(reason='Account too new')
+		return
 	mute_end = await db.get_mute_end(member.id)
 	if mute_end and mute_end > time.time():
 		await mute_user(member, mute_end - time.time(), member.guild.id)
+	else:
+		is_member = await db.get_is_member(member.id)
+		if is_member:
+			member_role_id = get_role_id(member.guild.id, 'member')
+			member_role = member.guild.get_role(member_role_id)
+			await member.add_roles(member_role, reason='Linked member rejoined')
 
 @client.event
 async def on_message(message):

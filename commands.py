@@ -77,20 +77,28 @@ async def link(message, ign: str=None):
 			description=f'Incorrect username. Did you link your account correctly in Hypixel? ({ign} is linked to {discord_name})'
 		))
 
-	# Remove the user's old rank
 	old_rank = await db.get_hypixel_rank(message.author.id)
-	if old_rank:
-		old_rank_role_id = get_role_id(message.guild.id, old_rank)
-		if old_rank_role_id:
-			old_rank_role = message.guild.get_role(old_rank_role_id)
-			await message.author.remove_roles(old_rank_role, reason='Old rank')
-	
-	# new_rank = await hypixel.get_hypixel_rank(ign)
-	new_rank = data['rank']
-	new_rank_role_id = get_role_id(message.guild.id, new_rank)
-	if new_rank_role_id:
-		new_rank_role = message.guild.get_role(new_rank_role_id)
-		await message.author.add_roles(new_rank_role, reason='Update rank')
+	new_rank = await hypixel.get_hypixel_rank(ign)
+
+	# Give the user their rank in all servers
+	for guild in client.guilds:
+		member = guild.get_member(message.author.id)
+		if not member:
+			# Member isn't in the guild
+			continue
+
+		# Remove the user's old rank
+		if old_rank:
+			old_rank_role_id = get_role_id(guild.id, old_rank)
+			if old_rank_role_id:
+				old_rank_role = guild.get_role(old_rank_role_id)
+				await member.remove_roles(old_rank_role, reason='Old rank')		
+		
+		new_rank = data['rank']
+		new_rank_role_id = get_role_id(guild.id, new_rank)
+		if new_rank_role_id:
+			new_rank_role = guild.get_role(new_rank_role_id)
+			await member.add_roles(new_rank_role, reason='Update rank')
 
 	await db.set_hypixel_rank(message.author.id, new_rank)
 	await db.set_minecraft_ign(message.author.id, ign, data['uuid'])
@@ -107,6 +115,26 @@ async def link(message, ign: str=None):
 				description=f'Linked your account to **{ign}**.'
 			)
 		)
+
+	# If you're muted, stop running the function
+	mute_end = await db.get_mute_end(message.author.id)
+	if (mute_end and mute_end > time.time()):
+		return
+
+	# You're already verified, stop running the function
+	is_member = await db.get_is_member(message.author.id)
+	if is_member: return
+
+	for guild in client.guilds:
+		member = guild.get_member(message.author.id)
+		if not member:
+			# Member isn't in the guild
+			continue
+		member_role_id = get_role_id(guild.id, 'member')
+		member_role = guild.get_role(member_role_id)
+		await member.add_roles(member_role, reason='New member linked')
+	await message.channel.send('You can now send messages in the server.')
+	await db.set_is_member(message.author.id)
 
 @betterbot.command(name='whois')
 async def whois(message, member: Member=None):
@@ -149,7 +177,10 @@ async def debugtime(message, length: Time):
 async def mute(message, member: Member, length: Time=0, reason: str=None):
 	'Mutes a member for a specified amount of time'
 
-	if not has_role(message.author.id, 717904501692170260, 'helper'): return
+	if not (
+		has_role(message.author.id, 717904501692170260, 'helper')
+		or has_role(message.author.id, 717904501692170260, 'trialhelper')
+	): return
 
 	if not member or not length:
 		return await message.channel.send(
@@ -434,7 +465,7 @@ def add_forum_ratelimit(user):
 async def forum_user(message, command, user):
 	if command not in {
 		'member',
-		'user'
+		'user',
 	}:
 		raise TypeError
 
@@ -475,6 +506,25 @@ async def forum_user(message, command, user):
 
 
 		await message.channel.send(embed=embed)
+
+# !forum thread
+@betterbot.command(name='forum', aliases=['forums', 'f'], pad_none=False)
+async def forum_user(message, command, user):
+	if command not in {
+		'post',
+		'thread',
+	}:
+		raise TypeError
+
+	if check_forum_ratelimit(message.author.id):
+		return await message.send('Stop spamming the command, nerd')
+	add_forum_ratelimit(message.author.id)
+
+
+	async with message.channel.typing():
+		member_id = await forums.member_id_from_name(user)
+		await message.channel.send('coming soon')
+
 
 @betterbot.command(name='pee', bot_channel=False)
 async def pee(message):
@@ -601,3 +651,19 @@ async def mute_length(message, member: Member=None):
 		await message.send(embed=discord.Embed(
 			description=f'<@{member.id}> is muted for {mute_str}'
 		))
+
+@betterbot.command(name='stackdandelion', aliases=['stackdandelions', 'fixdandelionstacking'])
+async def fix_dandelion_stacking(message):
+	if not fix_dandelion_stacking.fixed:
+		await message.send('Dandelion stacking has been fixed.')
+	else:
+		await message.send('Dandelion stacking is now broken again.')
+	fix_dandelion_stacking.fixed = not fix_dandelion_stacking.fixed
+fix_dandelion_stacking.fixed = False
+
+
+@betterbot.command(name='giveaway', bot_channel=False)
+async def start_giveaway(message, length, prize):
+	if not has_role(message.author.id, 717904501692170260, 'helper'): return
+
+

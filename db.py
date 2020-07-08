@@ -172,3 +172,30 @@ async def get_rock(user_id):
 		return data.get('last_rock', 0)
 	else:
 		return 0
+
+
+
+async def set_is_member(user_id):
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$set': {
+				'member': True
+			}
+		},
+		upsert=True
+	)
+
+
+async def get_is_member(user_id):
+	data = await member_data.find_one(
+		{
+			'discord': int(user_id)
+		}
+	)
+	if data:
+		return data.get('member', False)
+	else:
+		return 0

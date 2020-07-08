@@ -1,5 +1,5 @@
 
-# hypixel forums.py v0.7
+# hypixel forums.py v0.12
 
 from bs4 import BeautifulSoup
 import time
@@ -7,9 +7,10 @@ from . import aiocloudscraper
 import aiohttp
 import asyncio
 
-ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0'
+ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0'
 
 s = aiocloudscraper.AsyncCloudScraper()
+# s = aiohttp.ClientSession()
 
 '''
 User data:
@@ -17,8 +18,28 @@ User data:
 - title (forum title, new member, well known, etc)
 - name (forum username)
 - follower_count (forum follower acount)
-
+- messages (total number of forum posts)
 '''
+
+reaction_id_to_names = {
+	'': 'All',
+	'1': 'Like',
+
+	'3': 'Funny',
+	'4': 'Creative',
+	'5': 'Dislike',
+
+	'7': 'Agree',
+	'8': 'Disagree',
+	'9': 'Useful',
+	'10': 'Mod Emerald',
+	'11': 'Hype Train',
+	'12': 'Admin Diamond',
+	'13': 'Helper Lapis',
+	'14': 'Wat',
+	'15': 'Bug',
+}
+
 
 async def login(email, password):
 	r = await s.get('https://hypixel.net/login')
@@ -36,15 +57,20 @@ async def login(email, password):
 		'_xfRedirect': 'https://hypixel.net/',
 		'_xfToken': _xfToken
 	}, headers={
-		'content-type': 'application/x-www-form-urlencoded'
+		'content-type': 'application/x-www-form-urlencoded',
 	})
+	with open('aaaaa.html', 'w') as f:
+		f.write(await r.text())
 
 async def get_recent_posts(forum='skyblock', page=1):
 	forum_ids = {
 		'skyblock': 157,
 		'skyblock-patch-notes': 158,
 		'news-and-announcements': 4,
+		'official-hypixel-minecraft-server': 'official-hypixel-minecraft-server',
+		'hypixel-server-discussion': 'official-hypixel-minecraft-server'
 	}
+
 	forum_id = forum_ids.get(forum.lower().replace(' ', '-'), forum)
 	r = await s.get(f'https://hypixel.net/forums/{forum_id}/page-{page}')
 	url_page_part = str(r.url).split('/')[-1]
@@ -60,13 +86,13 @@ async def get_recent_posts(forum='skyblock', page=1):
 	for post_main_el in bs4_post_lists:
 		title = post_main_el.find(class_='structItem-title').text.strip()
 		url = post_main_el.find(class_='structItem-title').a['href']
-		author_id = post_main_el.find(class_='username')['data-user-id']
+		author_id = int(post_main_el.find(class_='username')['data-user-id'])
 		author_name = post_main_el.find(class_='username').text.strip()
 		created_time_string = post_main_el.find(class_='u-dt')['data-time']
 		created_time = int(created_time_string)
 		post_id = url.split('/')[-2].split('.')[-1]
 
-		last_message_author_id = post_main_el.findAll(class_='username')[-1]['data-user-id']
+		last_message_author_id = int(post_main_el.findAll(class_='username')[-1]['data-user-id'])
 		last_message_author_name = post_main_el.findAll(class_='username')[-1].text.strip()
 
 		is_recent = (time.time() - created_time) < 60 * 60 * 24 * 2
@@ -88,7 +114,7 @@ async def get_recent_posts(forum='skyblock', page=1):
 		})
 	return posts
 
-async def get_post(post_id):
+async def get_thread(post_id):
 	post_url = f'https://hypixel.net/threads/{post_id}/'
 	r = await s.get(post_url)
 	forum_post_html = await r.text()
@@ -114,7 +140,27 @@ async def get_post(post_id):
 		}
 	}
 
-async def reply(post_id, content):
+async def get_post_reactions(post_id):
+	post_url = f'https://hypixel.net/posts/{post_id}/reactions'
+	r = await s.get(post_url)
+	post_reactions_html = await r.text()
+	soup = BeautifulSoup(post_reactions_html, features='html5lib')
+	
+
+	reactions = {}
+
+	for tab_el in soup.findAll(class_='tabs-tab'):
+		if not tab_el['id']:
+			continue
+		reaction_id = tab_el['id'].split('-')[-1]
+		reaction_count = int(tab_el.text.strip().split(' ')[-1].strip('()'))
+		if reaction_id not in reactions:
+			reactions[reaction_id] = 0
+		reactions[reaction_id] += reaction_count
+	return reactions
+
+
+async def reply(post_id, content, bbcode=False):
 	r = await s.get(f'https://hypixel.net/threads/post.{post_id}/')
 	forum_post_html = await r.text()
 	soup = BeautifulSoup(forum_post_html, features='html5lib')
@@ -131,31 +177,113 @@ async def reply(post_id, content):
 	last_known_date = last_known_date_el['value']
 	_xfToken = _xfToken_el['value']
 
+	data = {
+		'attachment_hash': attachment_hash,
+		'attachment_hash_combined': attachment_hash_combined,
+		'last_date': last_date,
+		'last_known_date': last_known_date,
+		'_xfToken': _xfToken,
+		'_xfRequestUri': f'/threads/post.{post_id}/',
+		'_xfWithData': '1',
+		'_xfToken': _xfToken,
+		'_xfResponseType': 'json'
+	}
 
-	content_html = content
+	if not bbcode:
+		content_html = content
+		data['message_html'] = content_html
+	else:
+		data['message'] = content
+	
 	r = await s.post(
 		f'https://hypixel.net/threads/post.{post_id}/add-reply',
-		data={
-			'message_html': content_html,
-			'attachment_hash': attachment_hash,
-			'attachment_hash_combined': attachment_hash_combined,
-			'last_date': last_date,
-			'last_known_date': last_known_date,
-			'_xfToken': _xfToken,
-			'_xfRequestUri': f'/threads/post.{post_id}/',
-			'_xfWithData': '1',
-			'_xfToken': _xfToken,
-			'_xfResponseType': 'json'
-		}
+		data=data
 	)
 
-async def get_member(member_id):
+async def edit(post_id, title, content, bbcode=False):
+	r = await s.get(f'https://hypixel.net/threads/post.{post_id}/')
+	print(r.url.path)
+	forum_post_html = await r.text()
+	soup = BeautifulSoup(forum_post_html, features='html5lib')
+
+	other_post_id = soup.find('article')['data-content'].split('-')[-1]
+
+	attachment_hash_el = soup.find(attrs={'name': 'attachment_hash'})
+	with open('e.html', 'w') as f:
+		f.write(soup.prettify())
+	attachment_hash_combined_el = soup.find(attrs={'name': 'attachment_hash_combined'})
+	# last_date_el = soup.find(attrs={'name': 'last_date'})
+	# last_known_date_el = soup.find(attrs={'name': 'last_known_date'})
+	_xfToken = soup.find('html')['data-csrf']
+	print('_xfToken', _xfToken)
+
+	attachment_hash = attachment_hash_el['value']
+	attachment_hash_combined = attachment_hash_combined_el['value']
+	# last_date = last_date_el['value']
+	# last_known_date = last_known_date_el['value']
+	# _xfToken = _xfToken_el['value']
+	_xfRequestUri = r.url.path
+	print('_xfToken', _xfToken)
+
+	r = await s.get(
+		f'https://hypixel.net/posts/{other_post_id}/edit'
+		f'?_xfRequestUri={_xfRequestUri}'
+		'&_xfWithData=1'
+		f'&_xfToken={_xfToken}'
+		'&_xfResponseType=json'
+	)
+	print(r.url)
+	print(await r.text())
+	print(r.status)
+
+
+	data = {}
+
+	if not bbcode:
+		content_html = content
+		data['message_html'] = content_html
+	else:
+		data['message'] = content
+	data['title'] = title
+	
+	data.update({
+		'attachment_hash': attachment_hash,
+		'attachment_hash_combined': attachment_hash_combined,
+		# 'last_date': last_date,
+		# 'last_known_date': last_known_date,
+		'_xfToken': _xfToken,
+		'_xfRequestUri': _xfRequestUri,
+		'_xfWithData': '1',
+		'_xfToken': _xfToken,
+		'_xfResponseType': 'json',
+		'_xfInlineEdit': '1'
+	})
+
+	r = await s.post(
+		f'https://hypixel.net/posts/{other_post_id}/edit',
+		data=data,
+		headers={
+			# 'X-Requested-With': 'XMLHttpRequest',
+			# 'accept': 'application/json, text/javascript, */*; q=0.01',
+			# 'Referer': str(r.url)
+		}
+	)
+	print(await r.text())
+	print(r.url)
+
+async def get_member(member_id, ratings=False):
 	member_data = {}
 
-	member_about_data = await get_member_about(member_id)
-	member_data.update(member_about_data)
+	try:
+		member_about_data = await get_member_about(member_id)
+		if member_about_data['name'] == 'Oops! We ran into some problems.':
+			print('Oops! We ran into some problems.')
+		else:
+			member_data.update(member_about_data)
+	except:
+		pass
 
-	r = await s.get(f'https://hypixel.net/members/{member_id}/')
+	r = await s.get(f'https://hypixel.net/members/{member_id}/tooltip')
 
 	if r.status == 429:
 		await asyncio.sleep(5)
@@ -173,11 +301,13 @@ async def get_member(member_id):
 	except AttributeError:
 		positive_reactions_count = 0
 
-	member_id = member_about_data['id']
-
 	icon_url = f'https://hypixel.net/data/avatars/l/{str(member_id)[:-3]}/{member_id}.jpg'
 
+	forum_username = soup.find(class_='username').text.strip()
+
 	member_data.update({
+		'id': int(member_id),
+		'name': forum_username,
 		'messages': message_count,
 		'reactions': {
 			'positive_total': positive_reactions_count
@@ -200,7 +330,7 @@ async def get_member_about(member_id):
 			.find(class_='block-body')\
 			.findAll(class_='block-row', recursive=False)\
 			[-2]
-		preview_count = len(followers_block_row.find(class_='listHeap').find('li'))
+		preview_count = len(followers_block_row.find(class_='listHeap').findAll('li'))
 		try:
 			extra_count = int(followers_block_row.findAll('a')[-1].text.strip().split(' ')[2])
 		except IndexError:
@@ -263,3 +393,64 @@ async def member_id_from_name(username):
 	for result in results:
 		if username.lower() == result['name'].lower():
 			return result['id']
+
+async def get_posts_from_member(member_id):
+	posts = []
+
+	actual_last_page = False
+
+	url = f'https://hypixel.net/search/member?user_id={member_id}'
+	while not actual_last_page:
+		r = None
+		while not r:
+			r = await s.get(url)
+			if r.status == 429:
+				await asyncio.sleep(5)
+				r = None
+		initial_url = str(r.url)
+		page = 1
+		last_page = False
+		while not last_page:
+			soup = BeautifulSoup(await r.text(), features='html5lib')
+			post_els = soup.findAll(class_='contentRow-main')
+			for post_el in post_els:
+				post_url = post_el.find('h3').find('a')['href']
+				post_title = post_el.find('h3').text.strip()
+				post_id = int(post_url.strip('/').split('/')[-1].split('-')[-1].split('.')[-1])
+				post_time = int(post_el.find('time')['data-time'])
+				forum_url = post_el.find(class_='listInline').findAll('a')[-1]['href']
+				try:
+					forum_id = int(forum_url.split('.')[-1].strip('/'))
+				except ValueError:
+					forum_id = 1
+				author_id = int(post_el.find(class_='username')['data-user-id'])
+				author_name = post_el.find(class_='username').text.strip()
+				posts.append({
+					'title': post_title,
+					'id': post_id,
+					'forum_id': forum_id,
+					'time': post_time,
+					'author': {
+						'id': author_id,
+						'name': author_name,
+					}
+				})
+			if not post_els:
+				actual_last_page = True
+				last_page = True
+				# with open('e.html', 'w') as f:
+				# 	f.write(soup.prettify())
+			else:
+				page += 1
+				url = initial_url + f'?page={page}'
+				# r = await s.get(url)
+				r = None
+				while not r:
+					r = await s.get(url)
+					if r.status == 429:
+						await asyncio.sleep(5)
+						r = None
+				if r.url.query.get('page', '1') != str(page):
+					last_page = True
+					url = initial_url + 'older?before=' + str(post_time)
+	return posts

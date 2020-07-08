@@ -62,7 +62,7 @@ class BetterBot():
 		'''
 		Parses the command arguments
 		'''
-		# Annotations are the expected types
+		# Annotations are the expected types (str, int, Member, etc)
 		ann = func.__annotations__
 		# Args is all the arguments for the function
 		args = func.__code__.co_varnames[1:]  # [1:] to skip ctx
