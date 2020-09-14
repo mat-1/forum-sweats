@@ -1,12 +1,26 @@
 from aiohttp import web
-import asyncio
+import discordbot
 import commands
+import asyncio
+import os
 
 routes = web.RouteTableDef()
 
 @routes.get('/')
 async def index(request):
 	return web.Response(text='e')
+
+@routes.get('/kill')
+async def kill_bot(request):
+	if request.query.get('token') == os.getenv('token'):
+		exit()
+	return web.Response(text='e')
+
+@routes.get('/api/members')
+async def api_members(request):
+	return web.json_response(discordbot.api_get_members())
+
+
 
 def start_server(loop, background_task, client):
 	#app.discord = client

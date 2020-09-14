@@ -1,5 +1,5 @@
 
-# hypixel forums.py v0.12
+# hypixel forums.py v0.13
 
 from bs4 import BeautifulSoup
 import time
@@ -40,6 +40,10 @@ reaction_id_to_names = {
 	'15': 'Bug',
 }
 
+def avatar_from_id(user_id):
+	id_start = str(user_id)[:-3]
+	print('id_start', id_start)
+	return f'https://hypixel.net/data/avatars/l/{id_start}/{user_id}.jpg'
 
 async def login(email, password):
 	r = await s.get('https://hypixel.net/login')
@@ -114,14 +118,27 @@ async def get_recent_posts(forum='skyblock', page=1):
 		})
 	return posts
 
-async def get_thread(post_id):
+async def get_thread(post_id, is_thread=True):
 	post_url = f'https://hypixel.net/threads/{post_id}/'
 	r = await s.get(post_url)
 	forum_post_html = await r.text()
 	soup = BeautifulSoup(forum_post_html, features='html5lib')
 	post_element = soup.find(class_='message-inner')
+	if not post_element: return
 	body_text = post_element.find(class_='message-body').text.strip()
+	body_image_element = post_element.find(class_='message-body').find('img')
+	if body_image_element:
+		body_image = body_image_element['src']
+	else:
+		body_image = None
+
+	user_name = post_element.find(class_='username').text.strip()
+	user_id = post_element.find(class_='username')['data-user-id'].strip()
 	user_title = post_element.find(class_='userTitle').text.strip()
+	user_avatar_url = avatar_from_id(user_id)
+	user_url = f'https://hypixel.net/members/{user_id}'
+
+
 	post_title = soup.find(class_='p-title-value').text.strip()
 
 	created_time_string = soup.find(class_='u-dt')['data-time']
@@ -129,14 +146,20 @@ async def get_thread(post_id):
 
 	is_recent = (time.time() - created_time) < 60 * 60 * 24 * 2
 
+
 	return {
 		'body': body_text,
 		'title': post_title,
 		'id': int(post_id),
 		'is_recent': is_recent,
 		'url': str(r.url),
+		'image': body_image,
 		'author': {
-			'title': user_title
+			'name': user_name,
+			'url': user_url,
+			'id': user_id,
+			'title': user_title,
+			'avatar_url': user_avatar_url,
 		}
 	}
 
@@ -301,7 +324,7 @@ async def get_member(member_id, ratings=False):
 	except AttributeError:
 		positive_reactions_count = 0
 
-	icon_url = f'https://hypixel.net/data/avatars/l/{str(member_id)[:-3]}/{member_id}.jpg'
+	icon_url = avatar_from_id(member_id)
 
 	forum_username = soup.find(class_='username').text.strip()
 
@@ -317,11 +340,15 @@ async def get_member(member_id, ratings=False):
 
 	return member_data
 
+class ProfileLimited(Exception): pass
+
 async def get_member_about(member_id):
 	r = await s.get(f'https://hypixel.net/members/{member_id}/about')
 	if r.status == 429:
 		await asyncio.sleep(1)
 		return await get_member_about(member_id)
+	if r.status == 403:
+		raise ProfileLimited('This member limits who may view their full profile.')
 	member_about_html = await r.text()
 	soup = BeautifulSoup(member_about_html, features='html5lib')
 	

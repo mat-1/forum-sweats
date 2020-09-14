@@ -2,12 +2,13 @@ import discordbot
 import discord
 from discord.ext import commands
 import re
+import time
 
 
 # this is just so i can customize command parsing more
 
 class Context():  # very unfinished but its fine probably
-	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content')
+	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content', 'add_reaction', 'delete')
 
 	async def send(self, *args, embed=None, **kwargs):
 		'Send a message to a channel'
@@ -22,6 +23,9 @@ class Context():  # very unfinished but its fine probably
 		self.guild = message.guild
 		self.author = message.author
 
+		self.add_reaction = message.add_reaction
+		self.delete = message.delete
+
 		self.prefix = prefix
 		self.client = discordbot.client
 
@@ -35,6 +39,8 @@ bot_channels = {
 	), # forum sweats, bot-commands
 	719349183974473851: 719349184750420010, # bot testing, general
 }
+
+recent_members = {}
 
 class BetterBot():
 	functions = []
@@ -97,6 +103,8 @@ class BetterBot():
 		return return_args
 
 	async def process_commands(self, message):
+		global recent_members
+		recent_members[message.author] = time.time()
 		if message.author.bot:
 			return
 		parsing_left = message.content.replace('  ', ' ')
@@ -144,6 +152,16 @@ class BetterBot():
 			return func
 		return decorator
 
+
+def get_recent_members():
+	'Gets members that talked in chat in the past hour'
+	members = []
+	for member in dict(recent_members):
+		if recent_members[member] < 60 * 60:
+			members.append(member)
+		else:
+			del recent_members[member]
+	return members
 
 
 '''
@@ -216,11 +234,25 @@ def check_nickname(ctx, arg):
 	)
 	return member
 
+def check_nickname_recent(ctx, arg):
+	member = discord.utils.find(
+		lambda m: m.display_name.lower() == arg.lower(),
+		get_recent_members()
+	)
+	return member
+
 
 def check_name_starts_with(ctx, arg):
 	member = discord.utils.find(
 		lambda m: m.name.lower().startswith(arg.lower()),
 		get_guild_members(ctx.guild.id)
+	)
+	return member
+
+def check_name_starts_with_recent(ctx, arg):
+	member = discord.utils.find(
+		lambda m: m.name.lower().startswith(arg.lower()),
+		get_recent_members()
 	)
 	return member
 
@@ -232,11 +264,24 @@ def check_nickname_starts_with(ctx, arg):
 	)
 	return member
 
+def check_nickname_starts_with_recent(ctx, arg):
+	member = discord.utils.find(
+		lambda m: m.display_name.lower().startswith(arg.lower()),
+		get_recent_members()
+	)
+	return member
 
 def check_name_contains(ctx, arg):
 	member = discord.utils.find(
 		lambda m: arg.lower() in m.name.lower(),
 		get_guild_members(ctx.guild.id)
+	)
+	return member
+
+def check_name_contains_recent(ctx, arg):
+	member = discord.utils.find(
+		lambda m: arg.lower() in m.name.lower(),
+		get_recent_members()
 	)
 	return member
 
@@ -248,25 +293,40 @@ def check_nickname_contains(ctx, arg):
 	)
 	return member
 
+def check_nickname_contains_recent(ctx, arg):
+	member = discord.utils.find(
+		lambda m: arg.lower() in m.display_name.lower(),
+		get_recent_members()
+	)
+	return member
+
 class Member(commands.Converter):
 	async def convert(self, ctx, arg):
 		if arg[0] == '@':
 			arg = arg[1:]
 		
-		# these comments suck but i dont really want to remove them
-		# also this should be a module-level constant
-		# but this module is too big already
 		CHECKERS = [
 			check_user_id, # Check user id
 			check_mention, # Check mention
 			check_name_with_discrim, # Name + discrim
-			# check_name_with_discrim was repeated for some reason
-			# i hope removing it doesnt break something
-			check_nickname, # Nickname
+
 			check_name_starts_with, # Name starts with
+			check_name_starts_with_recent, # Name starts with
+			check_nickname_starts_with_recent, # Nickname starts with
+			check_name_contains_recent, # Name contains
+
+			check_nickname_recent, # Nickname
+			check_nickname, # Nickname
+
+
 			check_nickname_starts_with, # Nickname starts with
+
 			check_name_contains, # Name contains
+			
+			check_nickname_contains_recent, # Nickname contains
 			check_nickname_contains, # Nickname contains
+
+
 		]
 		for checker in CHECKERS:
 			member = checker(ctx, arg)
@@ -291,6 +351,8 @@ lengths = {
 
 	'minutes': 1 * 60,
 	'minute': 1 * 60,
+	'mins': 1 * 60,
+	'min': 1 * 60,
 	'm': 1 * 60,
 
 	'hours': 1 * 60 * 60,
@@ -312,9 +374,17 @@ lengths = {
 	'years': 1 * 60 * 60 * 24 * 365,
 	'year': 1 * 60 * 60 * 24 * 365,
 	'y': 1 * 60 * 60 * 24 * 365,
+
+	'eons': 1 * 60 * 60 * 24 * 365 * 1000000000,
+	'eon': 1 * 60 * 60 * 24 * 365 * 1000000000,
+	'e': 1 * 60 * 60 * 24 * 365 * 1000000000,
+	'aeon': 1 * 60 * 60 * 24 * 365 * 1000000000,
+	'aeons': 1 * 60 * 60 * 24 * 365 * 1000000000,
 }
 
 def check_time(ctx, arg):
+	if arg.strip() == 'forever':
+		return lengths['year'] * 1000
 	time_part = ''
 	for char in arg:
 		if char in '0123456789':
