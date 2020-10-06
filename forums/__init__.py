@@ -63,8 +63,6 @@ async def login(email, password):
 	}, headers={
 		'content-type': 'application/x-www-form-urlencoded',
 	})
-	with open('aaaaa.html', 'w') as f:
-		f.write(await r.text())
 
 async def get_recent_posts(forum='skyblock', page=1):
 	forum_ids = {
@@ -182,117 +180,6 @@ async def get_post_reactions(post_id):
 		reactions[reaction_id] += reaction_count
 	return reactions
 
-
-async def reply(post_id, content, bbcode=False):
-	r = await s.get(f'https://hypixel.net/threads/post.{post_id}/')
-	forum_post_html = await r.text()
-	soup = BeautifulSoup(forum_post_html, features='html5lib')
-
-	attachment_hash_el = soup.find(attrs={'name': 'attachment_hash'})
-	attachment_hash_combined_el = soup.find(attrs={'name': 'attachment_hash_combined'})
-	last_date_el = soup.find(attrs={'name': 'last_date'})
-	last_known_date_el = soup.find(attrs={'name': 'last_known_date'})
-	_xfToken_el = soup.find(attrs={'name': '_xfToken'})
-
-	attachment_hash = attachment_hash_el['value']
-	attachment_hash_combined = attachment_hash_combined_el['value']
-	last_date = last_date_el['value']
-	last_known_date = last_known_date_el['value']
-	_xfToken = _xfToken_el['value']
-
-	data = {
-		'attachment_hash': attachment_hash,
-		'attachment_hash_combined': attachment_hash_combined,
-		'last_date': last_date,
-		'last_known_date': last_known_date,
-		'_xfToken': _xfToken,
-		'_xfRequestUri': f'/threads/post.{post_id}/',
-		'_xfWithData': '1',
-		'_xfToken': _xfToken,
-		'_xfResponseType': 'json'
-	}
-
-	if not bbcode:
-		content_html = content
-		data['message_html'] = content_html
-	else:
-		data['message'] = content
-	
-	r = await s.post(
-		f'https://hypixel.net/threads/post.{post_id}/add-reply',
-		data=data
-	)
-
-async def edit(post_id, title, content, bbcode=False):
-	r = await s.get(f'https://hypixel.net/threads/post.{post_id}/')
-	print(r.url.path)
-	forum_post_html = await r.text()
-	soup = BeautifulSoup(forum_post_html, features='html5lib')
-
-	other_post_id = soup.find('article')['data-content'].split('-')[-1]
-
-	attachment_hash_el = soup.find(attrs={'name': 'attachment_hash'})
-	with open('e.html', 'w') as f:
-		f.write(soup.prettify())
-	attachment_hash_combined_el = soup.find(attrs={'name': 'attachment_hash_combined'})
-	# last_date_el = soup.find(attrs={'name': 'last_date'})
-	# last_known_date_el = soup.find(attrs={'name': 'last_known_date'})
-	_xfToken = soup.find('html')['data-csrf']
-	print('_xfToken', _xfToken)
-
-	attachment_hash = attachment_hash_el['value']
-	attachment_hash_combined = attachment_hash_combined_el['value']
-	# last_date = last_date_el['value']
-	# last_known_date = last_known_date_el['value']
-	# _xfToken = _xfToken_el['value']
-	_xfRequestUri = r.url.path
-	print('_xfToken', _xfToken)
-
-	r = await s.get(
-		f'https://hypixel.net/posts/{other_post_id}/edit'
-		f'?_xfRequestUri={_xfRequestUri}'
-		'&_xfWithData=1'
-		f'&_xfToken={_xfToken}'
-		'&_xfResponseType=json'
-	)
-	print(r.url)
-	print(await r.text())
-	print(r.status)
-
-
-	data = {}
-
-	if not bbcode:
-		content_html = content
-		data['message_html'] = content_html
-	else:
-		data['message'] = content
-	data['title'] = title
-	
-	data.update({
-		'attachment_hash': attachment_hash,
-		'attachment_hash_combined': attachment_hash_combined,
-		# 'last_date': last_date,
-		# 'last_known_date': last_known_date,
-		'_xfToken': _xfToken,
-		'_xfRequestUri': _xfRequestUri,
-		'_xfWithData': '1',
-		'_xfToken': _xfToken,
-		'_xfResponseType': 'json',
-		'_xfInlineEdit': '1'
-	})
-
-	r = await s.post(
-		f'https://hypixel.net/posts/{other_post_id}/edit',
-		data=data,
-		headers={
-			# 'X-Requested-With': 'XMLHttpRequest',
-			# 'accept': 'application/json, text/javascript, */*; q=0.01',
-			# 'Referer': str(r.url)
-		}
-	)
-	print(await r.text())
-	print(r.url)
 
 async def get_member(member_id, ratings=False):
 	member_data = {}

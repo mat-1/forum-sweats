@@ -121,7 +121,7 @@ async def get_active_mutes():
 		active_mutes[member['discord']] = member['muted_until']
 	return active_mutes
 
-async def add_infraction(user_id, infraction_type, reason):
+async def add_infraction(user_id: int, infraction_type, reason):
 	infraction_uuid = str(uuid.uuid4())
 	await infractions_data.insert_one({
 		'_id': infraction_uuid,
@@ -131,7 +131,7 @@ async def add_infraction(user_id, infraction_type, reason):
 		'date': datetime.now()
 	})
 
-async def get_infractions(user_id):
+async def get_infractions(user_id: int):
 	infractions = []
 	async for infraction in infractions_data.find({
 		'user': user_id,
@@ -140,7 +140,7 @@ async def get_infractions(user_id):
 		infractions.append(infraction)
 	return infractions
 
-async def clear_infractions(user_id, date):
+async def clear_infractions(user_id: int, date):
 	r = await infractions_data.delete_many({
 		'user': user_id,
 		'date': {
@@ -150,7 +150,7 @@ async def clear_infractions(user_id, date):
 	})
 	return r.deleted_count
 
-async def clear_recent_infraction(user_id):
+async def clear_recent_infraction(user_id: int):
 	async for infraction in infractions_data\
 		.find({'user': user_id})\
 		.sort('date', -1)\
@@ -158,7 +158,7 @@ async def clear_recent_infraction(user_id):
 			await infractions_data.delete_one({'_id': infraction['_id']})
 
 
-async def set_rock(user_id):
+async def set_rock(user_id: int):
 	await member_data.update_one(
 		{
 			'discord': user_id
@@ -172,7 +172,7 @@ async def set_rock(user_id):
 	)
 
 
-async def get_rock(user_id):
+async def get_rock(user_id: int):
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)
@@ -184,7 +184,7 @@ async def get_rock(user_id):
 		return 0
 
 
-async def add_message(user_id):
+async def add_message(user_id: int):
 	hour_id = int(time.time() / 3600)
 	await member_data.update_one(
 		{
@@ -199,7 +199,25 @@ async def add_message(user_id):
 	)
 
 
-async def set_is_member(user_id):
+
+
+async def get_active_members_from_past_hour(hoursago=1):
+	hour_id = int(time.time() / 3600) - hoursago
+	members = []
+	async for member in member_data.find(
+		{
+			f'messages.{hour_id}': {'$gte': 1}
+		}
+	):
+		member_modified = member
+		member_modified['hourly_messages'] = member['messages'][f'messages.{hour_id}']
+		del member_modified['messages']
+		members.append(member_modified)
+	return members
+
+
+
+async def set_is_member(user_id: int):
 	await member_data.update_one(
 		{
 			'discord': user_id
@@ -213,7 +231,7 @@ async def set_is_member(user_id):
 	)
 
 
-async def get_is_member(user_id):
+async def get_is_member(user_id: int):
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)
@@ -224,7 +242,7 @@ async def get_is_member(user_id):
 	else:
 		return 0
 
-async def set_counter(guild_id, number):
+async def set_counter(guild_id: int, number: int):
 	await servers_data.update_one(
 		{
 			'id': guild_id
@@ -237,14 +255,14 @@ async def set_counter(guild_id, number):
 		upsert=True
 	)
 
-async def get_counter(guild_id):
+async def get_counter(guild_id: int):
 	data = await servers_data.find_one({
 		'id': guild_id,
 	})
 	if data:
 		return data.get('counter', 0)
 
-async def set_last_general_duel(guild_id):
+async def set_last_general_duel(guild_id: int):
 	await servers_data.update_one(
 		{
 			'id': guild_id
@@ -257,9 +275,44 @@ async def set_last_general_duel(guild_id):
 		upsert=True
 	)
 
-async def get_last_general_duel(guild_id):
+async def get_last_general_duel(guild_id: int):
 	data = await servers_data.find_one({
 		'id': guild_id,
 	})
 	if data:
 		return data.get('last_duel')
+
+async def set_bobux(user_id: int, amount: int):
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$set': {
+				'bobux': amount
+			}
+		},
+		upsert=True
+	)
+
+
+async def get_bobux(user_id: int, amount: int):
+	data = await member_data.find_one(
+		{
+			'discord': user_id
+		}
+	)
+	return data.get('bobux', 0)
+
+async def change_bobux(user_id: int, amount: int):
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$inc': {
+				'bobux': amount
+			}
+		},
+		upsert=True
+	)

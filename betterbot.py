@@ -130,8 +130,8 @@ class BetterBot():
 			if parsing_left:
 				try:
 					return_args = await self.parse_args(parsing_left, func, ctx, ignore_extra=pad_none)
-				except Exception:
-					print('nope')
+				except Exception as e:
+					print('error parsing?', type(e), e)
 					continue
 			else:
 				return_args = []
@@ -176,9 +176,10 @@ def get_channel_members(channel_id):
 
 def get_guild_members(channel_id):
 	try:
-		return discordbot.client.get_guild(channel_id).members
-	except:
-		return [discordbot.client.get_channel(channel_id).recipient]
+		members = discordbot.client.get_guild(channel_id).members
+	except Exception as e:
+		members = [discordbot.client.get_channel(channel_id).recipient]
+	return members
 
 def check_user_id(ctx, arg):
 	try:
@@ -221,7 +222,7 @@ def check_name_with_discrim(ctx, arg):
 
 def check_name_without_discrim(ctx, arg):
 	member = discord.utils.find(
-		lambda m: m.name.lower == arg.lower(),
+		lambda m: m.name.lower() == arg.lower(),
 		get_guild_members(ctx.guild.id)
 	)
 	return member
@@ -243,11 +244,12 @@ def check_nickname_recent(ctx, arg):
 
 
 def check_name_starts_with(ctx, arg):
-	member = discord.utils.find(
+	members = list(filter(
 		lambda m: m.name.lower().startswith(arg.lower()),
 		get_guild_members(ctx.guild.id)
-	)
-	return member
+	))
+	if members:
+		return members[0]
 
 def check_name_starts_with_recent(ctx, arg):
 	member = discord.utils.find(
@@ -258,11 +260,12 @@ def check_name_starts_with_recent(ctx, arg):
 
 
 def check_nickname_starts_with(ctx, arg):
-	member = discord.utils.find(
+	members = list(filter(
 		lambda m: m.display_name.lower().startswith(arg.lower()),
 		get_guild_members(ctx.guild.id)
-	)
-	return member
+	))
+	if members:
+		return list(sorted(members, key=lambda m: len(m.display_name)))[-1]
 
 def check_nickname_starts_with_recent(ctx, arg):
 	member = discord.utils.find(
@@ -302,6 +305,7 @@ def check_nickname_contains_recent(ctx, arg):
 
 class Member(commands.Converter):
 	async def convert(self, ctx, arg):
+		arg = arg.strip()
 		if arg[0] == '@':
 			arg = arg[1:]
 		
@@ -318,15 +322,12 @@ class Member(commands.Converter):
 			check_nickname_recent, # Nickname
 			check_nickname, # Nickname
 
-
 			check_nickname_starts_with, # Nickname starts with
 
 			check_name_contains, # Name contains
 			
 			check_nickname_contains_recent, # Nickname contains
 			check_nickname_contains, # Nickname contains
-
-
 		]
 		for checker in CHECKERS:
 			member = checker(ctx, arg)
@@ -384,7 +385,7 @@ lengths = {
 
 def check_time(ctx, arg):
 	if arg.strip() == 'forever':
-		return lengths['year'] * 1000
+		return lengths['eons'] * 1000
 	time_part = ''
 	for char in arg:
 		if char in '0123456789':
@@ -399,6 +400,7 @@ def check_time(ctx, arg):
 
 class Time(commands.Converter):
 	async def convert(self, ctx, arg):
+		arg = arg.strip()
 		CHECKERS = [
 			check_time
 		]

@@ -9,6 +9,14 @@ import forums
 from datetime import datetime, timedelta
 import modbot
 import markovforums
+# import logging
+
+# logger = logging.getLogger('discord')
+# logger.setLevel(logging.DEBUG)
+# handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+# handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+# logger.addHandler(handler)
+
 
 prefix = '!'
 betterbot = BetterBot(
@@ -36,8 +44,40 @@ async def start_bot():
 	print('starting bot yeet')
 	await client.start(os.getenv('token'))
 
+cached_invites = []
+
+async def check_dead_chat():
+	guild = client.get_guild(717904501692170260)
+	general_channel = guild.get_channel(719579620931797002)
+	while True:
+		await asyncio.sleep(5)
+		time_since_message = time.time() - last_general_message
+		if time_since_message > 60 * 5:
+			await general_channel.send('dead chat xD')
+
+async def give_hourly_bobux():
+	while True:
+		time_until_bobux_given = 3600 - ((time.time() - 60*11) % 3600)
+		print('time_until_bobux_given', time_until_bobux_given)
+		await asyncio.sleep(time_until_bobux_given)
+		members = await db.get_active_members_from_past_hour(1)
+		print('active members:', members)
+		for member_data in members:
+			member_id = member_data['discord']
+			messages_in_past_hour = member_data['hourly_messages']
+			given_bobux = 0
+			if messages_in_past_hour >= 20:
+				given_bobux += 10
+			if messages_in_past_hour >= 10:
+				given_bobux += 5
+			else:
+				given_bobux += 1
+			await db.change_bobux(member_id, given_bobux)
+
+
 @client.event
 async def on_ready():
+	global cached_invites
 	print('ready')
 	await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
 
@@ -49,19 +89,50 @@ async def on_ready():
 	print('active_mutes', active_mutes)
 	for muted_id in active_mutes:
 		asyncio.ensure_future(unmute_user(muted_id, True))
+	guild = client.get_guild(717904501692170260)
+	cached_invites = await guild.invites()
+	asyncio.ensure_future(check_dead_chat())
+	asyncio.ensure_future(give_hourly_bobux())
+
 
 @client.event
 async def on_member_join(member):
-	# if datetime.now() - member.created_at < timedelta(days=7):
-	# 	await member.send('You were kicked from Forum Sweats because your Discord account is too new. This is an anti-spam measure, and you will be able to join the server after your account is at least week old.')
-	# 	await member.kick(reason='Account too new')
-	# 	return
+	global cached_invites
+	cached_invites_dict = {invite.code: invite for invite in cached_invites}
+	guild = client.get_guild(717904501692170260)
+	new_invites = await guild.invites()
+	used_invite = None
+	for invite in new_invites:
+		if invite.code in cached_invites_dict:
+			invite_uses_before = cached_invites_dict[invite.code].uses
+		else:
+			invite_uses_before = 0
+		invite_uses_now = invite.uses
+		if invite_uses_now > invite_uses_before:
+			used_invite = invite
+
+	bot_logs_channel = client.get_channel(718107452960145519)
+	if used_invite:
+		await bot_logs_channel.send(embed=discord.Embed(
+			description=f'<@{member.id}> joined using discord.gg/{used_invite.code} (created by <@{used_invite.inviter.id}>)'
+		))
+	else:
+		await bot_logs_channel.send(embed=discord.Embed(
+			description=f'<@{member.id}> joined using an unknown invite'
+		))
+	cached_invites = await guild.invites()
+
+	if 'ban speedrun' in member.name.lower() or 'forum sweats nsfw' in member.name.lower():
+		return await member.ban(reason='has blacklisted phrase in name')
 	mute_end = await db.get_mute_end(member.id)
-	if mute_end and mute_end > time.time():
-		await mute_user(member, mute_end - time.time(), member.guild.id)
-		await asyncio.sleep(1)
+	is_muted = mute_end and mute_end > time.time()
+	if is_muted:
+		mute_remaining = mute_end - time.time()
+		await mute_user(member, mute_remaining, member.guild.id)
+		await asyncio.sleep(5)
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
+		print('member_role', member_role, member)
 		await member.remove_roles(member_role, reason='mee6 cringe')
 	else:
 		is_member = await db.get_is_member(member.id)
@@ -84,20 +155,20 @@ def is_close_to_everyone(name):
 @client.event
 async def on_member_update(before, after):
 	# nick update
-	wacky_characters = ['𒈙', 'ٴٴ,', '˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞T']
+	wacky_characters = ['𒈙', 'ٴٴ,', '˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞T', '﷽']
 	if after.nick:
 		if any([c in after.nick or '' for c in wacky_characters]):
 			return await after.edit(nick=before.nick)
 	else:
 		if any([c in after.display_name or '' for c in wacky_characters]):
-			return await after.edit(nick='i am a poopoo head')
+			return await after.edit(nick='i am a poopoo head ' + str(after.id)[-5:])
 	if is_close_to_everyone(after.nick):
 		if not is_close_to_everyone(before.nick):
 			return await after.edit(nick=before.nick)
 		elif not is_close_to_everyone(after.name):
 			return await after.edit(nick=after.name)
 		else:
-			return await after.edit(nick='i am a poopoo head')
+			return await after.edit(nick='i am a poopoo head ' + str(after.id)[-5:])
 
 	await asyncio.sleep(5)
 	after = after.guild.get_member(after.id)
@@ -151,21 +222,25 @@ async def process_counting_channel(message):
 		await message.channel.send(f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})")
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
 	await update_counter()
-	
+
+last_general_message = time.time()
 
 @client.event
 async def on_message(message):
-	# skyblock-updates
-	if message.channel.id == 738937428378779659:
+	global last_general_message
+	if message.channel.id == 738937428378779659: # skyblock-updates
 		await message.publish()
-	if message.channel.id == 719570596005937152: # spam
+	if message.channel.id == 719579620931797002: # general
+		last_general_message = time.time()
+	if message.channel.id == 763088127287361586: # spam
 		if message.content and message.content[0] != '!' and not message.author.bot:
 			uwuized_message = message.content\
 				.replace('@', '')\
 				.replace('r', 'w')\
 				.replace('l', 'w')\
 				.replace('R', 'W')\
-				.replace('L', 'W')
+				.replace('L', 'W')\
+				.replace('<!642466378254647296>', '<@642466378254647296>')
 			await message.channel.send(uwuized_message)
 	asyncio.ensure_future(db.add_message(message.author.id))
 	await process_counting_channel(message)
@@ -318,8 +393,8 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 @client.event
 async def on_raw_reaction_add(payload):
 	# ignore reactions from mat
-	if payload.user_id == 224588823898619905:
-		return
+	# if payload.user_id == 224588823898619905:
+	# 	return
 	if payload.message_id == 732551899374551171:
 		if str(payload.emoji.name).lower() != 'disagree':
 			message = await client.get_channel(720258155900305488).fetch_message(732551899374551171)
@@ -334,7 +409,14 @@ async def on_raw_reaction_add(payload):
 			message = await client.get_channel(720258155900305488).fetch_message(741806331484438549)
 			await message.remove_reaction(payload.emoji, payload.member)
 			print('removed reaction!')
-	# if payload.message_id == wynncraft: # wynncraft role
+	elif payload.message_id == 756691321917276223: # Blurrzy art
+		print(payload.emoji.name)
+		if str(payload.emoji.name).lower() != 'agree':
+			message = await client.get_channel(720258155900305488).fetch_message(756691321917276223)
+			await message.remove_reaction(payload.emoji, payload.member)
+			print('removed reaction!')
+			await payload.member.send("Hey, you're a dum dum. If you disagree, please do `!gulag 15m` in <#718076311150788649>. Thanks!")
+
 		
 
 
@@ -390,3 +472,13 @@ def api_get_members():
 			'party_planner': ', '.join(party_planner_list),
 		}
 	}
+
+# @client.event
+# async def on_voice_state_update(member, before, after):
+# 	forum_sweats_got_talent_id = 755273538163966043
+# 	forum_sweats_got_talent = client.get_channel(forum_sweats_got_talent_id)
+# 	if before.channel != forum_sweats_got_talent and after.channel == forum_sweats_got_talent: # moved into forum sweats got talent
+# 		if not after.mute:
+# 			await member.edit(mute=True)
+# 	if after.channel != forum_sweats_got_talent: # unmute
+# 		await member.edit(mute=False)

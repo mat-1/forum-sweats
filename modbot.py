@@ -24,7 +24,11 @@ s = aiohttp.ClientSession()
 async def get_perspective_score(message, models=['SEVERE_TOXICITY', 'TOXICITY', 'IDENTITY_ATTACK']):
 
 	input_data = {
-		'comment': {'text': message.replace('shitpost', 'post')},
+		'comment': {
+			'text': message
+			.replace('shitpost', 'post')
+			.replace('> ', ' ')
+		},
 		'languages': ['en'],
 		'requestedAttributes': {},
 	}
@@ -164,7 +168,9 @@ async def process_messsage(message, warn=True):
 		.replace('⭕', 'o')\
 		.replace('🅾', 'o')\
 		.replace('👁‍🗨', 'o')
-	content = unidecode.unidecode(content)
+	content = unidecode.unidecode(content)\
+		.replace('Ⱡ', 'L')\
+		.replace('Ỻ', 'lL')
 
 	# antimoan
 	if re.match(r'[\w\W]*[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+[\w\W]*', content, flags=re.IGNORECASE):
@@ -175,10 +181,19 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None
 		)
 		return
+	# antichilynn
+	if message.author.id == 750815961942065252 and re.match(r'[\w\W]*c+[^a-z]*h+[^a-z]*[i1y]+[^a-z]*[li1]+[^a-z]*[yi]+[^a-z]*n+[\w\W]*', content, flags=re.IGNORECASE):
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			15,
+			message.guild.id if message.guild else None
+		)
+		return
 
 	if re.match(r'.*([1-2]?\d?\d)\.([1-2]?\d?\d)\.([1-2]?\d?\d)\.([1-2]?\d?\d).*', content):
 		# 69.420.69.420
-		await message.author.send("Don't post IP addresses in chat, nerd")
+		await message.author.send('Don\'t post IP addresses in chat, nerd')
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,

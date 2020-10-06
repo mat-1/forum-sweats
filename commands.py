@@ -27,6 +27,7 @@ import modbot
 import markovforums
 import deepfry
 import ducksweirdclickbaitcommand
+from urllib.parse import quote_plus
 
 bot_owners = {
 	224588823898619905, # mat
@@ -46,6 +47,10 @@ with open('doors.json', 'r') as f:
 
 with open('tables.json', 'r') as f:
 	tables = json.loads(f.read())
+
+with open('suntzu.json', 'r') as f:
+	suntzu_quotes = json.loads(f.read())
+
 
 def seconds_to_string(actual_seconds, extra_parts=1):
 	seconds = int(actual_seconds)
@@ -219,6 +224,12 @@ async def whois(message, member: Member=None):
 async def debugtime(message, length: Time):
 	'Debugging command to test time'
 	await message.send(seconds_to_string(length))
+
+@betterbot.command(name='debugmember')
+async def debugmember(message, member: Member=None):
+	await message.send(embed=discord.Embed(
+		description=f'<@{member.id}>'
+	))
 
 @betterbot.command(name='mute', bot_channel=False)
 async def mute(message, member: Member, length: Time=0, reason: str=None):
@@ -409,17 +420,17 @@ def execute(_code, loc):  # Executes code asynchronously
 @betterbot.command(name='exec', aliases=['eval'], bot_channel=False)
 async def execute_command(message, code: str):
 	if message.author.id != 224588823898619905: return
-	f = io.StringIO()
-	with redirect_stdout(f):
-		command = message.content.split(None, 1)[1].strip()
-		if command.startswith('```') and command.endswith('```'):
-			command = '\n'.join(command.split('\n')[1:])
-			command = command[:-3]
-		try:
-			await execute(command, locals())
-		except Exception as e:
-			traceback.print_exc()
-	out = f.getvalue()
+	# f = io.StringIO()
+	# with redirect_stdout(f):
+	command = message.content.split(None, 1)[1].strip()
+	if command.startswith('```') and command.endswith('```'):
+		command = '\n'.join(command.split('\n')[1:])
+		command = command[:-3]
+	try:
+		output = await execute(command, locals())
+	except Exception as e:
+		traceback.print_exc()
+	# out = f.getvalue()
 	if out == '':
 		# out = 'No output.'
 		return
@@ -753,7 +764,7 @@ async def throw_rock(message, member: Member):
 	}: return
 
 	if not member:
-		return await message.send('Unknown member. Example usage: **!rock piglegs**')
+		return await message.send('Unknown member. Example usage: **!rock pigsty**')
 
 	if member == message.author.id:
 		return await message.send("You can't throw a rock at yourself.")
@@ -1076,9 +1087,9 @@ async def wow(message):
 rigged_duel_users = set()
 
 @betterbot.command(name='rigduel', aliases=['rigduels'], bot_channel=False)
-async def rig_duel_command(message):
+async def rig_duel_command(message, member: Member=None):
 	if message.author.id != 224588823898619905: return # only works for mat
-	rigged_duel_users.add(message.author.id)
+	rigged_duel_users.add(member.id if member else message.author.id)
 	await message.delete()
 
 duel_statuses = {}
@@ -1269,43 +1280,119 @@ async def duel(message, opponent: Member):
 async def ducksweirdclickbaitthing(message):
 	await message.channel.send(ducksweirdclickbaitcommand.generate())
 
-amongus_cooldown = {}
-amongus_active = False
+# amongus_cooldown = {}
+# amongus_active = False
+# last_amongus = 0
 
-@betterbot.command(name='amongus', aliases=['votingsim', 'votingsimulator'], bot_channel=False)
-async def amongus_command(message):
-	global amongus_active
-	if message.channel.id == 718076311150788649: # bot commands
-		return await message.channel.send('This command only works in <#719579620931797002>')
-	if message.channel.id != 719579620931797002: # general
-		return
-	if not (
-		has_role(message.author.id, 717904501692170260, 'helper')
-		or has_role(message.author.id, 717904501692170260, 'trialhelper')
-		or has_role(message.author.id, 717904501692170260, 'sweat')
-	):
-		return await message.channel.send('You must be a sweat or staff member to start a game of Among Us')
-	if amongus_active:
-		return await message.channel.send('There is already a game of Among Us active')
-	amongus_active = True
-	players = []
-	async for message in message.channel.history(limit=500):
-		# make sure message has been created in past 15 minutes
-		if message.created_at > datetime.now() - timedelta(minutes=15):
-			# dont duplicate players
-			if message.author not in players:
-				players.append(message.author)
-			# max of 8 players
-			if len(players) >= 8:
-				break
-	if len(players) < 4:
-		amongus_active = False
-		return await message.channel.send('Chat is too dead right now :pensive:')
-	await message.channel.send(embed=discord.Embed(title='the command doesnt work right now btw im just testing', description=str(players)))
-	# return await message.channel.send('You must be a sweat or staff member to start a game of Among Us')
+# @betterbot.command(name='amongus', aliases=['votingsim', 'votingsimulator'], bot_channel=False)
+# async def amongus_command(message):
+# 	global amongus_active
+# 	global last_amongus
+# 	if message.channel.id == 718076311150788649: # bot commands
+# 		return await message.channel.send('This command only works in <#719579620931797002>')
+# 	if message.channel.id != 719579620931797002: # general
+# 		return
+# 	if not (
+# 		has_role(message.author.id, 717904501692170260, 'helper')
+# 		or has_role(message.author.id, 717904501692170260, 'trialhelper')
+# 		or has_role(message.author.id, 717904501692170260, 'sweat')
+# 	):
+# 		return await message.channel.send('You must be a sweat or staff member to start a game of Among Us')
+# 	if amongus_active:
+# 		return await message.channel.send('There is already a game of Among Us active')
+# 	if time.time() - last_amongus < 60 * 30:
+# 		return await message.channel.send('A game of Among Us already happened too recently')
+# 	amongus_active = True
+# 	players = []
+# 	async for message in message.channel.history(limit=500):
+# 		# make sure message has been created in past 15 minutes
+# 		if message.created_at > datetime.now() - timedelta(minutes=5):
+# 			# dont duplicate players
+# 			if message.author not in players:
+# 				players.append(message.author)
+# 			# max of 8 players
+# 			if len(players) >= 8:
+# 				break
+# 	# players 
+# 	if len(players) < 4:
+# 		amongus_active = False
+# 		return await message.channel.send('Chat is too dead right now :pensive:')
+# 	countdown_length = 30 # how long the voting period lasts, in seconds
+# 	embed = discord.Embed(
+# 		title='Who is The Imposter?',
+# 		footer=str(countdown_length)
+# 	)
+# 	keycap_emojis = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣')
+# 	for i, player in enumerate(players):
+# 		embed.add_field(name=str(player), value=keycap_emojis[i], inline=False)
+# 	game_message = await message.channel.send(embed=embed)
+# 	for i, player in enumerate(players):
+# 		await game_message.add_reaction(keycap_emojis[i])
+# 	for countdown in reversed(range(0, countdown_length)):
+# 		embed.set_footer(text=str(countdown))
+# 		await game_message.edit(embed=embed)
+# 		await asyncio.sleep(1)
+# 	print('ok counted down')
+# 	# fetch the message again to update reaction data
+# 	game_message = await game_message.channel.fetch_message(game_message.id)
+# 	top_reactions = {}	
+# 	total_votes = 0
+# 	for reaction in game_message.reactions:
+# 		print(reaction, reaction.emoji)
+# 		if reaction.emoji in keycap_emojis:
+# 			top_reactions[reaction.emoji] = reaction.count - 1 # -1 because initial bot reaction
+# 			total_votes += reaction.count - 1
+# 	print('total_votes', total_votes)
+# 	if total_votes < 4:
+# 		amongus_active = False
+# 		return await message.channel.send('Not enough votes')
+# 	# await message.channel.send(embed=discord.Embed(description=str(top_reactions)))
+# 	highest_reaction_user = None
+# 	highest_reaction_count = 0
+# 	is_tie = False
+# 	print('gotten reactions', top_reactions)
+# 	for i, reaction in enumerate(keycap_emojis):
+# 		reaction_count = top_reactions.get(reaction, 0)
+# 		if reaction_count == highest_reaction_count:
+# 			is_tie = True
+# 		elif reaction_count > highest_reaction_count:
+# 			highest_reaction_count = reaction_count
+# 			highest_reaction_user = players[i]
+# 			is_tie = False
+# 	print('e', highest_reaction_user)
+
+# 	if is_tie:
+# 		amongus_active = False
+# 		return await message.channel.send("It's a tie, no one goes to gulag")
+# 	else:
+# 		amongus_active = False
+# 		print('ok muted')
+# 		last_amongus = time.time()
+# 		await message.channel.send(f'<@{highest_reaction_user.id}> got voted out (5 minutes in gulag)')
+# 		mute_end = await db.get_mute_end(highest_reaction_user.id)
+# 		if not (mute_end and mute_end > time.time()):
+# 			mute_length = 60 * 5
+# 		else:
+# 			mute_remaining = mute_end - time.time()
+# 			mute_length = (60 * 5) + mute_remaining
+
+# 		await discordbot.mute_user(
+# 			highest_reaction_user,
+# 			mute_length,
+# 			message.guild.id if message.guild else None
+# 		)
+
+# 	# return await message.channel.send('You must be a sweat or staff member to start a game of Among Us')
 	
 
 
 
 
-	# amongus_cooldown[message.author.id] = time.time()
+# 	# amongus_cooldown[message.author.id] = time.time()
+
+@betterbot.command(name='suntzu')
+async def suntzu_quote(message, extra: str=None):
+	embed = discord.Embed()
+	quote_text = extra or random.choice(suntzu_quotes)['text']
+	embed.set_image(url='https://suntzu.matdoes.dev/quote.png?quote=' + quote_plus(quote_text))
+	await message.channel.send(embed=embed)
