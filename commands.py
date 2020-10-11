@@ -22,7 +22,7 @@ import traceback
 import aiohttp
 import random
 import tictactoe
-import asyncio
+import asyncio	
 import modbot
 import markovforums
 import deepfry
@@ -420,17 +420,17 @@ def execute(_code, loc):  # Executes code asynchronously
 @betterbot.command(name='exec', aliases=['eval'], bot_channel=False)
 async def execute_command(message, code: str):
 	if message.author.id != 224588823898619905: return
-	# f = io.StringIO()
-	# with redirect_stdout(f):
-	command = message.content.split(None, 1)[1].strip()
-	if command.startswith('```') and command.endswith('```'):
-		command = '\n'.join(command.split('\n')[1:])
-		command = command[:-3]
-	try:
-		output = await execute(command, locals())
-	except Exception as e:
-		traceback.print_exc()
-	# out = f.getvalue()
+	f = io.StringIO()
+	with redirect_stdout(f):
+		command = message.content.split(None, 1)[1].strip()
+		if command.startswith('```') and command.endswith('```'):
+			command = '\n'.join(command.split('\n')[1:])
+			command = command[:-3]
+		try:
+			output = await execute(command, locals())
+		except Exception as e:
+			traceback.print_exc()
+	out = f.getvalue()
 	if out == '':
 		# out = 'No output.'
 		return
@@ -795,6 +795,11 @@ async def throw_rock(message, member: Member):
 			next_rock_str = f'{next_rock_seconds} seconds'
 		return await message.send(f'You threw a rock too recently. You can throw a rock again in {next_rock_str}')
 
+	bobux = await db.get_bobux(message.author.id)
+	if bobux < 2:
+		return await message.send('You need at least 2 bobux to use !rock')
+	await db.change_bobux(message.author.id, -2)
+
 	await db.set_rock(message.author.id)
 
 	# Add 5 minutes to someone's mute
@@ -1031,6 +1036,10 @@ async def random_shitpost(message, title:str=''):
 
 	if not title:
 		title = await markovforums.generate_title()
+	
+	if len(title) > 200:
+		users_generating_shitpost[message.author.id] = False
+		return await message.channel.send('Title is too long')
 
 	sent_message = await message.channel.send(embed=discord.Embed(
 		title=title,
@@ -1113,6 +1122,7 @@ async def duel_wait_for(channel, opponent_1, opponent_2):
 	duel_id = get_duel_id(opponent_1, opponent_2)
 	duel_at_zero = duel_statuses[duel_id]['zero']
 	duel_statuses[duel_id]['ended'] = True
+	rigged = False
 	if duel_at_zero:
 		duel_winner = message.author
 		duel_loser = opponent_1 if duel_winner == opponent_2 else opponent_2
@@ -1121,6 +1131,7 @@ async def duel_wait_for(channel, opponent_1, opponent_2):
 			duel_winner_tmp = duel_winner
 			duel_winner = duel_loser
 			duel_loser = duel_winner_tmp
+			rigged = True
 		await channel.send(f'<@{duel_winner.id}> won the duel!')
 	else:
 		duel_winner = opponent_1 if message.author == opponent_2 else opponent_2
@@ -1130,6 +1141,7 @@ async def duel_wait_for(channel, opponent_1, opponent_2):
 			duel_winner_tmp = duel_winner
 			duel_winner = duel_loser
 			duel_loser = duel_winner_tmp
+			rigged = True
 
 		await channel.send(f'<@{duel_winner.id}> won the duel because <@{duel_loser.id}> shot too early')
 		print(1)
@@ -1165,6 +1177,10 @@ async def duel_wait_for(channel, opponent_1, opponent_2):
 			mute_length,
 			channel.guild.id if channel.guild else None
 		)
+
+	if not rigged and duel_loser.id == 719348452491919401 and channel.id == 719579620931797002:
+		# if you win against forum sweats in general, you get 50 bobux
+		await db.change_bobux(duel_winner.id, 50)
 
 def get_duel_id(opponent_1, opponent_2):
 	if opponent_1.id > opponent_2.id:
@@ -1243,33 +1259,35 @@ async def duel(message, opponent: Member):
 	await message.channel.send('Duel starting in 10 seconds... First person to type :gun: once the countdown ends, wins.')
 	await asyncio.sleep(5)
 	while not duel_statuses[duel_id]['zero']:
-		if not duel_statuses[duel_id]['ended']:
+		if (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
 			await message.channel.send('5')
 			await asyncio.sleep(1)
-		if not duel_statuses[duel_id]['ended']:
+		if (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
 			await message.channel.send('4')
 			await asyncio.sleep(1)
-		if not duel_statuses[duel_id]['ended']:
+		if (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
 			await message.channel.send('3')
 			await asyncio.sleep(1)
-		if not duel_statuses[duel_id]['ended']:
+		if (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
 			await message.channel.send('2')
 			await asyncio.sleep(1)
-		if not duel_statuses[duel_id]['ended']:
+		if (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
 			await message.channel.send('1')
 			await asyncio.sleep(1)
-		if not duel_statuses[duel_id]['ended']:
-			if random.randint(0, 9) == 0:
+		if (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
+			if random.randint(0, 9) == 0 and False:
 				await message.channel.send('sike')
 				await asyncio.sleep(5)
 			else:
 				await message.channel.send('Shoot')
-				duel_statuses[duel_id]['zero'] = True
-				duel_statuses[duel_id]['ended'] = True
-				if opponent.id == 719348452491919401:
-					await message.channel.send(':gun:')
+				if duel_id in duel_statuses:
+					duel_statuses[duel_id]['zero'] = True
+					duel_statuses[duel_id]['ended'] = True
+					if opponent.id == 719348452491919401:
+						await message.channel.send(':gun:')
 		else:
-			duel_statuses[duel_id]['zero'] = True
+			if duel_id in duel_statuses:
+				duel_statuses[duel_id]['zero'] = True
 		await asyncio.sleep(1)
 	if message.author.id in active_duelers:
 		active_duelers.remove(message.author.id)
@@ -1396,3 +1414,30 @@ async def suntzu_quote(message, extra: str=None):
 	quote_text = extra or random.choice(suntzu_quotes)['text']
 	embed.set_image(url='https://suntzu.matdoes.dev/quote.png?quote=' + quote_plus(quote_text))
 	await message.channel.send(embed=embed)
+
+@betterbot.command(name='bobux')
+async def show_bobux(message, member: Member=None):
+	print('bobux', member)
+	if not member:
+		member = message.author
+	bobux = await db.get_bobux(member.id)
+	if member.id == message.author.id:
+		bobux_message = f'You have **{bobux}** bobux'
+	else:
+		bobux_message = f'<@{member.id}> has **{bobux}** bobux'
+	print(bobux_message)
+	embed = discord.Embed(
+		# title='Bobux',
+		description=bobux_message
+	)
+	await message.channel.send(embed=embed)
+
+@betterbot.command(name='givebobux', bot_channel=False)
+async def give_bobux(message, member: Member=None, amount: int=0):
+	if not has_role(message.author.id, 717904501692170260, 'admin'): return
+	if not member:
+		return await message.channel.send('invalid member')
+	if not amount:
+		return await message.channel.send('invalid amount')
+	await db.change_bobux(member.id, amount)
+	await message.channel.send('ok')

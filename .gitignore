@@ -7,4 +7,4 @@ pyproject.toml
 __pycache__/
 unidecode/__pycache__/
 forums/__pycache__/
-*.py[cod]
+*.pyc

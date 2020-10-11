@@ -202,15 +202,16 @@ async def add_message(user_id: int):
 
 
 async def get_active_members_from_past_hour(hoursago=1):
-	hour_id = int(time.time() / 3600) - hoursago
+	hour_id = int((time.time()) / 3600) - hoursago
 	members = []
 	async for member in member_data.find(
 		{
 			f'messages.{hour_id}': {'$gte': 1}
 		}
 	):
+		print('bruh', member, hour_id)
 		member_modified = member
-		member_modified['hourly_messages'] = member['messages'][f'messages.{hour_id}']
+		member_modified['hourly_messages'] = member['messages'].get(str(hour_id), 0)
 		del member_modified['messages']
 		members.append(member_modified)
 	return members
@@ -296,7 +297,7 @@ async def set_bobux(user_id: int, amount: int):
 	)
 
 
-async def get_bobux(user_id: int, amount: int):
+async def get_bobux(user_id: int):
 	data = await member_data.find_one(
 		{
 			'discord': user_id
