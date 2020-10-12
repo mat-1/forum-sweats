@@ -4,6 +4,7 @@
 .replit
 poetry.lock
 pyproject.toml
+__pycache__
 __pycache__/
 unidecode/__pycache__/
 forums/__pycache__/
