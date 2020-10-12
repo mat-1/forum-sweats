@@ -2,12 +2,10 @@ import cloudscraper
 import asyncio
 import aiohttp
 from cloudscraper.exceptions import (
-	CloudflareLoopProtection,
 	CloudflareCode1020,
 	CloudflareIUAMError,
 	CloudflareChallengeError,
-	CloudflareReCaptchaError,
-	CloudflareReCaptchaProvider
+	CloudflareCaptchaProvider
 )
 import re
 from copy import deepcopy
@@ -134,27 +132,27 @@ class AsyncCloudScraper(cloudscraper.CloudScraper):
 		return response
 
 	async def Challenge_Response(self, resp, **kwargs):
-		if self.is_reCaptcha_Challenge(resp):
+		if self.is_Captcha_Challenge(resp):
 			# ------------------------------------------------------------------------------- #
 			# double down on the request as some websites are only checking
-			# if cfuid is populated before issuing reCaptcha.
+			# if cfuid is populated before issuing Captcha.
 			# ------------------------------------------------------------------------------- #
 
 			resp = self.decodeBrotli(
 				super(AsyncCloudScraper, self).request(resp.method, str(resp.url), **kwargs)
 			)
 
-			if not self.is_reCaptcha_Challenge(resp):
+			if not self.is_Captcha_Challenge(resp):
 				return resp
 
 			# ------------------------------------------------------------------------------- #
-			# if no reCaptcha provider raise a runtime error.
+			# if no Captcha provider raise a runtime error.
 			# ------------------------------------------------------------------------------- #
 
 			if not self.recaptcha or not isinstance(self.recaptcha, dict) or not self.recaptcha.get('provider'):
 				self.simpleException(
-					CloudflareReCaptchaProvider,
-					"Cloudflare reCaptcha detected, unfortunately you haven't loaded an anti reCaptcha provider "
+					CloudflareCaptchaProvider,
+					"Cloudflare Captcha detected, unfortunately you haven't loaded an anti Captcha provider "
 					"correctly via the 'recaptcha' parameter."
 				)
 
@@ -166,7 +164,7 @@ class AsyncCloudScraper(cloudscraper.CloudScraper):
 				return resp
 
 			self.recaptcha['proxies'] = self.proxies
-			submit_url = self.reCaptcha_Challenge_Response(
+			submit_url = self.Captcha_Challenge_Response(
 				self.recaptcha.get('provider'),
 				self.recaptcha,
 				await resp.text(),
@@ -295,7 +293,7 @@ class AsyncCloudScraper(cloudscraper.CloudScraper):
 				'Detected the new Cloudflare challenge.'
 			)
 
-		if self.is_reCaptcha_Challenge(resp) or await self.is_IUAM_Challenge(resp):
+		if self.is_Captcha_Challenge(resp) or await self.is_IUAM_Challenge(resp):
 			if self.debug:
 				print('Detected Challenge.')
 			return True
