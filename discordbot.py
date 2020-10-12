@@ -57,7 +57,7 @@ async def check_dead_chat():
 
 async def give_hourly_bobux():
 	while True:
-		time_until_bobux_given = 3600 - ((time.time() - 60*11) % 3600)
+		time_until_bobux_given = 3600 - ((time.time()) % 3600)
 		print('time_until_bobux_given', time_until_bobux_given)
 		await asyncio.sleep(time_until_bobux_given)
 		members = await db.get_active_members_from_past_hour(1)
@@ -68,9 +68,9 @@ async def give_hourly_bobux():
 			given_bobux = 0
 			if messages_in_past_hour >= 20:
 				given_bobux += 10
-			if messages_in_past_hour >= 10:
+			elif messages_in_past_hour >= 10:
 				given_bobux += 5
-			else:
+			elif messages_in_past_hour >= 1:
 				given_bobux += 1
 			await db.change_bobux(member_id, given_bobux)
 
@@ -225,6 +225,12 @@ async def process_counting_channel(message):
 
 last_general_message = time.time()
 
+async def process_suggestion(message):
+	agree_emoji = client.get_emoji(719235230958878822)
+	disagree_emoji = client.get_emoji(719235358029512814)
+	await message.add_reaction(agree_emoji)
+	await message.add_reaction(disagree_emoji)
+
 @client.event
 async def on_message(message):
 	global last_general_message
@@ -232,6 +238,8 @@ async def on_message(message):
 		await message.publish()
 	if message.channel.id == 719579620931797002: # general
 		last_general_message = time.time()
+	if message.channel.id == 718114140119629847: # suggestions
+		await process_suggestion(message)
 	if message.channel.id == 763088127287361586: # spam
 		if message.content and message.content[0] != '!' and not message.author.bot:
 			uwuized_message = message.content\
@@ -416,6 +424,9 @@ async def on_raw_reaction_add(payload):
 			await message.remove_reaction(payload.emoji, payload.member)
 			print('removed reaction!')
 			await payload.member.send("Hey, you're a dum dum. If you disagree, please do `!gulag 15m` in <#718076311150788649>. Thanks!")
+	# elif payload.message_id == : # react for role poll notifications
+	# 	get_role_id(payload.guild_id, 'pollnotifications')
+	# 	if 
 
 		
 
