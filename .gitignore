@@ -1,6 +1,7 @@
 .env
 .gitignore
 .local
+.local/
 .replit
 poetry.lock
 pyproject.toml
