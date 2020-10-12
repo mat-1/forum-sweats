@@ -1,38 +1,54 @@
-import discord
-from discordbot import (
+from ..discordbot import (
 	betterbot,
 	client,
-	has_role
+	has_role,
+	mute_user,
+	unmute_user
 )
-import discordbot
-from discord.ext import commands
-import hypixel
-import db
-from betterbot import (
+from ..betterbot import (
 	Member,
 	Time
 )
+from ..	import hypixel
+from .. import forums
+from .. import db
+from .. import modbot
+import discord
+from discord.ext import commands
 import json
 from datetime import datetime, timedelta
 import io
 from contextlib import redirect_stdout
-import forums
 import time
 import traceback
 import aiohttp
 import random
-import tictactoe
-import asyncio	
-import modbot
-import markovforums
-import deepfry
-import ducksweirdclickbaitcommand
+import asyncio
 from urllib.parse import quote_plus
+import os
+import importlib
+import sys
+
+
+print('commands.py')
+
+
+command_modules = []
+for module_filename in os.listdir('./bot/commands'):
+	if module_filename == '__init__.py' or module_filename[-3:] != '.py':
+		continue
+	module = importlib.import_module('bot.commands.' + module_filename[:-3])
+	command_modules.append(module)
+	betterbot.command(
+		module.name,
+		aliases=getattr(module, 'aliases', []),
+		bot_channel=getattr(module, 'bot_channel', None),
+		pad_none=getattr(module, 'pad_none', None),
+	)(module.run)
+	print('Registered modular function', module_filename)
 
 bot_owners = {
-	224588823898619905, # mat
-	# 385506886222348290, # andytimbo
-	# 573609464620515351, # quaglet
+	224588823898619905 # mat
 }
 
 s = aiohttp.ClientSession()
@@ -85,108 +101,6 @@ def seconds_to_string(actual_seconds, extra_parts=1):
 
 def get_role_id(guild_id, rank_name):
 	return roles.get(str(guild_id), {}).get(rank_name)
-
-# def bot_channel(func, *args2, **kwargs2):
-# 	print('2', args2, kwargs2)
-# 	def wrapper(*args, **kwargs):
-# 		print('1', args, kwargs)
-# 		# print('Calling', func.__name__)
-# 		message = args[0]
-# 		if not message.guild or bot_channels[message.guild.id] == message.channel.id:
-# 			return func(*args, **kwargs)
-# 		else:
-# 			print('no')
-# 	return wrapper
-
-@betterbot.command(name='e')
-async def e(message):
-	'Sends "e".'
-	await message.send('e')
-
-@betterbot.command(name='link')
-async def link(message, ign: str=None):
-	if not ign:
-		return await message.send('Do `!link yourusername` to link to your Hypixel account.')
-	ign = ign.strip()
-	try:
-		print('getting user data')
-		# discord_name = await hypixel.get_discord_name(ign)
-		data = await hypixel.get_user_data(ign)
-		print('data')
-		try:
-			# discord_name = data['links']['DISCORD']
-			discord_name = data['discord']['name']
-			assert discord_name is not None
-		except:
-			raise hypixel.DiscordNotFound()
-	except hypixel.PlayerNotFound:
-		return await message.send('Invalid username.')
-	except hypixel.DiscordNotFound:
-		return await message.send("You haven't set your Discord username in Hypixel yet.")
-	if str(message.author) == discord_name:
-		pass # good
-	else:
-		return await message.send(embed=discord.Embed(
-			description=f'Incorrect username. Did you link your account correctly in Hypixel? ({ign} is linked to {discord_name})'
-		))
-
-	old_rank = await db.get_hypixel_rank(message.author.id)
-	new_rank = await hypixel.get_hypixel_rank(ign)
-
-	# Give the user their rank in all servers
-	for guild in client.guilds:
-		member = guild.get_member(message.author.id)
-		if not member:
-			# Member isn't in the guild
-			continue
-
-		# Remove the user's old rank
-		if old_rank:
-			old_rank_role_id = get_role_id(guild.id, old_rank)
-			if old_rank_role_id:
-				old_rank_role = guild.get_role(old_rank_role_id)
-				await member.remove_roles(old_rank_role, reason='Old rank')		
-		
-		new_rank = data['rank']
-		new_rank_role_id = get_role_id(guild.id, new_rank)
-		if new_rank_role_id:
-			new_rank_role = guild.get_role(new_rank_role_id)
-			await member.add_roles(new_rank_role, reason='Update rank')
-
-	await db.set_hypixel_rank(message.author.id, new_rank)
-	await db.set_minecraft_ign(message.author.id, ign, data['uuid'])
-
-	if new_rank_role_id:
-		await message.channel.send(
-			embed=discord.Embed(
-				description=f'Linked your account to **{ign}** and updated your role to **{new_rank}**.'
-			)
-		)
-	else:
-		await message.channel.send(
-			embed=discord.Embed(
-				description=f'Linked your account to **{ign}**.'
-			)
-		)
-
-	# If you're muted, stop running the function
-	mute_end = await db.get_mute_end(message.author.id)
-	if (mute_end and mute_end > time.time()):
-		return
-
-	# You're already verified, stop running the function
-	is_member = await db.get_is_member(message.author.id)
-	if is_member: return
-
-	for guild in client.guilds:
-		member = guild.get_member(message.author.id)
-		if not member:
-			# Member isn't in the guild
-			continue
-		member_role_id = get_role_id(guild.id, 'member')
-		member_role = guild.get_role(member_role_id)
-		await member.add_roles(member_role, reason='New member linked')
-	await db.set_is_member(message.author.id)
 
 @betterbot.command(name='whois')
 async def whois(message, member: Member=None):
@@ -265,16 +179,18 @@ async def mute(message, member: Member, length: Time=0, reason: str=None):
 
 	try:
 		await member.send(f'You were muted for "**{reason}**"')
-	except: pass
+	except:
+		pass
 
 	try:
-		await discordbot.mute_user(
+		await mute_user(
 			member,
 			length,
 			message.guild.id if message.guild else None
 		)
 	except discord.errors.Forbidden:
 		await message.send("I don't have permission to do this")
+
 
 @betterbot.command(name='unmute', bot_channel=False)
 async def unmute(message, member: Member):
@@ -283,9 +199,10 @@ async def unmute(message, member: Member):
 	if not (
 		has_role(message.author.id, 717904501692170260, 'helper')
 		or has_role(message.author.id, 717904501692170260, 'trialhelper')
-	): return
+	):
+		return
 
-	await discordbot.unmute_user(
+	await unmute_user(
 		member.id,
 		reason=f'Unmuted by {str(message.author)}'
 	)
@@ -310,7 +227,7 @@ async def gulag(message, length: Time=60):
 	else:
 		await message.send(f'You have entered gulag for {length} seconds.')
 	
-	await discordbot.mute_user(
+	await mute_user(
 		message.author,
 		length,
 		message.guild.id if message.guild else None
@@ -441,21 +358,23 @@ async def execute_command(message, code: str):
 		)
 	)
 
+
 @betterbot.command(name='setcounting')
 async def counting_channel(message, value):
 	if message.author.id != 224588823898619905: return
 	await db.set_counter(message.guild.id, int(value))
 	await message.channel.send('ok')
-	await discordbot.update_counter()
+
 
 @betterbot.command(name='counting', aliases=['counter'])
 async def get_counting(message, value):
 	counter = await db.get_counter(message.guild.id)
 	await message.channel.send(counter)
 
+
 @betterbot.command(name='help', aliases=['commands'])
 async def help_command(message):
-	commands = [
+	help_commands = [
 		{
 			'name': 'link',
 			'args': '<ign>',
@@ -504,7 +423,7 @@ async def help_command(message):
 	]
 
 	if has_role(message.author.id, 717904501692170260, 'helper'):
-		commands.extend([
+		help_commands.extend([
 			{
 				'name': 'mute',
 				'args': '@member <length> [reason]',
@@ -527,7 +446,7 @@ async def help_command(message):
 			}
 		])
 	else:
-		commands.extend([
+		help_commands.extend([
 			{
 				'name': 'infractions',
 				'args': '',
@@ -537,7 +456,7 @@ async def help_command(message):
 
 	description = []
 
-	for command in commands:
+	for command in help_commands:
 		command_name = command['name']
 		command_args = command['args']
 		command_desc = command['desc']
@@ -552,10 +471,14 @@ async def help_command(message):
 	embed = discord.Embed(title='Commands', description='\n'.join(description))
 	await message.send(embed=embed)
 
+
 @betterbot.command(name='membercount', aliases=['members'])
 async def membercount(message, command, user):
 	true_member_count = message.guild.member_count
-	await message.channel.send(f'There are **{true_member_count:,}** people in this server.')
+	await message.channel.send(
+		f'There are **{true_member_count:,}** people in this server.'
+	)
+
 
 # !forum
 @betterbot.command(name='forum', aliases=['forums', 'f'], pad_none=False)
@@ -563,6 +486,7 @@ async def forum(message):
 	await message.send('Forum commands: **!forums user (username)**')
 
 forum_ratelimit = {}
+
 
 def check_forum_ratelimit(user):
 	global forum_ratelimit
@@ -594,30 +518,6 @@ def add_forum_ratelimit(user):
 	forum_ratelimit[user].append(time.time())
 	print('forum_ratelimit', forum_ratelimit)
 
-markov_ratelimit = {}
-
-def check_markov_ratelimit(user):
-	global markov_ratelimit
-	if user not in markov_ratelimit: return False
-	user_ratelimit = markov_ratelimit[user]
-	last_minute_uses = 0
-	last_20_second_uses = 0
-	for ratelimit in user_ratelimit:
-		if time.time() - ratelimit < 60:
-			last_minute_uses += 1
-			if time.time() - ratelimit < 20:
-				last_20_second_uses += 1
-		else:
-			del user_ratelimit[0]
-	if last_minute_uses >= 10: return True
-	if last_20_second_uses > 2: return True
-	return False
-
-def add_markov_ratelimit(user):
-	global markov_ratelimit
-	if user not in markov_ratelimit:
-		markov_ratelimit[user] = []
-	markov_ratelimit[user].append(time.time())
 
 # !forum user
 @betterbot.command(name='forum', aliases=['forums', 'f'], pad_none=False)
@@ -915,91 +815,6 @@ async def random_table(message):
 	embed.set_image(url=url)
 	await message.channel.send(embed=embed)
 
-@betterbot.command(name='tictactoe', aliases=['ttt'], bot_channel=False)
-async def tictactoe_command(message, player2: Member=None):
-	if message.channel.id not in {
-		720073985412562975, # gulag
-		718076311150788649, # bot-commands
-		719518839171186698, # staff-bot-commands
-	} and message.guild: return
-	is_gulag = message.channel.id == 720073985412562975
-
-	ttt_game = tictactoe.Game()
-	is_ai = True
-	player1 = message.author
-
-	title_msg = await message.send('**TIC TAC TOE**')
-	board_msg = await message.send('(loading)')
-
-	number_emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
-	if is_gulag:
-		number_emojis = list(reversed(number_emojis))
-		random.shuffle(ttt_game.numbers)
-		random.shuffle(number_emojis)
-
-	for number_emoji in number_emojis:
-		await board_msg.add_reaction(number_emoji)
-
-	async def update_board():
-		await board_msg.edit(content=ttt_game.render_board())
-		await title_msg.edit(content=f'**TIC TAC TOE** (:{ttt_game.turn}:s turn)')
-
-	await update_board()
-
-	while True:
-		# X
-		if player1:
-			placed = False
-			while not placed:
-				reaction, user = await client.wait_for('reaction_add', check=lambda reaction, user: user == player1 and reaction.emoji in number_emojis and reaction.message.id == board_msg.id)
-				placing_spot = number_emojis.index(reaction.emoji)
-				placed = ttt_game.board[placing_spot] is None
-		else:
-			await asyncio.sleep(1)
-			placing_spot = ttt_game.ai_choose()
-		print(placing_spot, ttt_game.turn)
-		ttt_game.place(placing_spot)
-		await update_board()
-		try:
-			await board_msg.clear_reaction(number_emojis[placing_spot])
-		except discord.errors.Forbidden:
-			await board_msg.remove_reaction(number_emojis[placing_spot], client.user)
-
-		winner = ttt_game.check_win()
-		if winner:
-			break
-		if None not in ttt_game.board:
-			# tie
-			break
-
-		# O
-		if player2:
-			placed = False
-			while not placed:
-				reaction, user = await client.wait_for('reaction_add', check=lambda reaction, user: user == player2 and reaction.emoji in number_emojis and reaction.message.id == board_msg.id)
-				placing_spot = number_emojis.index(reaction.emoji)
-				placed = ttt_game.board[placing_spot] is None
-		else:
-			await asyncio.sleep(1)
-			placing_spot = ttt_game.ai_choose()
-		print(placing_spot, ttt_game.turn)
-		ttt_game.place(placing_spot)
-		await update_board()
-		try:
-			await board_msg.clear_reaction(number_emojis[placing_spot])
-		except discord.errors.Forbidden:
-			await board_msg.remove_reaction(number_emojis[placing_spot], client.user)
-
-		winner = ttt_game.check_win()
-		if winner:
-			break
-		if None not in ttt_game.board:
-			# tie
-			break
-	if winner:
-		await title_msg.edit(content=f'**TIC TAC TOE** (:{winner}: WINS)')
-	else:
-		await title_msg.edit(content='**TIC TAC TOE** (it\'s a tie)')
 
 @betterbot.command(name='avatar')
 async def get_discord_avatar(message, member: Member):
@@ -1021,40 +836,6 @@ async def check_keyboardsmash(message, check_message: str):
 async def bagel(message):
 	await message.channel.send('I like french bread')
 
-users_generating_shitpost = {}
-
-@betterbot.command(name='shitpost', aliases=['markovshitpost'])
-async def random_shitpost(message, title:str=''):
-	if check_markov_ratelimit(message.author.id):
-		return await message.send('Stop spamming the command, nerd')
-	if users_generating_shitpost.get(message.author.id):
-		return await message.send('Already generating shitpost')
-
-	add_markov_ratelimit(message.author.id)
-
-	users_generating_shitpost[message.author.id] = True
-
-	if not title:
-		title = await markovforums.generate_title()
-	
-	if len(title) > 200:
-		users_generating_shitpost[message.author.id] = False
-		return await message.channel.send('Title is too long')
-
-	sent_message = await message.channel.send(embed=discord.Embed(
-		title=title,
-		description='loading...'
-	))
-	async for post_body in markovforums.generate_body(title):
-		await sent_message.edit(embed=discord.Embed(
-			title=title,
-			description=post_body[:2000] + '...'
-		))
-	await sent_message.edit(embed=discord.Embed(
-		title=title,
-		description=post_body[:2000]
-	))
-	users_generating_shitpost[message.author.id] = False
 
 @betterbot.command(name='bleach')
 async def bleach(message):
@@ -1062,29 +843,6 @@ async def bleach(message):
 		title="Here's a Clorox bleach if you want to unsee something weird:"
 	)
 	embed.set_image(url='https://cdn.discordapp.com/attachments/741200821936586785/741200842430087209/Icon_3.jpg')
-	await message.channel.send(embed=embed)
-
-@betterbot.command(name='jpeg')
-async def jpegify_member(message, member: Member):
-	async with message.channel.typing():
-		img_size = 128
-		user = client.get_user(member.id)
-		with io.BytesIO() as output:
-			asset = user.avatar_url_as(static_format='png', size=img_size)
-			await asset.save(output)
-			if '.gif' in asset._url:
-				content_type = 'image/gif'
-			else:
-				content_type = 'image/png'
-			output.seek(0)
-			img_bytes = output.getvalue()
-		
-		url = await deepfry.upload(img_bytes, content_type)
-	
-	embed = discord.Embed(title='JPEG')
-
-	embed.set_image(url=url)
-
 	await message.channel.send(embed=embed)
 
 
@@ -1294,9 +1052,6 @@ async def duel(message, opponent: Member):
 	if opponent.id in active_duelers:
 		active_duelers.remove(opponent.id)
 		
-@betterbot.command(name='ducksweirdclickbaitthing', aliases=['clickbait'])
-async def ducksweirdclickbaitthing(message):
-	await message.channel.send(ducksweirdclickbaitcommand.generate())
 
 # amongus_cooldown = {}
 # amongus_active = False

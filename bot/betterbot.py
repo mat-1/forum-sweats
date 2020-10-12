@@ -1,8 +1,8 @@
-import discordbot
 import discord
 from discord.ext import commands
 import re
 import time
+from . import discordbot
 
 
 # this is just so i can customize command parsing more

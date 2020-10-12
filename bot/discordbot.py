@@ -1,27 +1,21 @@
-from betterbot import BetterBot
-import discord
-import os
-import json
-import db
-import time
-import asyncio
-import forums
+from .betterbot import BetterBot
+from . import db
+from . import forums
+from . import modbot
 from datetime import datetime, timedelta
-import modbot
-import markovforums
-# import logging
-
-# logger = logging.getLogger('discord')
-# logger.setLevel(logging.DEBUG)
-# handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-# handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-# logger.addHandler(handler)
-
+import discord
+import asyncio
+import base64
+import json
+import time
+import os
 
 prefix = '!'
+token = os.getenv('token')
+is_dev = os.getenv('dev') == 'true'
 betterbot = BetterBot(
 	prefix=prefix,
-	bot_id=719348452491919401
+	bot_id=int(base64.b64decode(token.split('.')[0]))
 )
 
 with open('roles.json', 'r') as f:
@@ -41,8 +35,8 @@ def has_role(member_id, guild_id, role_name):
 client = discord.Client()
 
 async def start_bot():
-	print('starting bot yeet')
-	await client.start(os.getenv('token'))
+	print('starting bot pog')
+	await client.start(token)
 
 cached_invites = []
 
@@ -58,10 +52,8 @@ async def check_dead_chat():
 async def give_hourly_bobux():
 	while True:
 		time_until_bobux_given = 3600 - ((time.time()) % 3600)
-		print('time_until_bobux_given', time_until_bobux_given)
 		await asyncio.sleep(time_until_bobux_given)
 		members = await db.get_active_members_from_past_hour(1)
-		print('active members:', members)
 		for member_data in members:
 			member_id = member_data['discord']
 			messages_in_past_hour = member_data['hourly_messages']
@@ -77,26 +69,30 @@ async def give_hourly_bobux():
 
 @client.event
 async def on_ready():
+	from . import commands
 	global cached_invites
 	print('ready')
 	await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
+	for module in commands.command_modules:
+		if hasattr(module, 'init'):
+			await module.init()
 
 	await client.change_presence(
 		activity=discord.Game(name='e')
 	)
-	active_mutes = await db.get_active_mutes()
-	await markovforums.init()
-	print('active_mutes', active_mutes)
-	for muted_id in active_mutes:
-		asyncio.ensure_future(unmute_user(muted_id, True))
-	guild = client.get_guild(717904501692170260)
-	cached_invites = await guild.invites()
-	asyncio.ensure_future(check_dead_chat())
-	asyncio.ensure_future(give_hourly_bobux())
+	if not is_dev:
+		active_mutes = await db.get_active_mutes()
+		for muted_id in active_mutes:
+			asyncio.ensure_future(unmute_user(muted_id, True))
+		guild = client.get_guild(717904501692170260)
+		cached_invites = await guild.invites()
+		asyncio.ensure_future(check_dead_chat())
+		asyncio.ensure_future(give_hourly_bobux())
 
 
 @client.event
 async def on_member_join(member):
+	if is_dev: return
 	global cached_invites
 	cached_invites_dict = {invite.code: invite for invite in cached_invites}
 	guild = client.get_guild(717904501692170260)
@@ -139,7 +135,7 @@ async def on_member_join(member):
 
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
-	
+
 		if is_member:
 			await member.add_roles(member_role, reason='Linked member rejoined')
 		else:
@@ -148,14 +144,15 @@ async def on_member_join(member):
 			else:
 				await member.send('Hello! Please verify your Minecraft account by doing !link <your username>. (You must set your Discord in your Hypixel settings)')
 
+
 def is_close_to_everyone(name):
-	return name and name.lower().strip('@').split()[0] == 'everyone'
+	return name and name.lower().strip('@').split()[0] in ['everyone', 'here']
 
 
 @client.event
 async def on_member_update(before, after):
 	# nick update
-	wacky_characters = ['𒈙', 'ٴٴ,', '˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞T', '﷽']
+	wacky_characters = ['𒈙', 'ٴٴ', '˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞T', '﷽']
 	if after.nick:
 		if any([c in after.nick or '' for c in wacky_characters]):
 			return await after.edit(nick=before.nick)
@@ -189,14 +186,6 @@ async def on_member_update(before, after):
 
 most_recent_counting_message_id = None
 
-async def update_counter():
-	# current_counter = await db.get_counter(717904501692170260)
-	# print('updated counter to', current_counter)
-	# counting_channel = client.get_channel(738449805218676737)
-	# await counting_channel.edit(name=f'counting-{current_counter}', reason='Counting channel')
-	# print('ok')
-	return
-
 async def process_counting_channel(message):
 	global most_recent_counting_message_id
 	if message.channel.id != 738449805218676737:
@@ -221,7 +210,6 @@ async def process_counting_channel(message):
 		await db.set_counter(message.guild.id, 0)
 		await message.channel.send(f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})")
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
-	await update_counter()
 
 last_general_message = time.time()
 
