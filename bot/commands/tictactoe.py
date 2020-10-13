@@ -1,8 +1,8 @@
 from ..betterbot import Member
-from .. import db
 import random
 import asyncio
 import discord
+import db
 
 name = 'tictactoe'
 aliases = ['ttt']

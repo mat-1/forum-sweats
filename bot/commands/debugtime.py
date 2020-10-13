@@ -1,5 +1,5 @@
 from ..betterbot import Time
-from .utils import seconds_to_string
+from utils import seconds_to_string
 
 name = 'debugtime'
 

@@ -3,8 +3,8 @@ from ..discordbot import (
 	has_role,
 	mute_user
 )
-from .. import db
 import discord
+import db
 
 name = 'mute'
 bot_channel = False

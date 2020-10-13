@@ -1,7 +1,8 @@
-from .. import hypixel, db
-from . import utils
+from utils import get_role_id
+import hypixel
 import discord
 import time
+import db
 
 name = 'link'
 
@@ -52,13 +53,13 @@ async def run(message, ign: str = None):
 
 		# Remove the user's old rank
 		if old_rank:
-			old_rank_role_id = utils.get_role_id(guild.id, old_rank)
+			old_rank_role_id = get_role_id(guild.id, old_rank)
 			if old_rank_role_id:
 				old_rank_role = guild.get_role(old_rank_role_id)
 				await member.remove_roles(old_rank_role, reason='Old rank')
 
 		new_rank = data['rank']
-		new_rank_role_id = utils.get_role_id(guild.id, new_rank)
+		new_rank_role_id = get_role_id(guild.id, new_rank)
 		if new_rank_role_id:
 			new_rank_role = guild.get_role(new_rank_role_id)
 			await member.add_roles(new_rank_role, reason='Update rank')
@@ -97,7 +98,7 @@ async def run(message, ign: str = None):
 		if not member:
 			# Member isn't in the guild
 			continue
-		member_role_id = utils.get_role_id(guild.id, 'member')
+		member_role_id = get_role_id(guild.id, 'member')
 		member_role = guild.get_role(member_role_id)
 		await member.add_roles(member_role, reason='New member linked')
 	await db.set_is_member(message.author.id)

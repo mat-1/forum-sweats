@@ -1,12 +1,12 @@
-from . import unidecode
-from . import discordbot
-from . import db
 from datetime import datetime, timedelta
+from bot import discordbot
+import unidecode
 import aiohttp
 import time
 import json
 import os
 import re
+import db
 
 with open('letter_pairs.json', 'r') as f:
 	letter_pair_scores = json.loads(f.read())
@@ -21,6 +21,7 @@ perspective_url = 'https://commentanalyzer.googleapis.com/'\
 
 s = aiohttp.ClientSession()
 
+
 async def get_perspective_score(message, models=['SEVERE_TOXICITY', 'TOXICITY', 'IDENTITY_ATTACK']):
 
 	input_data = {
@@ -32,7 +33,7 @@ async def get_perspective_score(message, models=['SEVERE_TOXICITY', 'TOXICITY', 
 		'languages': ['en'],
 		'requestedAttributes': {},
 	}
-	
+
 	for m in models:
 		input_data['requestedAttributes'][m] = {}
 
@@ -52,6 +53,7 @@ async def get_perspective_score(message, models=['SEVERE_TOXICITY', 'TOXICITY', 
 		output[model] = raw_model_scores[model]['summaryScore']['value']
 	return output
 
+
 def get_keyboard_smash_score(phrase):
 	score = 0
 	letter_pair_scores_tmp = letter_pair_scores
@@ -69,11 +71,12 @@ def add_previous_message(message):
 		previous_user_messages[message.author.id] = []
 	previous_user_messages[message.author.id].append(message)
 
+
 def get_previous_messages(member, last_seconds=3600):
 	# get last 10 messages from user
 	messages = []
 	recent_message_count = 0
-	
+
 	now = datetime.now()
 	for message in reversed(previous_user_messages.get(member.id, [])):
 		if now - message.created_at < timedelta(seconds=last_seconds):
@@ -84,6 +87,7 @@ def get_previous_messages(member, last_seconds=3600):
 		del previous_user_messages[member.id]
 		return []
 	return messages[:10]
+
 
 async def check_repeat_spam(message):
 	if message.content.startswith('!keyboardsmash '):
@@ -114,6 +118,7 @@ async def check_repeat_spam(message):
 		return True
 	return False
 
+
 async def check_spam(message):
 	previous_messages = get_previous_messages(message.author, last_seconds=60)
 	previous_messages.insert(0, message)
@@ -123,6 +128,7 @@ async def check_spam(message):
 			same_message = False
 	if same_message and len(previous_messages) > 3:
 		await message.delete()
+
 
 async def get_perspectives_from_message(message):
 	if message.content.strip() == '':
@@ -142,8 +148,7 @@ async def get_perspectives_from_message(message):
 
 invite_regex = re.compile(r'(discord\.gg|discordapp\.com\/invite|discord\.com\/invite|discord\.gg\/invite)\/(.{1,10})')
 
-# async def process_for_invites(message):
-# 	invite_regex.findall(message)
+
 async def process_messsage(message, warn=True):
 	# await process_for_invites(message)
 	if message.channel.id == 719570596005937152:
@@ -204,16 +209,6 @@ async def process_messsage(message, warn=True):
 
 	await check_spam(message)
 
-	# if await check_repeat_spam(message):
-	# 	del previous_user_messages[message.author.id]
-	# 	await message.channel.send(f'<@{message.author.id}> has been muted for 60 seconds for "**spam**"')
-	# 	await discordbot.mute_user(
-	# 		message.author,
-	# 		60,
-	# 		message.guild.id if message.guild else None
-	# 	)
-	# 	return
-	
 	perspectives = await get_perspectives_from_message(message)
 	if not perspectives: return
 	severe_toxicity = perspectives['SEVERE_TOXICITY']
@@ -282,7 +277,5 @@ async def process_messsage(message, warn=True):
 			# 	await message.channel.send(f'<@{message.author.id}>, please be nice.')
 		last_toxic_message_times[message.author.id] = time.time()
 		return
-	
-	add_previous_message(message)
 
-	
+	add_previous_message(message)

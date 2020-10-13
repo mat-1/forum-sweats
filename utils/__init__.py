@@ -37,3 +37,30 @@ def seconds_to_string(actual_seconds, extra_parts=1):
 		second_time_string = seconds_to_string(remaining_seconds, extra_parts=extra_parts - 1)
 		time_string = f'{time_string} and {second_time_string}'
 	return time_string
+
+
+def trim_string(string, width=150, height=20):
+	# shortens a string and adds ellipses if it's too long
+	was_trimmed = False
+	new_string = ''
+	x_pos = 0
+	y_pos = 0
+	for character in string:
+		if character == '\n':
+			y_pos += 1
+			x_pos = 0
+		x_pos += 1
+		if x_pos > width:
+			y_pos += 1
+			x_pos = 0
+		if y_pos > height:
+			was_trimmed = True
+			break
+		new_string += character
+
+	if was_trimmed:
+		new_string += '...'
+	return new_string
+
+
+confirmed_emoji = '👍'

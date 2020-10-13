@@ -1,14 +1,19 @@
 from .betterbot import BetterBot
-from . import db
-from . import forums
-from . import modbot
 from datetime import datetime, timedelta
 import discord
 import asyncio
+import modbot
+import forums
 import base64
 import json
 import time
 import os
+import db
+
+intents = discord.Intents.default()
+intents.members = True
+intents.presences = True
+
 
 prefix = '!'
 token = os.getenv('token')
@@ -21,8 +26,10 @@ betterbot = BetterBot(
 with open('roles.json', 'r') as f:
 	roles = json.loads(f.read())
 
+
 def get_role_id(guild_id, role_name):
 	return roles.get(str(guild_id), {}).get(role_name)
+
 
 def has_role(member_id, guild_id, role_name):
 	'Checks if a member has a role from roles.json'
@@ -32,7 +39,9 @@ def has_role(member_id, guild_id, role_name):
 	role_id = get_role_id(guild_id, role_name)
 	return any([role_id == role.id for role in member.roles])
 
-client = discord.Client()
+
+client = discord.Client(intents=intents)
+
 
 async def start_bot():
 	print('starting bot pog')

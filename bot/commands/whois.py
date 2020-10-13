@@ -1,6 +1,6 @@
 from ..betterbot import Member
-from .. import db
 import discord
+import db
 
 name = 'whois'
 
