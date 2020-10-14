@@ -16,4 +16,5 @@ Member and Time can be imported by doing `from ..betterbot import Member, Time`
 - `Time` - Using an amount of time, like 5 minutes, in a command. See mute.py for an exmaple.
 - `str` - A string of unknown length, will intelligently change based on the arguments around it.
 - `int` - Any full number
+
 Omitting the type of argument will default to a string.
