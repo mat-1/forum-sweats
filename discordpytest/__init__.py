@@ -135,12 +135,6 @@ class Tester:
 			'discriminator': '6207',
 			'avatar': '',
 			'bot': False,
-			'system': False,
-			'mfa_enabled': False,
-			'locale': 'en-US',
-			'flags': 0,
-			'premium_type': 0,
-			'public_flags': 0
 		}
 		member = {
 			'nick': None,
@@ -179,7 +173,4 @@ class Tester:
 			check_content = checker
 			checker = lambda s: s['content'] == check_content
 
-		# while len(bot.client.http.messages_queue) == 0:
-		# 	await asyncio.sleep(0)
 		assert checker(self.client.http.messages_queue[0])
-

@@ -1,12 +1,10 @@
-import aiohttp
+from session import s
 import discord
 import random
 
 name = 'duck'
 aliases = ['duckpic', 'randomduck', 'duckpicture']
 bot_channel = False
-
-s = aiohttp.ClientSession()
 
 
 async def run(message):

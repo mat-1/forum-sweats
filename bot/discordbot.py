@@ -61,6 +61,7 @@ async def check_dead_chat():
 		if time_since_message > 60 * 5:
 			await general_channel.send('dead chat xD')
 
+
 async def give_hourly_bobux():
 	while True:
 		time_until_bobux_given = 3600 - ((time.time()) % 3600)
