@@ -10,7 +10,10 @@ All the bot commands are seperate Python files, in forum-sweats/bot/commands/. T
 If the command has multiple complex uses, you should put them in different files with the same name. See forum.py, forum_user.py, and forum_thread.py for an example. Additionally, you should have pad_none=True for these commands.
 
 #### Arguments
-The arguments that are used for running the command. The name of the command isn't included, and the first argument will always return the `message` object.
+The arguments that are used for running the command. The names of the arguments don't matter, but the types are listed below (can be set by doing `(message, argumentname: Member)`). The first argument is always the `message` object.
 Member and Time can be imported by doing `from ..betterbot import Member, Time`
 - `Member` - Using a server member in a command. This will intelligently figure out who the user is, and even allows for putting part of the user's name or nickname, and it can include spaces. See mute.py for an example.
 - `Time` - Using an amount of time, like 5 minutes, in a command. See mute.py for an exmaple.
+- `str` - A string of unknown length, will intelligently change based on the arguments around it.
+- `int` - Any full number
+Omitting the type of argument will default to a string.
