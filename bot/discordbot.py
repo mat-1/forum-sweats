@@ -498,7 +498,7 @@ for module_filename in os.listdir('./bot/commands'):
 	betterbot.command(
 		module.name,
 		aliases=getattr(module, 'aliases', []),
-		bot_channel=getattr(module, 'bot_channel', None),
-		pad_none=getattr(module, 'pad_none', None),
+		bot_channel=getattr(module, 'bot_channel', True),
+		pad_none=getattr(module, 'pad_none', True),
 	)(module.run)
 	print('Registered command from file', module_filename)
