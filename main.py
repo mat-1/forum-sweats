@@ -1,1 +1,1 @@
-import bot
+import bot.main

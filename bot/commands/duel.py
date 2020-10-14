@@ -1,7 +1,8 @@
-from ...rigduel import rigged_duel_users
+from .rigduel import rigged_duel_users
 from ..discordbot import mute_user
 from ..betterbot import Member
 import asyncio
+import random
 import time
 import db
 
@@ -101,20 +102,14 @@ name = 'duel'
 bot_channel = False
 
 
-async def duel(message, opponent: Member):
+async def run(message, opponent: Member):
 	if message.channel.id not in {
 		719579620931797002,  # general
 		718076311150788649,  # bot-commands
 		720073985412562975,  # gulag
 		750147192383078400,  # quaglet channel
 	}: return
-	# if message.channel.id == 719579620931797002:
-	# 	last_duel = await db.get_last_general_duel(message.guild.id)
-	# 	if last_duel:
-	# 		time_since_last_duel = datetime.now() - last_duel
-	# 		if time_since_last_duel < timedelta(hours=1):
-	# 			return await message.channel.send('There can only be one duel in general per hour.')
-	# get_last_general_duel
+
 	if not opponent:
 		return await message.channel.send('You must choose an opponent (example: !duel quaglet)')
 	if opponent.id == message.author.id:
@@ -147,7 +142,7 @@ async def duel(message, opponent: Member):
 	await duel_invite_message.add_reaction('🔫')
 	try:
 		if opponent.id != 719348452491919401:
-			reaction, user = await client.wait_for(
+			reaction, user = await message.client.wait_for(
 				'reaction_add',
 				check=lambda reaction, user: (
 					user.id == opponent.id and reaction.emoji == '🔫' and reaction.message.id == duel_invite_message.id
@@ -167,7 +162,7 @@ async def duel(message, opponent: Member):
 
 	if message.channel.id == 719579620931797002:
 		await db.set_last_general_duel(message.guild.id)
-	asyncio.ensure_future(duel_wait_for(client, message.channel, message.author, opponent))
+	asyncio.ensure_future(duel_wait_for(message.client, message.channel, message.author, opponent))
 	await message.channel.send('Duel starting in 10 seconds... First person to type :gun: once the countdown ends, wins.')
 	await asyncio.sleep(5)
 	while not duel_statuses[duel_id]['zero']:

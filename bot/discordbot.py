@@ -1,5 +1,7 @@
 from .betterbot import BetterBot
+from . import commands
 from datetime import datetime, timedelta
+import importlib
 import discord
 import asyncio
 import modbot
@@ -49,6 +51,7 @@ async def start_bot():
 
 cached_invites = []
 
+
 async def check_dead_chat():
 	guild = client.get_guild(717904501692170260)
 	general_channel = guild.get_channel(719579620931797002)
@@ -78,7 +81,6 @@ async def give_hourly_bobux():
 
 @client.event
 async def on_ready():
-	from . import commands
 	global cached_invites
 	print('ready')
 	await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
@@ -222,22 +224,24 @@ async def process_counting_channel(message):
 
 last_general_message = time.time()
 
+
 async def process_suggestion(message):
 	agree_emoji = client.get_emoji(719235230958878822)
 	disagree_emoji = client.get_emoji(719235358029512814)
 	await message.add_reaction(agree_emoji)
 	await message.add_reaction(disagree_emoji)
 
+
 @client.event
 async def on_message(message):
 	global last_general_message
-	if message.channel.id == 738937428378779659: # skyblock-updates
+	if message.channel.id == 738937428378779659:  # skyblock-updates
 		await message.publish()
-	if message.channel.id == 719579620931797002: # general
+	if message.channel.id == 719579620931797002:  # general
 		last_general_message = time.time()
-	if message.channel.id == 718114140119629847: # suggestions
+	if message.channel.id == 718114140119629847:  # suggestions
 		await process_suggestion(message)
-	if message.channel.id == 763088127287361586: # spam
+	if message.channel.id == 763088127287361586:  # spam
 		if message.content and message.content[0] != '!' and not message.author.bot:
 			uwuized_message = message.content\
 				.replace('@', '')\
@@ -252,6 +256,7 @@ async def on_message(message):
 	await betterbot.process_commands(message)
 	await modbot.process_messsage(message)
 
+
 @client.event
 async def on_message_delete(message):
 	print('deleted:', message.author, message.content)
@@ -259,11 +264,13 @@ async def on_message_delete(message):
 		counter = await db.get_counter(message.guild.id)
 		await message.channel.send(str(counter))
 
+
 @client.event
 async def on_message_edit(before, after):
 	if after.channel.id == 738449805218676737:
 		await after.delete()
 	await modbot.process_messsage(after, warn=False)
+
 
 async def mute_user(member, length, guild_id=None):
 	guild_id = guild_id if guild_id else 717904501692170260
@@ -481,12 +488,17 @@ def api_get_members():
 		}
 	}
 
-# @client.event
-# async def on_voice_state_update(member, before, after):
-# 	forum_sweats_got_talent_id = 755273538163966043
-# 	forum_sweats_got_talent = client.get_channel(forum_sweats_got_talent_id)
-# 	if before.channel != forum_sweats_got_talent and after.channel == forum_sweats_got_talent: # moved into forum sweats got talent
-# 		if not after.mute:
-# 			await member.edit(mute=True)
-# 	if after.channel != forum_sweats_got_talent: # unmute
-# 		await member.edit(mute=False)
+
+command_modules = []
+for module_filename in os.listdir('./bot/commands'):
+	if module_filename == '__init__.py' or module_filename[-3:] != '.py':
+		continue
+	module = importlib.import_module('bot.commands.' + module_filename[:-3])
+	command_modules.append(module)
+	betterbot.command(
+		module.name,
+		aliases=getattr(module, 'aliases', []),
+		bot_channel=getattr(module, 'bot_channel', None),
+		pad_none=getattr(module, 'pad_none', None),
+	)(module.run)
+	print('Registered command from file', module_filename)
