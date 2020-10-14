@@ -1,8 +1,8 @@
-import discordbot
 import discord
 from discord.ext import commands
 import re
 import time
+from . import discordbot
 
 
 # this is just so i can customize command parsing more
@@ -32,15 +32,17 @@ class Context():  # very unfinished but its fine probably
 
 class NothingFound(BaseException): pass
 
+
 bot_channels = {
 	717904501692170260: (
 		718076311150788649,
 		719518839171186698
-	), # forum sweats, bot-commands
-	719349183974473851: 719349184750420010, # bot testing, general
+	),  # forum sweats, bot-commands
+	719349183974473851: 719349184750420010,  # bot testing, general
 }
 
 recent_members = {}
+
 
 class BetterBot():
 	functions = []
@@ -168,11 +170,13 @@ def get_recent_members():
 Member
 '''
 
+
 def get_channel_members(channel_id):
 	try:
 		return discordbot.client.get_channel(channel_id).members
 	except:
 		return [discordbot.client.get_channel(channel_id).recipient]
+
 
 def get_guild_members(channel_id):
 	try:
@@ -180,6 +184,7 @@ def get_guild_members(channel_id):
 	except Exception as e:
 		members = [discordbot.client.get_channel(channel_id).recipient]
 	return members
+
 
 def check_user_id(ctx, arg):
 	try:

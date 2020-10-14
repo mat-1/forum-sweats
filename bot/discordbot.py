@@ -1,34 +1,37 @@
-from betterbot import BetterBot
-import discord
-import os
-import json
-import db
-import time
-import asyncio
-import forums
+from .betterbot import BetterBot
+from . import commands
 from datetime import datetime, timedelta
+import importlib
+import discord
+import asyncio
 import modbot
-import markovforums
-# import logging
+import forums
+import base64
+import json
+import time
+import os
+import db
 
-# logger = logging.getLogger('discord')
-# logger.setLevel(logging.DEBUG)
-# handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-# handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-# logger.addHandler(handler)
+intents = discord.Intents.default()
+intents.members = True
+intents.presences = True
 
 
 prefix = '!'
+token = os.getenv('token')
+is_dev = os.getenv('dev') == 'true'
 betterbot = BetterBot(
 	prefix=prefix,
-	bot_id=719348452491919401
+	bot_id=int(base64.b64decode(token.split('.')[0])) if token else 0
 )
 
 with open('roles.json', 'r') as f:
 	roles = json.loads(f.read())
 
+
 def get_role_id(guild_id, role_name):
 	return roles.get(str(guild_id), {}).get(role_name)
+
 
 def has_role(member_id, guild_id, role_name):
 	'Checks if a member has a role from roles.json'
@@ -38,13 +41,16 @@ def has_role(member_id, guild_id, role_name):
 	role_id = get_role_id(guild_id, role_name)
 	return any([role_id == role.id for role in member.roles])
 
-client = discord.Client()
+
+client = discord.Client(intents=intents)
+
 
 async def start_bot():
-	print('starting bot yeet')
-	await client.start(os.getenv('token'))
+	print('starting bot pog')
+	await client.start(token)
 
 cached_invites = []
+
 
 async def check_dead_chat():
 	guild = client.get_guild(717904501692170260)
@@ -58,10 +64,8 @@ async def check_dead_chat():
 async def give_hourly_bobux():
 	while True:
 		time_until_bobux_given = 3600 - ((time.time()) % 3600)
-		print('time_until_bobux_given', time_until_bobux_given)
 		await asyncio.sleep(time_until_bobux_given)
 		members = await db.get_active_members_from_past_hour(1)
-		print('active members:', members)
 		for member_data in members:
 			member_id = member_data['discord']
 			messages_in_past_hour = member_data['hourly_messages']
@@ -80,23 +84,26 @@ async def on_ready():
 	global cached_invites
 	print('ready')
 	await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
+	for module in commands.command_modules:
+		if hasattr(module, 'init'):
+			await module.init()
 
 	await client.change_presence(
 		activity=discord.Game(name='e')
 	)
-	active_mutes = await db.get_active_mutes()
-	await markovforums.init()
-	print('active_mutes', active_mutes)
-	for muted_id in active_mutes:
-		asyncio.ensure_future(unmute_user(muted_id, True))
-	guild = client.get_guild(717904501692170260)
-	cached_invites = await guild.invites()
-	asyncio.ensure_future(check_dead_chat())
-	asyncio.ensure_future(give_hourly_bobux())
+	if not is_dev:
+		active_mutes = await db.get_active_mutes()
+		for muted_id in active_mutes:
+			asyncio.ensure_future(unmute_user(muted_id, True))
+		guild = client.get_guild(717904501692170260)
+		cached_invites = await guild.invites()
+		asyncio.ensure_future(check_dead_chat())
+		asyncio.ensure_future(give_hourly_bobux())
 
 
 @client.event
 async def on_member_join(member):
+	if is_dev: return
 	global cached_invites
 	cached_invites_dict = {invite.code: invite for invite in cached_invites}
 	guild = client.get_guild(717904501692170260)
@@ -139,7 +146,7 @@ async def on_member_join(member):
 
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
-	
+
 		if is_member:
 			await member.add_roles(member_role, reason='Linked member rejoined')
 		else:
@@ -148,14 +155,15 @@ async def on_member_join(member):
 			else:
 				await member.send('Hello! Please verify your Minecraft account by doing !link <your username>. (You must set your Discord in your Hypixel settings)')
 
+
 def is_close_to_everyone(name):
-	return name and name.lower().strip('@').split()[0] == 'everyone'
+	return name and name.lower().strip('@').split()[0] in ['everyone', 'here']
 
 
 @client.event
 async def on_member_update(before, after):
 	# nick update
-	wacky_characters = ['𒈙', 'ٴٴ,', '˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞T', '﷽']
+	wacky_characters = ['𒈙', 'ٴٴ', '˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞T', '﷽']
 	if after.nick:
 		if any([c in after.nick or '' for c in wacky_characters]):
 			return await after.edit(nick=before.nick)
@@ -189,14 +197,6 @@ async def on_member_update(before, after):
 
 most_recent_counting_message_id = None
 
-async def update_counter():
-	# current_counter = await db.get_counter(717904501692170260)
-	# print('updated counter to', current_counter)
-	# counting_channel = client.get_channel(738449805218676737)
-	# await counting_channel.edit(name=f'counting-{current_counter}', reason='Counting channel')
-	# print('ok')
-	return
-
 async def process_counting_channel(message):
 	global most_recent_counting_message_id
 	if message.channel.id != 738449805218676737:
@@ -221,9 +221,9 @@ async def process_counting_channel(message):
 		await db.set_counter(message.guild.id, 0)
 		await message.channel.send(f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})")
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
-	await update_counter()
 
 last_general_message = time.time()
+
 
 async def process_suggestion(message):
 	agree_emoji = client.get_emoji(719235230958878822)
@@ -231,16 +231,17 @@ async def process_suggestion(message):
 	await message.add_reaction(agree_emoji)
 	await message.add_reaction(disagree_emoji)
 
+
 @client.event
 async def on_message(message):
 	global last_general_message
-	if message.channel.id == 738937428378779659: # skyblock-updates
+	if message.channel.id == 738937428378779659:  # skyblock-updates
 		await message.publish()
-	if message.channel.id == 719579620931797002: # general
+	if message.channel.id == 719579620931797002:  # general
 		last_general_message = time.time()
-	if message.channel.id == 718114140119629847: # suggestions
+	if message.channel.id == 718114140119629847:  # suggestions
 		await process_suggestion(message)
-	if message.channel.id == 763088127287361586: # spam
+	if message.channel.id == 763088127287361586:  # spam
 		if message.content and message.content[0] != '!' and not message.author.bot:
 			uwuized_message = message.content\
 				.replace('@', '')\
@@ -255,6 +256,7 @@ async def on_message(message):
 	await betterbot.process_commands(message)
 	await modbot.process_messsage(message)
 
+
 @client.event
 async def on_message_delete(message):
 	print('deleted:', message.author, message.content)
@@ -262,11 +264,13 @@ async def on_message_delete(message):
 		counter = await db.get_counter(message.guild.id)
 		await message.channel.send(str(counter))
 
+
 @client.event
 async def on_message_edit(before, after):
 	if after.channel.id == 738449805218676737:
 		await after.delete()
 	await modbot.process_messsage(after, warn=False)
+
 
 async def mute_user(member, length, guild_id=None):
 	guild_id = guild_id if guild_id else 717904501692170260
@@ -484,12 +488,17 @@ def api_get_members():
 		}
 	}
 
-# @client.event
-# async def on_voice_state_update(member, before, after):
-# 	forum_sweats_got_talent_id = 755273538163966043
-# 	forum_sweats_got_talent = client.get_channel(forum_sweats_got_talent_id)
-# 	if before.channel != forum_sweats_got_talent and after.channel == forum_sweats_got_talent: # moved into forum sweats got talent
-# 		if not after.mute:
-# 			await member.edit(mute=True)
-# 	if after.channel != forum_sweats_got_talent: # unmute
-# 		await member.edit(mute=False)
+
+command_modules = []
+for module_filename in os.listdir('./bot/commands'):
+	if module_filename == '__init__.py' or module_filename[-3:] != '.py':
+		continue
+	module = importlib.import_module('bot.commands.' + module_filename[:-3])
+	command_modules.append(module)
+	betterbot.command(
+		module.name,
+		aliases=getattr(module, 'aliases', []),
+		bot_channel=getattr(module, 'bot_channel', None),
+		pad_none=getattr(module, 'pad_none', None),
+	)(module.run)
+	print('Registered command from file', module_filename)

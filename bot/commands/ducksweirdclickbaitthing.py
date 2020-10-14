@@ -1,5 +1,9 @@
 import random
 
+name = 'ducksweirdclickbaitthing'
+aliases = ['clickbait']
+
+
 gaming = "1"
 contacting = "2"
 challenge = "3"
@@ -15,7 +19,7 @@ generating = False
 capsList = [True, False]
 
 
-def generate():
+def generate_clickbait():
 	theme = random.choice(themeList)
 	gaming1caps = random.choice(capsList)
 	gaming2caps = random.choice(capsList)
@@ -90,3 +94,7 @@ def generate():
 			challenge3 = challenge3.upper()
 
 		return f'{challenge1} {challenge2} {challenge3}'
+
+
+async def run(message):
+	await message.channel.send(generate_clickbait())

@@ -10,3 +10,4 @@ __pycache__/
 unidecode/__pycache__/
 forums/__pycache__/
 *.pyc
+pytest_cache

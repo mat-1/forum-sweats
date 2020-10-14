@@ -1,0 +1,6 @@
+beautifulsoup4
+cloudscraper
+discord.py
+motor
+dnspython
+python-dotenv
