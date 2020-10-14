@@ -1,7 +1,4 @@
 import os
-if not os.getenv('token'):
-	from dotenv import load_dotenv
-	load_dotenv()
 import bot.discordbot as bot
 import discordpytest
 import pytest
@@ -32,4 +29,3 @@ def channel(test, guild):
 async def test_e(test, channel):
 	await test.message('!e', channel)
 	test.verify_message('e')
-

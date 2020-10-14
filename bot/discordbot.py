@@ -22,7 +22,7 @@ token = os.getenv('token')
 is_dev = os.getenv('dev') == 'true'
 betterbot = BetterBot(
 	prefix=prefix,
-	bot_id=int(base64.b64decode(token.split('.')[0]))
+	bot_id=int(base64.b64decode(token.split('.')[0])) if token else 0
 )
 
 with open('roles.json', 'r') as f:

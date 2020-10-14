@@ -15,9 +15,10 @@ last_toxic_message_times = {}
 last_very_toxic_message_times = {}
 
 perspective_key = os.getenv('perspective_key')
-
-perspective_url = 'https://commentanalyzer.googleapis.com/'\
-	'v1alpha1/comments:analyze?key=' + perspective_key
+if not perspective_key:
+	print('No perspective key found!')
+perspective_url = f'https://commentanalyzer.googleapis.com/'\
+	'v1alpha1/comments:analyze?key={perspective_key}'
 
 s = aiohttp.ClientSession()
 
