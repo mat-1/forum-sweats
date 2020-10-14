@@ -1,5 +1,7 @@
-from dotenv import load_dotenv
-load_dotenv()
+import os
+if not os.getenv('token'):
+	from dotenv import load_dotenv
+	load_dotenv()
 from . import server, discordbot
 import sys
 

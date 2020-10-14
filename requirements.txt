@@ -3,3 +3,4 @@ cloudscraper
 discord.py
 motor
 dnspython
+python-dotenv
