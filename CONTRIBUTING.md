@@ -4,6 +4,7 @@ All the bot commands are seperate Python files, in forum-sweats/bot/commands/. T
 - `name` - The name of the command. (You can add alternative names using aliseses)
 - `run` - This is actually an asynchronous function, not a variable. The first argument for this function will be the discord.py Message object, and all other arguments are for parsing the command itself.
 #### Optional variables
+- `init` - Another asynchronous function like `run`, but with no arguments. It is executed when the bot starts up (on_ready)
 - `aliases` - A list with other names for the command.
 - `bot_channel` - If the command will only run when used in the #bot-commands channel. If this is false, the command will work anywhere, but you can add further limits (such as !rock working in #bot-commands and gulag)
 - `pad_none` - Usually extra arguments specified by the user will be ignored, only useful if a command is defined multiple times (such as !forum)
