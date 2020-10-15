@@ -84,7 +84,7 @@ async def on_ready():
 	global cached_invites
 	print('ready')
 	await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
-	for module in commands.command_modules:
+	for module in command_modules:
 		if hasattr(module, 'init'):
 			await module.init()
 
@@ -139,7 +139,6 @@ async def on_member_join(member):
 		await asyncio.sleep(5)
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
-		print('member_role', member_role, member)
 		await member.remove_roles(member_role, reason='mee6 cringe')
 	else:
 		is_member = await db.get_is_member(member.id)
