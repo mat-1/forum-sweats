@@ -20,7 +20,7 @@ async def run(message, ign: str = None):
 		print('data')
 		try:
 			# discord_name = data['links']['DISCORD']
-			discord_name = data['discord']['name']
+			discord_name = data.get('discord', {}).get('name')
 			assert discord_name is not None
 		except AssertionError:
 			raise hypixel.DiscordNotFound()
