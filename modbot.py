@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from bot import discordbot
 import unidecode
-import aiohttp
+from session import s
 import time
 import json
 import os
@@ -17,14 +17,14 @@ last_very_toxic_message_times = {}
 perspective_key = os.getenv('perspective_key')
 if not perspective_key:
 	print('No perspective key found!')
-perspective_url = f'https://commentanalyzer.googleapis.com/'\
-	'v1alpha1/comments:analyze?key={perspective_key}'
-
-s = aiohttp.ClientSession()
+perspective_url = (
+	'https://commentanalyzer.googleapis.com/'
+	f'v1alpha1/comments:analyze?key={perspective_key}'
+) if perspective_key else None
 
 
 async def get_perspective_score(message, models=['SEVERE_TOXICITY', 'TOXICITY', 'IDENTITY_ATTACK']):
-
+	if not perspective_key: return {}
 	input_data = {
 		'comment': {
 			'text': message

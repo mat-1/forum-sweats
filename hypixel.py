@@ -1,11 +1,9 @@
-import aiohttp
+from session import s
 import random
 import os
 
 # API keys are seperated by commas
 api_keys = os.getenv('keys').split(',') if os.getenv('keys') else []
-
-s = aiohttp.ClientSession()
 
 
 class PlayerNotFound(Exception):

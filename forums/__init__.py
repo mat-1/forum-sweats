@@ -40,10 +40,12 @@ reaction_id_to_names = {
 	'15': 'Bug',
 }
 
+
 def avatar_from_id(user_id):
 	id_start = str(user_id)[:-3]
 	print('id_start', id_start)
 	return f'https://hypixel.net/data/avatars/l/{id_start}/{user_id}.jpg'
+
 
 async def login(email, password):
 	r = await s.get('https://hypixel.net/login')

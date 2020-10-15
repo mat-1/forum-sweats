@@ -16,9 +16,10 @@ from cloudscraper import CipherSuiteAdapter
 import copyreg
 import ssl
 
+
 class AsyncCloudScraper(cloudscraper.CloudScraper):
 	def __init__(self, *args, **kwargs):
-		self.s = aiohttp.ClientSession()
+		self.s = None
 		self.debug = kwargs.pop('debug', False)
 		self.delay = kwargs.pop('delay', None)
 		self.cipherSuite = kwargs.pop('cipherSuite', None)
@@ -66,7 +67,12 @@ class AsyncCloudScraper(cloudscraper.CloudScraper):
 		# purely to allow us to pickle dump
 		copyreg.pickle(ssl.SSLContext, lambda obj: (obj.__class__, (obj.protocol,)))
 
+	async def make_session_if_not_exists(self):
+		if not self.s:
+			self.s = aiohttp.ClientSession()
+
 	async def request(self, method, url, *args, **kwargs):
+		await self.make_session_if_not_exists()
 		# pylint: disable=E0203
 		if kwargs.get('proxies') and kwargs.get('proxies') != self.proxies:
 			self.proxies = kwargs.get('proxies')
@@ -109,7 +115,7 @@ class AsyncCloudScraper(cloudscraper.CloudScraper):
 
 			if self.debug:
 				self.debugRequest(response)
-		
+
 		# Check if Cloudflare anti-bot is on
 		if await self.is_Challenge_Request(response):
 			# ------------------------------------------------------------------------------- #
@@ -190,12 +196,12 @@ class AsyncCloudScraper(cloudscraper.CloudScraper):
 						CloudflareIUAMError,
 						"Cloudflare IUAM possibility malformed, issue extracing delay value."
 					)
-			
+
 			await asyncio.sleep(self.delay)
 
 			# ------------------------------------------------------------------------------- #
 			body = await resp.text()
-			
+
 			submit_url = self.IUAM_Challenge_Response(
 				body,
 				str(resp.url),
