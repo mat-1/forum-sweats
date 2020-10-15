@@ -14,7 +14,9 @@ member_data = db['members']
 infractions_data = db['infractions']
 servers_data = db['servers']
 
+
 async def set_minecraft_ign(user_id, ign, uuid):
+	if not connection_url: return
 	await member_data.update_one(
 		{
 			'discord': user_id
@@ -30,14 +32,18 @@ async def set_minecraft_ign(user_id, ign, uuid):
 		upsert=True
 	)
 
+
 async def get_minecraft_data(user_id):
+	if not connection_url: return
 	data = await member_data.find_one({
 		'discord': user_id,
 	})
 	if data:
 		return data.get('minecraft')
 
+
 async def set_hypixel_rank(user_id, rank):
+	if not connection_url: return
 	await member_data.update_one(
 		{
 			'discord': user_id
@@ -50,15 +56,18 @@ async def set_hypixel_rank(user_id, rank):
 		upsert=True
 	)
 
+
 async def get_hypixel_rank(user_id):
+	if not connection_url: return
 	data = await member_data.find_one({
 		'discord': user_id,
 	})
 	if data:
 		return data.get('hypixel_rank')
 
+
 async def set_mute_end(user_id, end_time, extra_data={}):
-	print('extra_data', extra_data)
+	if not connection_url: return
 	set_data = {
 		'muted_until': end_time
 	}
@@ -75,7 +84,9 @@ async def set_mute_end(user_id, end_time, extra_data={}):
 		upsert=True
 	)
 
+
 async def get_is_muted(user_id):
+	if not connection_url: return
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)
@@ -88,6 +99,7 @@ async def get_is_muted(user_id):
 
 
 async def get_mute_end(user_id):
+	if not connection_url: return 0
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)
@@ -98,7 +110,9 @@ async def get_mute_end(user_id):
 	else:
 		return 0
 
+
 async def get_mute_data(user_id):
+	if not connection_url: return {}
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)
@@ -109,7 +123,9 @@ async def get_mute_data(user_id):
 	else:
 		return 0
 
+
 async def get_active_mutes():
+	if not connection_url: return
 	active_mutes = {}
 	async for member in member_data.find(
 		{
@@ -121,7 +137,9 @@ async def get_active_mutes():
 		active_mutes[member['discord']] = member['muted_until']
 	return active_mutes
 
+
 async def add_infraction(user_id: int, infraction_type, reason):
+	if not connection_url: return
 	infraction_uuid = str(uuid.uuid4())
 	await infractions_data.insert_one({
 		'_id': infraction_uuid,
@@ -131,7 +149,9 @@ async def add_infraction(user_id: int, infraction_type, reason):
 		'date': datetime.now()
 	})
 
+
 async def get_infractions(user_id: int):
+	if not connection_url: return
 	infractions = []
 	async for infraction in infractions_data.find({
 		'user': user_id,
@@ -140,7 +160,9 @@ async def get_infractions(user_id: int):
 		infractions.append(infraction)
 	return infractions
 
+
 async def clear_infractions(user_id: int, date):
+	if not connection_url: return
 	r = await infractions_data.delete_many({
 		'user': user_id,
 		'date': {
@@ -150,15 +172,18 @@ async def clear_infractions(user_id: int, date):
 	})
 	return r.deleted_count
 
+
 async def clear_recent_infraction(user_id: int):
+	if not connection_url: return
 	async for infraction in infractions_data\
 		.find({'user': user_id})\
 		.sort('date', -1)\
 		.limit(1):
-			await infractions_data.delete_one({'_id': infraction['_id']})
+		await infractions_data.delete_one({'_id': infraction['_id']})
 
 
 async def set_rock(user_id: int):
+	if not connection_url: return
 	await member_data.update_one(
 		{
 			'discord': user_id
@@ -173,6 +198,7 @@ async def set_rock(user_id: int):
 
 
 async def get_rock(user_id: int):
+	if not connection_url: return
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)
@@ -185,6 +211,7 @@ async def get_rock(user_id: int):
 
 
 async def add_message(user_id: int):
+	if not connection_url: return
 	hour_id = int(time.time() / 3600)
 	await member_data.update_one(
 		{
@@ -199,9 +226,8 @@ async def add_message(user_id: int):
 	)
 
 
-
-
 async def get_active_members_from_past_hour(hoursago=1):
+	if not connection_url: return
 	hour_id = int((time.time()) / 3600) - hoursago
 	members = []
 	async for member in member_data.find(
@@ -217,8 +243,8 @@ async def get_active_members_from_past_hour(hoursago=1):
 	return members
 
 
-
 async def set_is_member(user_id: int):
+	if not connection_url: return
 	await member_data.update_one(
 		{
 			'discord': user_id
@@ -233,6 +259,7 @@ async def set_is_member(user_id: int):
 
 
 async def get_is_member(user_id: int):
+	if not connection_url: return
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)
@@ -243,7 +270,9 @@ async def get_is_member(user_id: int):
 	else:
 		return 0
 
+
 async def set_counter(guild_id: int, number: int):
+	if not connection_url: return
 	await servers_data.update_one(
 		{
 			'id': guild_id
@@ -256,14 +285,18 @@ async def set_counter(guild_id: int, number: int):
 		upsert=True
 	)
 
+
 async def get_counter(guild_id: int):
+	if not connection_url: return
 	data = await servers_data.find_one({
 		'id': guild_id,
 	})
 	if data:
 		return data.get('counter', 0)
 
+
 async def set_last_general_duel(guild_id: int):
+	if not connection_url: return
 	await servers_data.update_one(
 		{
 			'id': guild_id
@@ -276,14 +309,18 @@ async def set_last_general_duel(guild_id: int):
 		upsert=True
 	)
 
+
 async def get_last_general_duel(guild_id: int):
+	if not connection_url: return
 	data = await servers_data.find_one({
 		'id': guild_id,
 	})
 	if data:
 		return data.get('last_duel')
 
+
 async def set_bobux(user_id: int, amount: int):
+	if not connection_url: return
 	await member_data.update_one(
 		{
 			'discord': user_id
@@ -298,6 +335,7 @@ async def set_bobux(user_id: int, amount: int):
 
 
 async def get_bobux(user_id: int):
+	if not connection_url: return
 	data = await member_data.find_one(
 		{
 			'discord': user_id
@@ -305,7 +343,9 @@ async def get_bobux(user_id: int):
 	)
 	return data.get('bobux', 0)
 
+
 async def change_bobux(user_id: int, amount: int):
+	if not connection_url: return
 	await member_data.update_one(
 		{
 			'discord': user_id

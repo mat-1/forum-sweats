@@ -137,7 +137,6 @@ class BetterBot():
 					continue
 			else:
 				return_args = []
-			print(return_args, parsing_left)
 			for attempt in range(10):
 				try:
 					return await func(ctx, *return_args)
@@ -240,6 +239,7 @@ def check_nickname(ctx, arg):
 	)
 	return member
 
+
 def check_nickname_recent(ctx, arg):
 	member = discord.utils.find(
 		lambda m: m.display_name.lower() == arg.lower(),
@@ -255,6 +255,7 @@ def check_name_starts_with(ctx, arg):
 	))
 	if members:
 		return members[0]
+
 
 def check_name_starts_with_recent(ctx, arg):
 	member = discord.utils.find(
@@ -272,6 +273,7 @@ def check_nickname_starts_with(ctx, arg):
 	if members:
 		return list(sorted(members, key=lambda m: len(m.display_name)))[-1]
 
+
 def check_nickname_starts_with_recent(ctx, arg):
 	member = discord.utils.find(
 		lambda m: m.display_name.lower().startswith(arg.lower()),
@@ -279,12 +281,14 @@ def check_nickname_starts_with_recent(ctx, arg):
 	)
 	return member
 
+
 def check_name_contains(ctx, arg):
 	member = discord.utils.find(
 		lambda m: arg.lower() in m.name.lower(),
 		get_guild_members(ctx.guild.id)
 	)
 	return member
+
 
 def check_name_contains_recent(ctx, arg):
 	member = discord.utils.find(
@@ -301,6 +305,7 @@ def check_nickname_contains(ctx, arg):
 	)
 	return member
 
+
 def check_nickname_contains_recent(ctx, arg):
 	member = discord.utils.find(
 		lambda m: arg.lower() in m.display_name.lower(),
@@ -308,37 +313,38 @@ def check_nickname_contains_recent(ctx, arg):
 	)
 	return member
 
+
 class Member(commands.Converter):
 	async def convert(self, ctx, arg):
 		arg = arg.strip()
 		if arg[0] == '@':
 			arg = arg[1:]
-		
+
 		CHECKERS = [
-			check_user_id, # Check user id
-			check_mention, # Check mention
-			check_name_with_discrim, # Name + discrim
+			check_user_id,  # Check user id
+			check_mention,  # Check mention
+			check_name_with_discrim,  # Name + discrim
 
-			check_name_starts_with, # Name starts with
-			check_name_starts_with_recent, # Name starts with
-			check_nickname_starts_with_recent, # Nickname starts with
-			check_name_contains_recent, # Name contains
+			check_name_starts_with,  # Name starts with
+			check_name_starts_with_recent,  # Name starts with
+			check_nickname_starts_with_recent,  # Nickname starts with
+			check_name_contains_recent,  # Name contains
 
-			check_nickname_recent, # Nickname
-			check_nickname, # Nickname
+			check_nickname_recent,  # Nickname
+			check_nickname,  # Nickname
 
-			check_nickname_starts_with, # Nickname starts with
+			check_nickname_starts_with,  # Nickname starts with
 
-			check_name_contains, # Name contains
-			
-			check_nickname_contains_recent, # Nickname contains
-			check_nickname_contains, # Nickname contains
+			check_name_contains,  # Name contains
+
+			check_nickname_contains_recent,  # Nickname contains
+			check_nickname_contains,  # Nickname contains
 		]
 		for checker in CHECKERS:
 			member = checker(ctx, arg)
 			if member is not None:
 				return member
-		
+
 		return None
 
 
@@ -388,6 +394,7 @@ lengths = {
 	'aeons': 1 * 60 * 60 * 24 * 365 * 1000000000,
 }
 
+
 def check_time(ctx, arg):
 	if arg.strip() == 'forever':
 		return lengths['eons'] * 1000
@@ -403,6 +410,7 @@ def check_time(ctx, arg):
 	if time_type in lengths:
 		return lengths[time_type] * time_part
 
+
 class Time(commands.Converter):
 	async def convert(self, ctx, arg):
 		arg = arg.strip()
@@ -413,6 +421,6 @@ class Time(commands.Converter):
 			length = checker(ctx, arg)
 			if length is not None:
 				return length
-		
+
 		return None
 
