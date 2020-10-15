@@ -187,8 +187,8 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None
 		)
 		return
-	# antichilynn
-	if message.author.id == 750815961942065252 and re.match(r'[\w\W]*c+[^a-z]*h+[^a-z]*[i1y]+[^a-z]*[li1]+[^a-z]*[yi]+[^a-z]*n+[\w\W]*', content, flags=re.IGNORECASE):
+	# antichilynn for someblanket and piglegs
+	if message.author.id in {750815961942065252, 440574784271810572} and re.match(r'[\w\W]*c+[^a-z]*h+[^a-z]*[i1y]+[^a-z]*[li1]+[^a-z]*[yi]+[^a-z]*n+[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
