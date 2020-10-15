@@ -179,7 +179,7 @@ async def process_messsage(message, warn=True):
 		.replace('Ỻ', 'lL')
 
 	# antimoan
-	if re.match(r'[\w\W]*[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+[\w\W]*', content, flags=re.IGNORECASE):
+	if re.match(r'[\w\W]*[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+[\w\W]*', content, flags=re.IGNORECASE) and False:
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
