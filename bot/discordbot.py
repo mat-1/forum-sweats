@@ -218,7 +218,7 @@ async def process_counting_channel(message):
 		await db.set_counter(message.guild.id, int(new_number))
 		most_recent_counting_message_id = message.id
 		# give 1 bobux every time you count
-		await db.change_bobux(member.id, 1)
+		await db.change_bobux(message.author.id, 1)
 	else:
 		await db.set_counter(message.guild.id, 0)
 		await message.channel.send(f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})")
