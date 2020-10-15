@@ -150,12 +150,6 @@ class Tester:
 			'discriminator': str(discriminator),
 			'avatar': '',
 			'bot': False,
-			'system': False,
-			'mfa_enabled': False,
-			'locale': 'en-US',
-			'flags': 0,
-			'premium_type': 0,
-			'public_flags': 0
 		}
 		return self.client._connection.store_user(data)
 
