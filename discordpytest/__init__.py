@@ -1,5 +1,9 @@
+from discord.member import Member
+from discord.user import User
+from discord.role import Role
 import discord
 import asyncio
+import time
 
 
 class FakeClient(discord.Client):
@@ -25,7 +29,7 @@ class FakeClient(discord.Client):
 				setattr(self, attr, getattr(client, attr))
 
 	def connect(self, *, reconnect=True):
-		print('connect :)')
+		pass
 
 	def login(self, token, *, bot=True):
 		self.http.static_login(token.strip(), bot=bot)
@@ -37,8 +41,6 @@ class FakeClient(discord.Client):
 		self.login(*args, bot=bot)
 		self.connect(reconnect=reconnect)
 
-		print('started')
-
 
 class FakeHTTPClient():
 	def __init__(self):
@@ -48,14 +50,12 @@ class FakeHTTPClient():
 		pass
 
 	async def ws_connect(self, url, *, compress=0):
-		print('ws connect')
+		pass
 
 	async def request(self, route, *, files=None, **kwargs):
 		pass
-		print('request', route, kwargs)
 
 	def static_login(self, token, *, bot):
-		print('logged in')
 		self.token = token
 		self.bot_token = bot
 
@@ -72,6 +72,9 @@ class FakeHTTPClient():
 			'allowed_mentions': allowed_mentions
 		})
 
+	async def send_typing(self, channel_id):
+		pass
+
 
 class Tester:
 	def __init__(self, client):
@@ -79,11 +82,9 @@ class Tester:
 
 		self.client.start('-.-.-')
 
-		print('starting')
-
-	def make_guild(self, id=0):
+	def make_guild(self, **kwargs):
 		data = {
-			'id': id,
+			'id': 0,
 			'name': 'Forum Sweats',
 			'icon': None,
 			'splash': None,
@@ -95,7 +96,7 @@ class Tester:
 			'verification_level': 0,
 			'default_message_notifications': 0,
 			'explicit_content_filter': 0,
-			'roles': [],
+			'roles': {},
 			'emojis': [],
 			'features': [],
 			'mfa_level': 0,
@@ -111,14 +112,28 @@ class Tester:
 			'premium_subscription_count': 0,
 			'preferred_locale': 'en-US',
 			'public_updates_channel_id': None,
+			'member_count': 0
 		}
+		data.update(kwargs)
 		self.client._connection.parse_guild_create(data)
-		return self.client._connection._get_guild(int(data['id']))
+		guild = self.client.get_guild(int(data['id']))
+		default_role = Role(guild=guild, state=self.client._connection, data={
+			'id': str(guild.id),
+			'name': '@everyone',
+			'color': '000000',
+			'hoist': True,
+			'position': 0,
+			'permissions': '',
+			'managed': False,
+			'mentionable': False
+		})
+		guild._roles[default_role.id] = default_role
+		return guild
 
-	def make_channel(self, guild_id, **kwargs):
+	def make_channel(self, guild, **kwargs):
 		data = {
 			'id': id,
-			'guild_id': guild_id,
+			'guild_id': guild.id,
 			'type': 0,
 			'name': 'general',
 			'position': 0,
@@ -128,21 +143,38 @@ class Tester:
 		self.client._connection.parse_channel_create(data)
 		return self.client._connection.get_channel(int(data['id']))
 
-	async def message(self, content, channel, **kwargs):
-		author = {
-			'id': '1',
-			'username': 'mat',
-			'discriminator': '6207',
+	def make_user(self, user_id=1, username='user', discriminator='0001'):
+		data = {
+			'id': str(user_id),
+			'username': username,
+			'discriminator': str(discriminator),
 			'avatar': '',
 			'bot': False,
 		}
-		member = {
+		return self.client._connection.store_user(data)
+
+	def make_member(self, guild, user):
+		data = {
+			'user': user._to_minimal_user_json(),
 			'nick': None,
 			'roles': [],
-			'joined_at': '1970-01-01T00:00:01+00:00',
-			'deaf': False,
-			'mute': False
+			'joined_at': '1970-01-01T00:00:01+00:00'
 		}
+		member = Member(data=data, state=self.client._connection, guild=guild)
+		guild._add_member(member)
+		guild._member_count = len(guild._members)
+		return member
+
+	async def message(self, content, channel, author=None, **kwargs):
+		if not author:
+			author = self.make_member(channel.guild, self.make_user())
+		author_data = {
+			'user': author._user._to_minimal_user_json(),
+			'nick': author.nick,
+			'roles': author._roles,
+			'joined_at': author.joined_at.isoformat(),
+		}
+		member = Member(state=self.client._connection, data=author_data, guild=channel.guild)
 		data = {
 			'id': '0',
 			'channel_id': channel.id,
@@ -161,16 +193,24 @@ class Tester:
 			'content': content,
 			'nonce': None,
 			'message_reference': None,
-			'author': author,
-			'member': member
+			'author': author._user._to_minimal_user_json(),
+			'member': author_data
 		}
-
+		data.update(kwargs)
 		self.client._connection.parse_message_create(data)
-		await asyncio.sleep(5)
 
-	def verify_message(self, checker):
+	async def verify_message(self, checker, timeout=1):
 		if isinstance(checker, str):
 			check_content = checker
 			checker = lambda s: s['content'] == check_content
 
-		assert checker(self.client.http.messages_queue[0])
+		started_time = time.time()
+
+		while len(self.client.http.messages_queue) == 0:
+			await asyncio.sleep(0.1)
+			elapsed_time = time.time() - started_time
+			if elapsed_time > timeout:
+				raise TimeoutError()
+
+		message = self.client.http.messages_queue.pop()
+		assert checker(message)
