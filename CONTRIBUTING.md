@@ -1,3 +1,14 @@
+## Environment variables
+There's a few env variables you have to set if you want to run the bot locally, however the unit tests still work without them.
+- `token` - The Discord bot token, obtained from the [developers page](https://discord.com/developers/applications)
+- `keys` - Your Hypixel API key, this isn't used I think idk someone check pls
+- `dburi` - The MongoDB URI, you can get a free one from [mongodb.com](https://mongodb.com)
+- `forumemail` - Your Hypixel forums email, you shouldn't put your main account in case it gets leaked
+- `forumpassword` - Your Hypixel forums password, you shouldn't put your main account in case it gets leaked
+- `perspective_key` - Your [Perspective API](https://perspectiveapi.com/#/home) key, used for detecting toxic messages
+- `dev` - true/false, whether this is the main bot
+
+
 ## Adding a new command
 All the bot commands are seperate Python files, in [forum-sweats/bot/commands/](https://github.com/mat-1/forum-sweats/tree/master/bot/commands). The name of the file does not actually matter, but I recommend you make it the name of the command to make it easier to find.
 #### Required variables
