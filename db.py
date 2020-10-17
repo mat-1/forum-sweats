@@ -138,7 +138,7 @@ async def get_active_mutes():
 	return active_mutes
 
 
-async def add_infraction(user_id: int, infraction_type, reason):
+async def add_infraction(user_id: int, infraction_type, reason, mute_length=0):
 	if not connection_url: return
 	infraction_uuid = str(uuid.uuid4())
 	await infractions_data.insert_one({
@@ -146,7 +146,8 @@ async def add_infraction(user_id: int, infraction_type, reason):
 		'user': user_id,
 		'type': infraction_type,
 		'reason': reason,
-		'date': datetime.now()
+		'date': datetime.now(),
+		'length': mute_length
 	})
 
 
