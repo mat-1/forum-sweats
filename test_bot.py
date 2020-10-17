@@ -3,7 +3,6 @@ import discordpytest
 import asyncio
 import pytest
 import time
-import db
 
 
 bobux_queue = []
@@ -16,7 +15,7 @@ async def fake_change_bobux(user_id: int, amount: int):
 		'amount': amount
 	})
 
-db.change_bobux = fake_change_bobux
+# db.change_bobux = fake_change_bobux
 
 
 async def verify_bobux(checker, timeout=1):

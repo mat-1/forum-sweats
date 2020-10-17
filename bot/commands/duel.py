@@ -60,7 +60,7 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 		except:
 			pass
 	elif channel.id == 720073985412562975:  # gulag
-		mute_end = await db.get_mute_end(duel_loser.id)
+		mute_end = await get_mute_end(duel_loser.id)
 		mute_remaining = mute_end - time.time()
 		mute_length = mute_remaining + 60 * 5
 	else:
