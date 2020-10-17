@@ -3,6 +3,7 @@ from discord.user import User
 from discord.role import Role
 import discord
 import asyncio
+import random
 import time
 
 
@@ -12,7 +13,7 @@ class FakeClient(discord.Client):
 		self.loop = asyncio.get_event_loop()
 		self._listeners = client._listeners
 
-		self.http = FakeHTTPClient()
+		self.http = FakeHTTPClient(self)
 
 		self._handlers = client._handlers
 
@@ -41,18 +42,15 @@ class FakeClient(discord.Client):
 		self.login(*args, bot=bot)
 		self.connect(reconnect=reconnect)
 
-
 class FakeHTTPClient():
-	def __init__(self):
+	def __init__(self, client):
 		self.messages_queue = []
+		self.client = client
 
 	def recreate(self):
 		pass
 
 	async def ws_connect(self, url, *, compress=0):
-		pass
-
-	async def request(self, route, *, files=None, **kwargs):
 		pass
 
 	def static_login(self, token, *, bot):
@@ -71,9 +69,41 @@ class FakeHTTPClient():
 			'nonce': nonce,
 			'allowed_mentions': allowed_mentions
 		})
+		print('send message', content)
+		user_json = self.client._connection.user._to_minimal_user_json()
+		return {
+			'id': random.randint(100000, 99999999999999),
+			'channel_id': channel_id,
+			'guild_id': self.client.get_channel(channel_id).guild.id,
+			'author': user_json,
+			'member': {
+				'user': user_json,
+				'nick': None,
+				'roles': [],
+				'joined_at': '1970-01-01T00:00:01+00:00'
+			},
+			'content': content,
+			'timestamp': '1970-01-01T00:00:01+00:00',
+			'edited_timestamp': None,
+			'tts': tts,
+			'mention_everyone': False,
+			'mentions': [],
+			'mention_roles': [],
+			'mention_channels': [],
+			'attachments': [],
+			'embeds': [],
+			'pinned': False,
+			'type': 0,
+		}
 
 	async def send_typing(self, channel_id):
 		pass
+
+	async def add_reaction(self, channel_id, message_id, emoji):
+		print('add reaction!')
+
+	async def add_role(self, guild_id, user_id, role_id, *, reason=None):
+		print('add role!')
 
 
 class Tester:
@@ -81,6 +111,8 @@ class Tester:
 		self.client = FakeClient(client)
 
 		self.client.start('-.-.-')
+
+		self.client._connection.user = self.make_user(719348452491919401)
 
 	def make_guild(self, **kwargs):
 		data = {
@@ -128,6 +160,7 @@ class Tester:
 			'mentionable': False
 		})
 		guild._roles[default_role.id] = default_role
+		self.make_member(guild, self.client._connection.user)  # the bot is always a member of the guild
 		return guild
 
 	def make_channel(self, guild, **kwargs):
@@ -207,10 +240,11 @@ class Tester:
 		started_time = time.time()
 
 		while len(self.client.http.messages_queue) == 0:
-			await asyncio.sleep(0.1)
+			await asyncio.sleep(0)
 			elapsed_time = time.time() - started_time
 			if elapsed_time > timeout:
 				raise TimeoutError()
 
-		message = self.client.http.messages_queue.pop()
+		message = self.client.http.messages_queue.pop(0)
+		print('GOOD', message)
 		assert checker(message)

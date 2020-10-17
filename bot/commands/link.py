@@ -14,12 +14,8 @@ async def run(message, ign: str = None):
 		)
 	ign = ign.strip()
 	try:
-		print('getting user data')
-		# discord_name = await hypixel.get_discord_name(ign)
 		data = await hypixel.get_user_data(ign)
-		print('data')
 		try:
-			# discord_name = data['links']['DISCORD']
 			discord_name = data.get('discord', {}).get('name')
 			assert discord_name is not None
 		except AssertionError:

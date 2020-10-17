@@ -193,9 +193,10 @@ async def on_member_update(before, after):
 	# 		print('manual unmute')
 	# 		await after.add_roles(member_role, reason='Member manually unmuted')
 	# 		await unmute_user(after.id, wait=False)
-	
+
 
 most_recent_counting_message_id = None
+
 
 async def process_counting_channel(message):
 	global most_recent_counting_message_id
@@ -280,6 +281,8 @@ async def mute_user(member, length, guild_id=None):
 
 	muted_role_id = get_role_id(guild_id, 'muted')
 	muted_role = guild.get_role(muted_role_id)
+
+	if not muted_role: return print('muted role not found')
 
 	member_role_id = get_role_id(guild_id, 'member')
 	member_role = guild.get_role(member_role_id)
@@ -434,7 +437,6 @@ async def on_raw_reaction_add(payload):
 	# 	get_role_id(payload.guild_id, 'pollnotifications')
 	# 	if 
 
-		
 
 
 def api_get_members():

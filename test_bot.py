@@ -1,11 +1,41 @@
 import bot.discordbot as bot
 import discordpytest
+import asyncio
 import pytest
+import time
+import db
+
+
+bobux_queue = []
+
+
+async def fake_change_bobux(user_id: int, amount: int):
+	global bobux_queue
+	bobux_queue.append({
+		'user_id': user_id,
+		'amount': amount
+	})
+
+db.change_bobux = fake_change_bobux
+
+
+async def verify_bobux(checker, timeout=1):
+	global bobux_queue
+	started_time = time.time()
+
+	while len(bobux_queue) == 0:
+		await asyncio.sleep(0)
+		elapsed_time = time.time() - started_time
+		if elapsed_time > timeout:
+			raise TimeoutError()
+	assert checker(bobux_queue.pop())
 
 
 @pytest.fixture
 def test():
 	tester = discordpytest.Tester(bot.client)
+	bot.client.http = tester.client.http
+	bot.client._connection = tester.client._connection
 	bot.client = tester.client
 	return tester
 
@@ -78,3 +108,26 @@ async def test_debugmember(client, test, channel, guild):
 
 	await test.message('!debugmember g', channel)
 	await test.verify_message(lambda m: m['embed']['description'] == '<@3>')
+
+
+@pytest.mark.asyncio
+async def test_duel_general_win(client, test):
+	guild = test.make_guild(id=717904501692170260)
+	general = test.make_channel(guild, id=719579620931797002)
+	user = test.make_member(guild, test.make_user(1, 'mat', 6207))
+	print('doing message')
+	await test.message('!duel <@719348452491919401>', general, user)
+	await test.verify_message(
+		'<@719348452491919401>, react to this message with :gun: to duel <@1>. '
+		'The loser will get muted for one hour'
+	)
+	await test.verify_message('Duel starting in 10 seconds... First person to type :gun: once the countdown ends, wins.')
+	await test.verify_message('5')
+	await test.verify_message('4')
+	await test.verify_message('3')
+	await test.verify_message('2')
+	await test.verify_message('1')
+	await test.verify_message('Shoot')
+	await asyncio.sleep(0)
+	await test.message(':gun:', general, user)
+	await test.verify_message('<@1> won the duel!')
