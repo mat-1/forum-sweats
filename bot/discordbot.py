@@ -35,6 +35,8 @@ def get_role_id(guild_id, role_name):
 
 def has_role(member_id, guild_id, role_name):
 	'Checks if a member has a role from roles.json'
+	if is_dev:
+		return True
 	guild = client.get_guild(guild_id)
 	member = guild.get_member(member_id)
 
