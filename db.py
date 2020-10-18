@@ -147,7 +147,7 @@ async def add_infraction(user_id: int, infraction_type, reason, mute_length=0):
 		'type': infraction_type,
 		'reason': reason,
 		'date': datetime.now(),
-		'length': mute_length
+		'length': str(mute_length)  # must be a string otherwise mongodb gets mad on long mutes
 	})
 
 
