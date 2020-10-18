@@ -180,7 +180,11 @@ async def clear_recent_infraction(user_id: int):
 		.find({'user': user_id})\
 		.sort('date', -1)\
 		.limit(1):
-		await infractions_data.delete_one({'_id': infraction['_id']})
+		await clear_infraction(infraction['_id'])
+
+
+async def clear_infraction(infraction_id):
+	await infractions_data.delete_one({'_id': infraction_id})
 
 
 async def set_rock(user_id: int):

@@ -133,7 +133,7 @@ class BetterBot():
 				try:
 					return_args = await self.parse_args(parsing_left, func, ctx, ignore_extra=pad_none)
 				except Exception as e:
-					print('error parsing?', type(e), e)
+					print('error parsing?', type(e), e, func.__code__.co_filename)
 					continue
 			else:
 				return_args = []
