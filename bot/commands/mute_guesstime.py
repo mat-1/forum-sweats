@@ -14,6 +14,7 @@ pad_none = False
 
 infraction_keywords = {
 	'spam': 60 * 15,
+	'chat flood': 60 * 15,
 	'nsfw': 60 * 60 * 24,
 	'toxic': 60 * 60,
 	'drama': 60 * 30,
@@ -21,7 +22,7 @@ infraction_keywords = {
 	'slurs': 60 * 60 * 24 * 7,
 	'dox': 60 * 60 * 24 * 7,
 	'creepy': 60 * 60 * 24,
-	'weird': 60 * 60 * 24,
+	'weird': 60 * 60 * 12,
 	None: 60 * 1
 }
 
