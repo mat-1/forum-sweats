@@ -470,6 +470,9 @@ async def run(message, code_arg: str):
 	except ReachedMaxSteps:
 		await message.channel.send('Too many steps :(')
 		return
+	except:
+		await message.channel.send('Something went wrong :(')
+		return
 	print('executed')
 	await message.channel.send(embed=discord.Embed(
 		title='Safe exec',
