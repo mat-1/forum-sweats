@@ -3,7 +3,7 @@ from discord.ext import commands
 import re
 import time
 from . import discordbot
-
+import traceback
 
 # this is just so i can customize command parsing more
 
@@ -139,12 +139,16 @@ class BetterBot():
 				return_args = []
 			for attempt in range(10):
 				try:
+					print('doing function', func.__code__.co_filename)
 					return await func(ctx, *return_args)
 				except TypeError:
 					if pad_none:
 						return_args.append(None)
 					else:
 						break
+				except BaseException as e:
+					print('error :(')
+					traceback.print_exc()
 
 	def command(self, name, aliases=[], bot_channel=True, pad_none=True):
 		def decorator(func):
