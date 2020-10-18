@@ -55,7 +55,7 @@ async def guess_mute_length_for_member(member, reason):
 		infraction_mute_keyword = get_mute_reason_keyword(reason)
 		adding_length = get_mute_length_for_infraction(reason)
 
-		if infraction_mute_keyword != mute_keyword:
+		if infraction_mute_keyword != mute_keyword or mute_keyword is None:
 			# if the other mute was for a different reason, it can be shortened
 			adding_length /= 2
 
