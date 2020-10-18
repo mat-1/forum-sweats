@@ -187,12 +187,13 @@ async def run(message, opponent: Member):
 			if not is_testing: await asyncio.sleep(1)
 		if (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
 			await message.channel.send('Shoot')
+			is_bot_shooting = duel_id in duel_statuses and not duel_statuses[duel_id]['ended']
 			if duel_id in duel_statuses and not duel_statuses[duel_id]['ended']:
 				duel_statuses[duel_id]['zero'] = True
 				duel_statuses[duel_id]['ended'] = True
 			if is_testing:  # if its a unit test give it a free extra second
 				await asyncio.sleep(1)
-			if duel_id in duel_statuses and not duel_statuses[duel_id]['ended']:
+			if is_bot_shooting:
 				if opponent.id == message.guild.me.id:
 					await message.channel.send(':gun:')
 		else:
