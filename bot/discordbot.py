@@ -134,6 +134,7 @@ async def on_member_join(member):
 
 	if 'ban speedrun' in member.name.lower() or 'forum sweats nsfw' in member.name.lower():
 		return await member.ban(reason='has blacklisted phrase in name')
+
 	mute_end = await db.get_mute_end(member.id)
 	is_muted = mute_end and mute_end > time.time()
 	if is_muted:
@@ -144,18 +145,20 @@ async def on_member_join(member):
 		member_role = member.guild.get_role(member_role_id)
 		await member.remove_roles(member_role, reason='mee6 cringe')
 	else:
-		is_member = await db.get_is_member(member.id)
+		# is_member = await db.get_is_member(member.id)
 
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
 
-		if is_member:
-			await member.add_roles(member_role, reason='Linked member rejoined')
-		else:
-			if datetime.now() - member.created_at > timedelta(days=365):
-				await member.add_roles(member_role, reason='Account is older than a year')
-			else:
-				await member.send('Hello! Please verify your Minecraft account by doing !link <your username>. (You must set your Discord in your Hypixel settings)')
+		await member.add_roles(member_role, reason='Member joined')
+
+		# if is_member:
+		# 	await member.add_roles(member_role, reason='Linked member rejoined')
+		# else:
+		# 	if datetime.now() - member.created_at > timedelta(days=365):
+		# 		await member.add_roles(member_role, reason='Account is older than a year')
+		# 	else:
+		# 		await member.send('Hello! Please verify your Minecraft account by doing !link <your username>. (You must set your Discord in your Hypixel settings)')
 
 
 def is_close_to_everyone(name):
