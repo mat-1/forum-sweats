@@ -139,7 +139,7 @@ async def on_member_join(member):
 	is_muted = mute_end and mute_end > time.time()
 	if is_muted:
 		mute_remaining = mute_end - time.time()
-		await mute_user(member, mute_remaining, member.guild.id)
+		await mute_user(member, mute_remaining, member.guild.id, gulag_message=False)
 		await asyncio.sleep(5)
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
@@ -280,7 +280,7 @@ async def on_message_edit(before, after):
 	await modbot.process_messsage(after, warn=False)
 
 
-async def mute_user(member, length, guild_id=None):
+async def mute_user(member, length, guild_id=None, gulag_message=True):
 	guild_id = guild_id if guild_id else 717904501692170260
 	guild = client.get_guild(guild_id)
 
@@ -309,12 +309,12 @@ async def mute_user(member, length, guild_id=None):
 
 	await member.add_roles(muted_role)
 	await member.remove_roles(member_role)
-	
+
 	unmute_time = await db.get_mute_end(member.id)
 	unmute_in = unmute_time - time.time()
 
 	muted_before = False
-	
+
 	if unmute_in < 0:
 		extra_data = {
 			'sweat': sweat_role in member.roles,
@@ -337,26 +337,27 @@ async def mute_user(member, length, guild_id=None):
 		await member.remove_roles(og_role)
 
 	gulag = client.get_channel(720073985412562975)
-	if not muted_before:
-		await gulag.send(f'Welcome to gulag, <@{member.id}>.')
-	else:
-		mute_remaining = int(length)
-		mute_remaining_minutes = int(mute_remaining // 60)
-		mute_remaining_hours = int(mute_remaining_minutes // 60)
-		if mute_remaining_hours >= 2:
-			mute_str = f'{mute_remaining_hours} hours'
-		elif mute_remaining_hours == 1:
-			mute_str = f'one hour'
-		elif mute_remaining_minutes >= 2:
-			mute_str = f'{mute_remaining_minutes} minutes'
-		elif mute_remaining_minutes == 1:
-			mute_str = f'one minute'
-		elif mute_remaining == 1:
-			mute_str = f'one second'
+	if gulag_message:
+		if not muted_before:
+			await gulag.send(f'Welcome to gulag, <@{member.id}>.')
 		else:
-			mute_str = f'{mute_remaining} seconds'
+			mute_remaining = int(length)
+			mute_remaining_minutes = int(mute_remaining // 60)
+			mute_remaining_hours = int(mute_remaining_minutes // 60)
+			if mute_remaining_hours >= 2:
+				mute_str = f'{mute_remaining_hours} hours'
+			elif mute_remaining_hours == 1:
+				mute_str = f'one hour'
+			elif mute_remaining_minutes >= 2:
+				mute_str = f'{mute_remaining_minutes} minutes'
+			elif mute_remaining_minutes == 1:
+				mute_str = f'one minute'
+			elif mute_remaining == 1:
+				mute_str = f'one second'
+			else:
+				mute_str = f'{mute_remaining} seconds'
 
-		await gulag.send(f'<@{member.id}>, your mute is now {mute_str}')
+			await gulag.send(f'<@{member.id}>, your mute is now {mute_str}')
 
 	await unmute_user(member.id, wait=True)
 
