@@ -22,7 +22,7 @@ infraction_keywords = {
 	'slurs': 60 * 60 * 24 * 7,
 	'dox': 60 * 60 * 24 * 7,
 	'creepy': 60 * 60 * 24,
-	'weird': 60 * 60 * 24,
+	'weird': 60 * 60 * 12,
 	None: 60 * 1
 }
 
