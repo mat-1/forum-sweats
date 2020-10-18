@@ -19,7 +19,7 @@ infraction_keywords = {
 	'toxic': 60 * 60,
 	'drama': 60 * 30,
 	'discrimination': 60 * 60 * 24 * 3,
-	'slurs': 60 * 60 * 24 * 7,
+	'slur': 60 * 60 * 24 * 7,
 	'dox': 60 * 60 * 24 * 7,
 	'creepy': 60 * 60 * 24,
 	'weird': 60 * 60 * 12,
@@ -56,7 +56,7 @@ async def guess_mute_length_for_member(member, reason):
 		infraction_mute_keyword = get_mute_reason_keyword(reason)
 		adding_length = get_mute_length_for_infraction(reason)
 
-		if infraction_mute_keyword != mute_keyword:
+		if infraction_mute_keyword != mute_keyword or mute_keyword is None:
 			# if the other mute was for a different reason, it can be shortened
 			adding_length /= 2
 
