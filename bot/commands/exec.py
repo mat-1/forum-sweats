@@ -18,9 +18,9 @@ def execute(_code, loc):  # Executes code asynchronously
 	)
 	return globs['__ex']()
 
-
+# anti for staff
 async def run(message, code: str):
-	if message.author.id != 224588823898619905: return
+	if message.author.id != 461340349680582667: return
 	f = io.StringIO()
 	with redirect_stdout(f):
 		command = message.content.split(None, 1)[1].strip()
