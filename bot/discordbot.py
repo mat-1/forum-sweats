@@ -140,7 +140,7 @@ async def on_member_join(member):
 	if is_muted:
 		mute_remaining = mute_end - time.time()
 		await mute_user(member, mute_remaining, member.guild.id, gulag_message=False)
-		await asyncio.sleep(5)
+		await asyncio.sleep(1)
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
 		await member.remove_roles(member_role, reason='mee6 cringe')

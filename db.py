@@ -187,6 +187,15 @@ async def clear_infraction(infraction_id):
 	await infractions_data.delete_one({'_id': infraction_id})
 
 
+async def clear_infraction_by_partial_id(infraction_partial_id):
+	infraction_data = await infractions_data.find_one({'_id': {
+		'$regex': '^' + infraction_partial_id
+	}})
+	if not infraction_data: return None
+	await infractions_data.delete_one({'_id': infraction_data['_id']})
+	return infraction_data
+
+
 async def set_rock(user_id: int):
 	if not connection_url: return
 	await member_data.update_one(
