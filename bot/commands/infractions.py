@@ -33,9 +33,12 @@ async def run(message, member: Member = None):
 	for infraction in infractions[-30:]:
 		value = infraction.get('reason') or '<no reason>'
 		name = infraction['type']
+		infraction_partial_id = infraction['_id'][:8]
 		if 'date' in infraction:
 			date_pretty = infraction['date'].strftime('%m/%d/%Y')
-			name += f' ({date_pretty})'
+			name += f' ({date_pretty} {infraction_partial_id})'
+		else:
+			name += f' ({infraction_partial_id})'
 		if len(value) > 1000:
 			value = value[:1000] + '...'
 		embed.add_field(
