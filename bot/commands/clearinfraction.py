@@ -28,7 +28,7 @@ async def run(message, infraction_ids: str):
 	for infraction_id in infraction_ids:
 		data = await db.clear_infraction_by_partial_id(infraction_id)
 		if not data:
-			return await message.send('Infraction not found')
+			return await message.send(f'Infraction {infraction_id} not found')
 		else:
 			cleared_count += 1
 			cleared_users.add(data['user'])
