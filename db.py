@@ -189,7 +189,7 @@ async def clear_infraction(infraction_id):
 
 async def clear_infraction_by_partial_id(infraction_partial_id):
 	infraction_data = await infractions_data.find_one({'_id': {
-		'$regex': '^' + infraction_partial_id
+		'$regex': '^' + infraction_partial_id + '.*'
 	}})
 	if not infraction_data: return None
 	await infractions_data.delete_one({'_id': infraction_data['_id']})
