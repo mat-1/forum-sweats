@@ -121,6 +121,7 @@ async def check_repeat_spam(message):
 
 
 async def check_spam(message):
+	if message.author.bot: return
 	previous_messages = get_previous_messages(message.author, last_seconds=60)
 	previous_messages.insert(0, message)
 	same_message = True
