@@ -453,6 +453,8 @@ async def run(message, code_arg: str):
 
 	if code_arg.startswith('```py\n') and code_arg.endswith('```'):
 		code = code_arg[6:-3]
+	elif code_arg.startswith('```python\n') and code_arg.endswith('```'):
+		code = code_arg[10:-3]
 	else:
 		code = code_arg
 
