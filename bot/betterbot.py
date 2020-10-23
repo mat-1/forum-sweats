@@ -330,8 +330,8 @@ class Member(commands.Converter):
 			check_mention,  # Check mention
 			check_name_with_discrim,  # Name + discrim
 
-			check_name_starts_with,  # Name starts with
 			check_name_starts_with_recent,  # Name starts with
+			check_name_starts_with,  # Name starts with
 			check_nickname_starts_with_recent,  # Nickname starts with
 			check_name_contains_recent,  # Name contains
 
@@ -397,7 +397,7 @@ lengths = {
 	'e': 1 * 60 * 60 * 24 * 365 * 1000000000,
 	'aeon': 1 * 60 * 60 * 24 * 365 * 1000000000,
 	'aeons': 1 * 60 * 60 * 24 * 365 * 1000000000,
-	
+
 	'antisynth': 1*60*60*24*365*1000000000*99999999999999999999
 }
 
@@ -430,4 +430,3 @@ class Time(commands.Converter):
 				return length
 
 		return None
-
