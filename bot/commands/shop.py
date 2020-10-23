@@ -7,12 +7,6 @@ import db
 name = 'shop'
 aliases = ['bobuxshop']
 
-# **Bobux shop**
-# 1) Better rock (50 bobux) - mutes for 10 more minutes
-# 2) your mom!
-# *page 1/2*
-# :arrow_backward: :one: :two: :arrow_forward:
-
 
 PAGE_LENGTH = 10
 
@@ -31,6 +25,7 @@ SHOP_ITEMS = [
 		'persistent': True
 	}
 ]
+
 
 backward_emoji = '◀️'
 forward_emoji = '▶️'
@@ -155,10 +150,9 @@ async def do_shop_gui(message, page_number=1, shop_message=None):
 	await shop_message.clear_reactions()
 	if selected_item['persistent']:
 		await db.get_shop_item(message.author.id, selected_item_id)
+
 	if 'activation_function' in selected_item:
 		await selected_item['activation_function'](message.author)
-
-	# good
 
 
 async def run(message):
