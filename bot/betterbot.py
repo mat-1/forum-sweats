@@ -7,8 +7,9 @@ import traceback
 
 # this is just so i can customize command parsing more
 
+
 class Context():  # very unfinished but its fine probably
-	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content', 'add_reaction', 'delete')
+	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content', 'add_reaction', 'delete', 'edit')
 
 	async def send(self, *args, embed=None, **kwargs):
 		'Send a message to a channel'

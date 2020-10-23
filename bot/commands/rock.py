@@ -56,7 +56,12 @@ async def run(message, member: Member):
 	await db.set_rock(message.author.id)
 
 	# Add 5 minutes to someone's mute
-	new_mute_remaining = int(mute_remaining + (60 * 5))
+	has_bigger_rock = await db.spend_shop_item(message.author.id, 'bigger_rock')
+	if has_bigger_rock:
+		rock_length = 60 * 10
+	else:
+		rock_length = 60 * 5
+	new_mute_remaining = int(mute_remaining + rock_length)
 
 	print('muting again')
 

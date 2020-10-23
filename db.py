@@ -371,3 +371,60 @@ async def change_bobux(user_id: int, amount: int):
 		},
 		upsert=True
 	)
+
+
+async def get_shop_item(user_id: int, shop_item_id: str):
+	if not connection_url: return
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$set': {
+				f'shop.{shop_item_id}': True
+			}
+		},
+		upsert=True
+	)
+
+
+async def get_bought_shop_items(user_id: int):
+	if not connection_url: return
+	data = await member_data.find_one(
+		{
+			'discord': user_id
+		}
+	)
+	shop_items = set()
+	for item in data.get('shop', {}):
+		if data['shop'][item]:
+			shop_items.add(item)
+	return shop_items
+
+
+async def has_shop_item(user_id: int, shop_item_id: str):
+	if not connection_url: return
+	shop_items = await get_bought_shop_items(user_id)
+	return shop_item_id in shop_items
+
+
+async def spend_shop_item(user_id: int, shop_item_id: str):
+	has_item = await has_shop_item(user_id, shop_item_id)
+	if has_item:
+		await lose_shop_item(user_id, shop_item_id)
+	return has_item
+
+
+async def lose_shop_item(user_id: int, shop_item_id: str):
+	if not connection_url: return
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$set': {
+				f'shop.{shop_item_id}': False
+			}
+		},
+		upsert=True
+	)
