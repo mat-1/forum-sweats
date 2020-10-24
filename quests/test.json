@@ -1,0 +1,36 @@
+{
+	"name": "Example quest",
+	"areas": [
+		{
+			"id": "start",
+			"text": "you are bad",
+			"footer": "React with ◀️ or ▶️ to continue",
+			"next": [
+				{
+					"react": "◀️",
+					"area": "left"
+				},
+				{
+					"react": "▶️",
+					"area": "right"
+				}
+			]
+		},
+		{
+			"id": "left",
+			"text": "You are in the left room.",
+			"dead": true
+		},
+		{
+			"id": "right",
+			"text": "You are in the right room.",
+			"win": true
+		}
+	],
+	"cost": {
+		"bobux": 1
+	},
+	"reward": {
+		"bobux": 1
+	}
+}
