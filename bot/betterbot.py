@@ -187,7 +187,7 @@ def get_guild_members(channel_id):
 		members = discordbot.client.get_guild(channel_id).members
 	except Exception as e:
 		members = [discordbot.client.get_channel(channel_id).recipient]
-	return members
+	return sorted(members, key=lambda m: len(m.name))
 
 
 def check_user_id(ctx, arg):
@@ -332,14 +332,14 @@ class Member(commands.Converter):
 
 			check_name_starts_with_recent,  # Name starts with
 			check_name_starts_with,  # Name starts with
-			check_nickname_starts_with_recent,  # Nickname starts with
-			check_name_contains_recent,  # Name contains
 
 			check_nickname_recent,  # Nickname
 			check_nickname,  # Nickname
 
+			check_nickname_starts_with_recent,  # Nickname starts with
 			check_nickname_starts_with,  # Nickname starts with
 
+			check_name_contains_recent,  # Name contains
 			check_name_contains,  # Name contains
 
 			check_nickname_contains_recent,  # Nickname contains
