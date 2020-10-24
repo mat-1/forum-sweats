@@ -251,33 +251,33 @@ async def process_messsage(message, warn=True):
 		last_toxic_message_times[message.author.id] = time.time()
 		return
 
-	if severe_toxicity and severe_toxicity > 0.8 and toxicity > 0.7:
-		if time.time() - last_toxic_message_times.get(message.author.id, 0) < 3600:
-			if time.time() - last_very_toxic_message_times.get(message.author.id, 0) < 3600 and severe_toxicity > 0.9:
-				# if warn:
-				# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :rage:')
-				await discordbot.mute_user(
-					message.author,
-					60 * 3,
-					message.guild.id if message.guild else None
-				)
-			else:
-				if severe_toxicity > 0.9:
-					# if warn:
-					# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :rage:')
-					await discordbot.mute_user(
-						message.author,
-						15,
-						message.guild.id if message.guild else None
-					)
-				# else:
-					# if warn:
-					# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :angry:')
-				last_very_toxic_message_times[message.author.id] = time.time()
-		# else:
-			# if warn:
-			# 	await message.channel.send(f'<@{message.author.id}>, please be nice.')
-		last_toxic_message_times[message.author.id] = time.time()
-		return
+	# if severe_toxicity and severe_toxicity > 0.8 and toxicity > 0.7:
+	# 	if time.time() - last_toxic_message_times.get(message.author.id, 0) < 3600:
+	# 		if time.time() - last_very_toxic_message_times.get(message.author.id, 0) < 3600 and severe_toxicity > 0.9:
+	# 			# if warn:
+	# 			# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :rage:')
+	# 			await discordbot.mute_user(
+	# 				message.author,
+	# 				60 * 3,
+	# 				message.guild.id if message.guild else None
+	# 			)
+	# 		else:
+	# 			if severe_toxicity > 0.9:
+	# 				# if warn:
+	# 				# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :rage:')
+	# 				await discordbot.mute_user(
+	# 					message.author,
+	# 					15,
+	# 					message.guild.id if message.guild else None
+	# 				)
+	# 			# else:
+	# 				# if warn:
+	# 				# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :angry:')
+	# 			last_very_toxic_message_times[message.author.id] = time.time()
+	# 	# else:
+	# 		# if warn:
+	# 		# 	await message.channel.send(f'<@{message.author.id}>, please be nice.')
+	# 	last_toxic_message_times[message.author.id] = time.time()
+	# 	return
 
 	add_previous_message(message)
