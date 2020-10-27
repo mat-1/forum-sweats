@@ -150,6 +150,7 @@ class BetterBot():
 				except BaseException as e:
 					print('error :(')
 					traceback.print_exc()
+					return
 
 	def command(self, name, aliases=[], bot_channel=True, pad_none=True):
 		def decorator(func):
