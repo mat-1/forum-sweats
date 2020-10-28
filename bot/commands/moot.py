@@ -38,7 +38,7 @@ async def do_moot(message, member, length, reason):
 		pass
 
 	try:
-		await moot_user(
+		await mute_user(
 			member,
 			length,
 			message.guild.id if message.guild else None
