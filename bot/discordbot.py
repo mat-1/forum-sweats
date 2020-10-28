@@ -135,11 +135,11 @@ async def on_member_join(member):
 	if 'ban speedrun' in member.name.lower() or 'forum sweats nsfw' in member.name.lower():
 		return await member.ban(reason='has blacklisted phrase in name')
 
-	mute_end = await db.get_mute_end(member.id)
-	is_muted = mute_end and mute_end > time.time()
-	if is_muted:
-		mute_remaining = mute_end - time.time()
-		await mute_user(member, mute_remaining, member.guild.id, gulag_message=False)
+	moot_end = await db.get_moot_end(member.id)
+	is_mooted = moot_end and moot_end > time.time()
+	if is_mooted:
+		moot_remaining = moot_end - time.time()
+		await moot_user(member, moot_remaining, member.guild.id, gulag_message=False)
 		await asyncio.sleep(1)
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
@@ -150,11 +150,11 @@ async def on_member_join(member):
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
 
-	mute_end = await db.get_mute_end(member.id)
-	is_muted = mute_end and mute_end > time.time()
-	if is_muted:
-		mute_remaining = mute_end - time.time()
-		await mute_user(member, mute_remaining, member.guild.id, gulag_message=False)
+	moot_end = await db.get_moot_end(member.id)
+	is_mooted = moot_end and moot_end > time.time()
+	if is_mooted:
+		moot_remaining = moot_end - time.time()
+		await moot_user(member, moot_remaining, member.guild.id, gulag_message=False)
 		await asyncio.sleep(1)
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
