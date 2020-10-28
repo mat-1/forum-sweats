@@ -149,6 +149,23 @@ async def on_member_join(member):
 
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
+		
+# moot starts here ------------------------------------------------------------------------------------
+
+	mute_end = await db.get_mute_end(member.id)
+	is_muted = mute_end and mute_end > time.time()
+	if is_muted:
+		mute_remaining = mute_end - time.time()
+		await mute_user(member, mute_remaining, member.guild.id, gulag_message=False)
+		await asyncio.sleep(1)
+		member_role_id = get_role_id(member.guild.id, 'member')
+		member_role = member.guild.get_role(member_role_id)
+		await member.remove_roles(member_role, reason='mee6 cringe')
+	else:
+		# is_member = await db.get_is_member(member.id)
+
+		member_role_id = get_role_id(member.guild.id, 'member')
+		member_role = member.guild.get_role(member_role_id)
 
 		await member.add_roles(member_role, reason='Member joined')
 
@@ -411,6 +428,141 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 
 	# await member.send(embed=discord.Embed(
 	# 	description='You have been unmuted.'
+	# ))
+	
+# MOOT STARTS HERE ------------------------------------------------------------------------------------------------------------------------------------------------
+
+async def moot_user(member, length, guild_id=None, gulag_message=True):
+	guild_id = guild_id if guild_id else 717904501692170260
+	guild = client.get_guild(guild_id)
+
+	mooted_role_id = get_role_id(guild_id, 'mooted')
+	mooted_role = guild.get_role(mooted_role_id)
+
+	if not mooted_role: return print('mooted role not found')
+
+	member_role_id = get_role_id(guild_id, 'member')
+	member_role = guild.get_role(member_role_id)
+
+	sweat_role_id = get_role_id(guild_id, 'sweat')
+	sweat_role = guild.get_role(sweat_role_id)
+
+	print(sweat_role, 'sweat_role')
+
+	og_role_id = get_role_id(guild_id, 'og')
+	og_role = guild.get_role(og_role_id)
+
+	# if length == 0:
+	# 	await message.send(str(length))
+
+	print('mooted_role', mooted_role)
+
+	print()
+
+	await member.add_roles(mooted_role)
+	await member.remove_roles(member_role)
+
+	unmoot_time = await db.get_moot_end(member.id)
+	unmoot_in = unmoot_time - time.time()
+
+	mooted_before = False
+
+	if unmoot_in < 0:
+		extra_data = {
+			'sweat': sweat_role in member.roles,
+			'og': og_role in member.roles,
+		}
+	else:
+		extra_data = await db.get_moot_data(member.id)
+		mooted_before = True
+
+	await db.set_moot_end(
+		member.id,
+		time.time() + length,
+		extra_data
+	)
+
+	if sweat_role in member.roles:
+		await member.remove_roles(sweat_role)
+
+	if og_role in member.roles:
+		await member.remove_roles(og_role)
+
+	gulag = client.get_channel(720073985412562975)
+	if gulag_message:
+		if not mooted_before:
+			await gulag.send(f'Welcome to gulag, <@{member.id}>.')
+		else:
+			moot_remaining = int(length)
+			moot_remaining_minutes = int(moot_remaining // 60)
+			moot_remaining_hours = int(moot_remaining_minutes // 60)
+			if moot_remaining_hours >= 2:
+				moot_str = f'{moot_remaining_hours} hours'
+			elif moot_remaining_hours == 1:
+				moot_str = f'one hour'
+			elif moot_remaining_minutes >= 2:
+				moot_str = f'{moot_remaining_minutes} minutes'
+			elif moot_remaining_minutes == 1:
+				moot_str = f'one minute'
+			elif moot_remaining == 1:
+				moot_str = f'one second'
+			else:
+				moot_str = f'{moot_remaining} seconds'
+
+			await gulag.send(f'<@{member.id}>, your moot is now {moot_str}')
+
+	await unmoot_user(member.id, wait=True)
+
+async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
+	'Unmoots a user after a certain amount of seconds pass'
+	if wait:
+		print('unmuting in...')
+		unmoot_time = await db.get_moot_end(user_id)
+		unmoot_in = unmoot_time - time.time()
+		print('unmoot_in', unmoot_in)
+		await asyncio.sleep(unmoot_in)
+		if (await db.get_moot_end(user_id) != unmoot_time):
+			return print('Moot seems to have been extended.')
+	print('now unmuting')
+
+	moot_data = await db.get_moot_data(user_id)
+
+	for guild in client.guilds:
+		member = guild.get_member(user_id)
+		if not member: continue
+
+		mooted_role_id = get_role_id(guild.id, 'mooted')
+		mooted_role = guild.get_role(mooted_role_id)
+
+		member_role_id = get_role_id(guild.id, 'member')
+		member_role = guild.get_role(member_role_id)
+
+		await member.add_roles(member_role, reason=reason)
+		await member.remove_roles(mooted_role, reason=reason)
+
+		sweat_role_id = get_role_id(guild.id, 'sweat')
+		sweat_role = guild.get_role(sweat_role_id)
+
+		og_role_id = get_role_id(guild.id, 'og')
+		og_role = guild.get_role(og_role_id)
+
+		if moot_data.get('sweat'):
+			await member.add_roles(sweat_role)
+
+		if moot_data.get('og'):
+			await member.add_roles(og_role)
+
+
+	await db.set_moot_end(user_id, time.time())
+
+	if gulag_message:
+		gulag = client.get_channel(720073985412562975)
+		await gulag.send(f'<@{user_id}> has left gulag.')
+
+
+
+	# await member.send(embed=discord.Embed(
+	# 	description='You have been unmooted.'
 	# ))
 
 @client.event
