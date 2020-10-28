@@ -49,6 +49,7 @@ async def guess_mute_length_for_member(member, reason):
 	mute_length += get_mute_length_for_infraction(reason)
 
 	for infraction in await db.get_infractions(member.id):
+		if infraction['type'] == 'moot': continue
 		if datetime.now() - infraction['date'] < timedelta(minutes=3):
 			# if the infraction was made less than 3 minutes ago, it should be removed as it was likely an accident
 			await db.clear_infraction(infraction['_id'])
