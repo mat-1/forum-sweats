@@ -563,7 +563,7 @@ async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 	# 	description='You have been unmooted.'
 	# ))
 	
-	async def set_moot_end(user_id, end_time, extra_data={}):
+async def set_moot_end(user_id, end_time, extra_data={}):
     if not connection_url: return
     set_data = {
         'mooted_until': end_time
