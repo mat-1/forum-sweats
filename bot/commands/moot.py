@@ -1,7 +1,7 @@
 from ..betterbot import Member, Time
 from ..discordbot import (
 	has_role,
-	mute_user
+	moot_user
 )
 from datetime import datetime, timedelta
 from utils import seconds_to_string
@@ -40,7 +40,7 @@ async def do_moot(message, member, length, reason):
 		pass
 
 	try:
-		await mute_user(
+		await moot_user(
 			member,
 			length,
 			message.guild.id if message.guild else None
