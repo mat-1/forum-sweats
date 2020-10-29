@@ -1,7 +1,7 @@
 from ..betterbot import Member
 from ..discordbot import (
 	has_role,
-	unmute_user
+	unmoot_user
 )
 import discord
 
