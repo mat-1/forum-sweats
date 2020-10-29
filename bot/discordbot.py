@@ -562,6 +562,63 @@ async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 	# await member.send(embed=discord.Embed(
 	# 	description='You have been unmooted.'
 	# ))
+	
+	async def set_moot_end(user_id, end_time, extra_data={}):
+    if not connection_url: return
+    set_data = {
+        'mooted_until': end_time
+    }
+    for data in extra_data:
+        set_data[f'mooted_data.{data}'] = extra_data[data]
+    set_data['mooted'] = end_time > time.time()
+    await member_data.update_one(
+        {
+            'discord': user_id
+        },
+        {
+            '$set': set_data
+        },
+        upsert=True
+    )
+
+
+async def get_is_mooted(user_id):
+    if not connection_url: return
+    data = await member_data.find_one(
+        {
+            'discord': int(user_id)
+        }
+    )
+    if data:
+        return data.get('mooted', False)
+    else:
+        return 0
+
+
+async def get_mooted_end(user_id):
+    if not connection_url: return 0
+    data = await member_data.find_one(
+        {
+            'discord': int(user_id)
+        }
+    )
+    if data:
+        return data.get('mooted_until', 0)
+    else:
+        return 0
+
+
+async def get_moot_data(user_id):
+    if not connection_url: return {}
+    data = await member_data.find_one(
+        {
+            'discord': int(user_id)
+        }
+    )
+    if data:
+        return data.get('mooted_data', {})
+    else:
+        return 0
 
 @client.event
 async def on_raw_reaction_add(payload):
