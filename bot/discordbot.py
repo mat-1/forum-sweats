@@ -376,6 +376,7 @@ async def mute_user(member, length, guild_id=None, gulag_message=True):
 
 	await unmute_user(member.id, wait=True)
 
+
 async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 	'Unmutes a user after a certain amount of seconds pass'
 	if wait:
@@ -415,20 +416,16 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 		if mute_data.get('og'):
 			await member.add_roles(og_role)
 
-
 	await db.set_mute_end(user_id, time.time())
 
 	if gulag_message:
 		gulag = client.get_channel(720073985412562975)
 		await gulag.send(f'<@{user_id}> has left gulag.')
 
-
-
 	# await member.send(embed=discord.Embed(
 	# 	description='You have been unmuted.'
 	# ))
-	
-# MOOT STARTS HERE ------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 async def moot_user(member, length, guild_id=None, gulag_message=True):
 	guild_id = guild_id if guild_id else 717904501692170260
@@ -497,19 +494,20 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 			if moot_remaining_hours >= 2:
 				moot_str = f'{moot_remaining_hours} hours'
 			elif moot_remaining_hours == 1:
-				moot_str = f'one hour'
+				moot_str = 'one hour'
 			elif moot_remaining_minutes >= 2:
 				moot_str = f'{moot_remaining_minutes} minutes'
 			elif moot_remaining_minutes == 1:
-				moot_str = f'one minute'
+				moot_str = 'one minute'
 			elif moot_remaining == 1:
-				moot_str = f'one second'
+				moot_str = 'one second'
 			else:
 				moot_str = f'{moot_remaining} seconds'
 
 			await gulag.send(f'<@{member.id}>, your moot is now {moot_str}')
 
 	await unmoot_user(member.id, wait=True)
+
 
 async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 	'Unmoots a user after a certain amount of seconds pass'
@@ -550,18 +548,16 @@ async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 		if moot_data.get('og'):
 			await member.add_roles(og_role)
 
-
 	await db.set_moot_end(user_id, time.time())
 
 	if gulag_message:
 		gulag = client.get_channel(720073985412562975)
 		await gulag.send(f'<@{user_id}> has left gulag.')
 
-
-
 	# await member.send(embed=discord.Embed(
 	# 	description='You have been unmooted.'
 	# ))
+
 
 @client.event
 async def on_raw_reaction_add(payload):
@@ -582,17 +578,13 @@ async def on_raw_reaction_add(payload):
 			message = await client.get_channel(720258155900305488).fetch_message(741806331484438549)
 			await message.remove_reaction(payload.emoji, payload.member)
 			print('removed reaction!')
-	elif payload.message_id == 756691321917276223: # Blurrzy art
+	elif payload.message_id == 756691321917276223:  # Blurrzy art
 		print(payload.emoji.name)
 		if str(payload.emoji.name).lower() != 'agree':
 			message = await client.get_channel(720258155900305488).fetch_message(756691321917276223)
 			await message.remove_reaction(payload.emoji, payload.member)
 			print('removed reaction!')
 			await payload.member.send("Hey, you're a dum dum. If you disagree, please do `!gulag 15m` in <#718076311150788649>. Thanks!")
-	# elif payload.message_id == : # react for role poll notifications
-	# 	get_role_id(payload.guild_id, 'pollnotifications')
-	# 	if 
-
 
 
 def api_get_members():
