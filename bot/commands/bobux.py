@@ -1,5 +1,5 @@
-from ..discordbot import check_bobux_roles
 from ..betterbot import Member
+import discordbot
 import discord
 import db
 
@@ -18,4 +18,4 @@ async def run(message, member: Member = None):
 		description=bobux_message
 	)
 	await message.channel.send(embed=embed)
-	await check_bobux_roles(member.id, bobux)
+	await discordbot.check_bobux_roles(member.id, bobux)
