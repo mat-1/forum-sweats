@@ -144,11 +144,6 @@ async def on_member_join(member):
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
 		await member.remove_roles(member_role, reason='mee6 cringe')
-	else:
-		# is_member = await db.get_is_member(member.id)
-
-		member_role_id = get_role_id(member.guild.id, 'member')
-		member_role = member.guild.get_role(member_role_id)
 
 	mute_end = await db.get_mute_end(member.id)
 	is_muted = mute_end and mute_end > time.time()
