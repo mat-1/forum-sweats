@@ -610,3 +610,35 @@ for module_filename in os.listdir('./bot/commands'):
 		pad_none=getattr(module, 'pad_none', True),
 	)(module.run)
 	print('Registered command from file', module_filename)
+
+
+async def check_bobux_roles(member_id, bobux=None):
+	if not bobux:
+		bobux = await db.get_bobux(member_id)
+
+	guild_id = 717904501692170260
+
+	applicable_bobux_roles_names = []
+	all_bobux_roles_names = ['rich']
+
+	guild = client.get_guild(guild_id)
+	member = guild.get_member(member_id)
+
+	if bobux >= 1000:
+		applicable_bobux_roles_names.append('rich')
+
+	add_roles = []
+	remove_roles = []
+	for role_name in applicable_bobux_roles_names:
+		role_id = get_role_id(guild_id, role_name)
+		add_roles.append(guild.get_role(role_id))
+
+	for role_name in all_bobux_roles_names:
+		if role_name not in applicable_bobux_roles_names:
+			role_id = get_role_id(guild_id, role_name)
+			remove_roles.append(guild.get_role(role_id))
+
+	if add_roles:
+		await member.add_roles(*add_roles)
+	if remove_roles:
+		await member.remove_roles(*remove_roles)
