@@ -486,3 +486,13 @@ async def get_moot_data(user_id):
 		return data.get('mooted_data', {})
 	else:
 		return 0
+
+
+async def get_bobux_leaderboard(limit=10):
+	leaderboard = []
+	async for member in member_data\
+		.find({'bobux': {'$gte': 1}})\
+		.sort('bobux', -1)\
+		.limit(limit):
+		leaderboard.append(member)
+	return leaderboard
