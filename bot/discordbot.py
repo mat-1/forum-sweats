@@ -436,7 +436,26 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 
 	if not mooted_role: return print('mooted role not found')
 
+	member_role_id = get_role_id(guild_id, 'member')
+	member_role = guild.get_role(member_role_id)
+
+	sweat_role_id = get_role_id(guild_id, 'sweat')
+	sweat_role = guild.get_role(sweat_role_id)
+
+	print(sweat_role, 'sweat_role')
+
+	og_role_id = get_role_id(guild_id, 'og')
+	og_role = guild.get_role(og_role_id)
+
+	# if length == 0:
+	# 	await message.send(str(length))
+
+	print('mooted_role', mooted_role)
+
+	print()
+
 	await member.add_roles(mooted_role)
+	await member.remove_roles(member_role)
 
 	unmoot_time = await db.get_moot_end(member.id)
 	unmoot_in = unmoot_time - time.time()
@@ -444,7 +463,10 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 	mooted_before = False
 
 	if unmoot_in < 0:
-		extra_data = {}
+		extra_data = {
+			'sweat': sweat_role in member.roles,
+			'og': og_role in member.roles,
+		}
 	else:
 		extra_data = await db.get_moot_data(member.id)
 		mooted_before = True
@@ -454,6 +476,12 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 		time.time() + length,
 		extra_data
 	)
+
+	if sweat_role in member.roles:
+		await member.remove_roles(sweat_role)
+
+	if og_role in member.roles:
+		await member.remove_roles(og_role)
 
 	gulag = client.get_channel(720073985412562975)
 	if gulag_message:
@@ -502,7 +530,23 @@ async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 		mooted_role_id = get_role_id(guild.id, 'mooted')
 		mooted_role = guild.get_role(mooted_role_id)
 
+		member_role_id = get_role_id(guild.id, 'member')
+		member_role = guild.get_role(member_role_id)
+
+		await member.add_roles(member_role, reason=reason)
 		await member.remove_roles(mooted_role, reason=reason)
+
+		sweat_role_id = get_role_id(guild.id, 'sweat')
+		sweat_role = guild.get_role(sweat_role_id)
+
+		og_role_id = get_role_id(guild.id, 'og')
+		og_role = guild.get_role(og_role_id)
+
+		if moot_data.get('sweat'):
+			await member.add_roles(sweat_role)
+
+		if moot_data.get('og'):
+			await member.add_roles(og_role)
 
 	await db.set_moot_end(user_id, time.time())
 
