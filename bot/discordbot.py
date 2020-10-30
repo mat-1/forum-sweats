@@ -92,7 +92,7 @@ async def on_ready():
 			await module.init()
 
 	await client.change_presence(
-		activity=discord.Game(name='e')
+		activity=discord.Game(name='your mom')
 	)
 	if not is_dev:
 		active_mutes = await db.get_active_mutes()
