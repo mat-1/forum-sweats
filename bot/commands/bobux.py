@@ -1,5 +1,5 @@
 from ..betterbot import Member
-import discordbot
+import bot.discordbot as discordbot
 import discord
 import db
 
