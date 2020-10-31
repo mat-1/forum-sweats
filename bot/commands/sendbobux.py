@@ -14,6 +14,7 @@ async def run(message, member: Member = None, amount: int = 0):
 	sender_bobux = await db.get_bobux(message.author.id)
 	if sender_bobux < amount:
 		return await message.channel.send('You don\'t have enough bobux')
+	await db.change_bobux(message.author.id, -amount)
 	await db.change_bobux(member.id, amount)
 	reciever_bobux = await db.get_bobux(member.id)
 	await message.channel.send(
