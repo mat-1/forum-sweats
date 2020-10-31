@@ -18,7 +18,7 @@ async def run(message, member: Member = None, amount: int = 0):
 	reciever_bobux = await db.get_bobux(member.id)
 	await message.channel.send(
 		embed=discord.Embed(
-			description=f'Ok, <@{member.id} now has **{reciever_bobux}** bobux.'
+			description=f'Ok, <@{member.id}> now has **{reciever_bobux}** bobux.'
 		)
 	)
 	await discordbot.check_bobux_roles(member.id, reciever_bobux)
