@@ -1,19 +1,19 @@
 import bot.discordbot as discordbot
-from ..discordbot import has_role
 from ..betterbot import Member
 import discord
 import db
 
-name = 'givebobux'
-bot_channel = False
+name = 'sendbobux'
 
 
 async def run(message, member: Member = None, amount: int = 0):
-	if not has_role(message.author.id, 717904501692170260, 'admin'): return
 	if not member:
 		return await message.channel.send('Invalid member')
-	if not amount:
+	if not amount or amount <= 0:
 		return await message.channel.send('Invalid amount')
+	sender_bobux = await db.get_bobux(message.author.id)
+	if sender_bobux < amount:
+		return await message.channel.send('You don\'t have enough bobux')
 	await db.change_bobux(member.id, amount)
 	reciever_bobux = await db.get_bobux(member.id)
 	await message.channel.send(
