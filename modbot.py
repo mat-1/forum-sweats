@@ -179,6 +179,10 @@ async def process_messsage(message, warn=True):
 		.replace('Ⱡ', 'L')\
 		.replace('Ỻ', 'lL')
 
+	if 'trump' in content.lower() or 'biden' in content.lower():
+		await message.delete()
+		await message.author.send('politics bad!!!1')
+		return
 	# antimoan
 	if re.match(r'[\w\W]*[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
