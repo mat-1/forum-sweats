@@ -181,7 +181,16 @@ async def process_messsage(message, warn=True):
 
 	if 'trump' in content.lower() or 'biden' in content.lower():
 		await message.delete()
-		await message.author.send('politics bad!!!1')
+		try:
+			await message.author.send('politics bad!!!1')
+		except:
+			pass
+		await discordbot.mute_user(
+			message.author,
+			15,
+			message.guild.id if message.guild else None
+		)
+
 		return
 	# antimoan
 	if re.match(r'[\w\W]*[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+[\w\W]*', content, flags=re.IGNORECASE):
