@@ -7,6 +7,7 @@ import asyncio
 import modbot
 import forums
 import base64
+import config
 import json
 import time
 import os
@@ -25,12 +26,9 @@ betterbot = BetterBot(
 	bot_id=int(base64.b64decode(token.split('.')[0])) if token else 0
 )
 
-with open('roles.json', 'r') as f:
-	roles = json.loads(f.read())
-
 
 def get_role_id(guild_id, role_name):
-	return roles.get(str(guild_id), {}).get(role_name)
+	return config.roles.get(str(guild_id), {}).get(role_name)
 
 
 def has_role(member_id, guild_id, role_name):
