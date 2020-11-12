@@ -23,6 +23,7 @@ infraction_keywords = {
 	'dox': 60 * 60 * 24 * 7,
 	'creepy': 60 * 60 * 24,
 	'weird': 60 * 60 * 12,
+	'racism': 60 * 60 * 24 * 3,
 	None: 60 * 1
 }
 
