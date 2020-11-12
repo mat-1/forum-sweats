@@ -1,7 +1,7 @@
 from .rigduel import rigged_duel_users
 from ..discordbot import mute_user
 from ..betterbot import Member
-from db import change_bobux, get_mute_end
+import db
 import asyncio
 import time
 
@@ -11,6 +11,7 @@ active_duelers = set()
 
 async def duel_wait_for(client, channel, opponent_1, opponent_2):
 	global duel_statuses
+
 	def duel_check(message):
 		print(message.content.strip())
 		return (
@@ -60,7 +61,7 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 		except:
 			pass
 	elif channel.id == 720073985412562975:  # gulag
-		mute_end = await get_mute_end(duel_loser.id)
+		mute_end = await db.get_mute_end(duel_loser.id)
 		mute_remaining = mute_end - time.time()
 		mute_length = mute_remaining + 60 * 5
 	else:
@@ -88,7 +89,7 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 	if not rigged and duel_loser.id == message.guild.me.id and channel.id == 719579620931797002:
 		print('won in general!', duel_winner.id)
 		# if you win against forum sweats in general, you get 50 bobux
-		await change_bobux(duel_winner.id, 50)
+		await db.change_bobux(duel_winner.id, 50)
 		print('epic gaming moment')
 
 
@@ -118,10 +119,10 @@ async def run(message, opponent: Member):
 	if opponent.id == message.author.id:
 		return await message.channel.send("You can't duel yourself")
 
-	mute_end = await get_mute_end(message.author.id)
+	mute_end = await db.get_mute_end(message.author.id)
 	if (mute_end and mute_end > time.time()) and not message.channel.id == 720073985412562975:
 		return await message.channel.send("You can't use this command while muted")
-	mute_end = await get_mute_end(opponent.id)
+	mute_end = await db.get_mute_end(opponent.id)
 	if (mute_end and mute_end > time.time()) and not message.channel.id == 720073985412562975:
 		return await message.channel.send('Your opponent is muted')
 	if message.author.id in active_duelers:
@@ -138,7 +139,10 @@ async def run(message, opponent: Member):
 		'ended': False
 	}
 	if message.channel.id == 719579620931797002:
-		duel_invite_text = f'<@{opponent.id}>, react to this message with :gun: to duel <@{message.author.id}>. The loser will get muted for one hour'
+		duel_invite_text = (
+			f'<@{opponent.id}>, react to this message with :gun: to duel <@{message.author.id}>. '
+			'The loser will get muted for one hour'
+		)
 	else:
 		duel_invite_text = f'<@{opponent.id}>, react to this message with :gun: to duel <@{message.author.id}>'
 	duel_invite_message = await message.channel.send(duel_invite_text)
@@ -157,7 +161,9 @@ async def run(message, opponent: Member):
 		if message.author.id in active_duelers:
 			active_duelers.remove(message.author.id)
 
-		return await duel_invite_message.edit(content="The opponent didn't react to this message, so the duel has been cancelled.")
+		return await duel_invite_message.edit(
+			content='The opponent didn\'t react to this message, so the duel has been cancelled.'
+		)
 
 	if opponent.id in active_duelers:
 		return

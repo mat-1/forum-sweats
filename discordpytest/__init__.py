@@ -42,6 +42,7 @@ class FakeClient(discord.Client):
 		self.login(*args, bot=bot)
 		self.connect(reconnect=reconnect)
 
+
 class FakeHTTPClient():
 	def __init__(self, client):
 		self.messages_queue = []
@@ -235,7 +236,9 @@ class Tester:
 	async def verify_message(self, checker, timeout=1):
 		if isinstance(checker, str):
 			check_content = checker
-			checker = lambda s: s['content'] == check_content
+
+			def checker(s):
+				return s['content'] == check_content
 
 		started_time = time.time()
 
