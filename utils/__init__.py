@@ -1,7 +1,7 @@
 import json
+import config
 
-with open('roles.json', 'r') as f:
-	roles = json.loads(f.read())
+roles = config.roles
 
 
 def get_role_id(guild_id, rank_name):

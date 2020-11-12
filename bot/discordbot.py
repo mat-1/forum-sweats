@@ -7,6 +7,7 @@ import asyncio
 import modbot
 import forums
 import base64
+import config
 import json
 import time
 import os
@@ -25,12 +26,9 @@ betterbot = BetterBot(
 	bot_id=int(base64.b64decode(token.split('.')[0])) if token else 0
 )
 
-with open('roles.json', 'r') as f:
-	roles = json.loads(f.read())
-
 
 def get_role_id(guild_id, role_name):
-	return roles.get(str(guild_id), {}).get(role_name)
+	return config.roles.get(str(guild_id), {}).get(role_name)
 
 
 def has_role(member_id, guild_id, role_name):
@@ -155,20 +153,11 @@ async def on_member_join(member):
 		member_role = member.guild.get_role(member_role_id)
 		await member.remove_roles(member_role, reason='mee6 cringe')
 	else:
-		# is_member = await db.get_is_member(member.id)
 
 		member_role_id = get_role_id(member.guild.id, 'member')
 		member_role = member.guild.get_role(member_role_id)
 
 		await member.add_roles(member_role, reason='Member joined')
-
-		# if is_member:
-		# 	await member.add_roles(member_role, reason='Linked member rejoined')
-		# else:
-		# 	if datetime.now() - member.created_at > timedelta(days=365):
-		# 		await member.add_roles(member_role, reason='Account is older than a year')
-		# 	else:
-		# 		await member.send('Hello! Please verify your Minecraft account by doing !link <your username>. (You must set your Discord in your Hypixel settings)')
 
 
 def is_close_to_everyone(name):
@@ -229,7 +218,7 @@ async def process_counting_channel(message):
 	content = message.content.replace(',', '')
 	try:
 		new_number = float(content)
-	except:
+	except ValueError:
 		new_number = 0
 	if old_number == 0 and new_number != 1:
 		await message.delete()
@@ -241,7 +230,9 @@ async def process_counting_channel(message):
 		await db.change_bobux(message.author.id, 1)
 	else:
 		await db.set_counter(message.guild.id, 0)
-		await message.channel.send(f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})")
+		await message.channel.send(
+			f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})"
+		)
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
 
 last_general_message = time.time()
@@ -539,7 +530,9 @@ async def on_raw_reaction_add(payload):
 			message = await client.get_channel(720258155900305488).fetch_message(756691321917276223)
 			await message.remove_reaction(payload.emoji, payload.member)
 			print('removed reaction!')
-			await payload.member.send("Hey, you're a dum dum. If you disagree, please do `!gulag 15m` in <#718076311150788649>. Thanks!")
+			await payload.member.send(
+				'Hey, you\'re a dum dum. If you disagree, please do `!gulag 15m` in <#718076311150788649>. Thanks!'
+			)
 
 
 def api_get_members():

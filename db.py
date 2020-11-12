@@ -487,6 +487,7 @@ async def get_moot_data(user_id):
 	else:
 		return 0
 
+
 async def get_moot_end(user_id):
 	if not connection_url: return 0
 	data = await member_data.find_one(
@@ -499,7 +500,7 @@ async def get_moot_end(user_id):
 	else:
 		return 0
 
-	
+
 async def get_bobux_leaderboard(limit=10):
 	leaderboard = []
 	async for member in member_data\

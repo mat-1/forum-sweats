@@ -3,7 +3,7 @@ import discordpytest
 import asyncio
 import pytest
 import time
-
+import db
 
 bobux_queue = []
 
@@ -15,7 +15,18 @@ async def fake_change_bobux(user_id: int, amount: int):
 		'amount': amount
 	})
 
-# db.change_bobux = fake_change_bobux
+
+async def get_mute_end(user_id: int):
+	return 0
+
+
+async def get_counter(guild_id: int):
+	return 1
+
+
+db.change_bobux = fake_change_bobux
+db.get_mute_end = get_mute_end
+db.get_counter = get_counter
 
 
 async def verify_bobux(checker, timeout=1):
@@ -130,3 +141,9 @@ async def test_duel_general_win(client, test):
 	await asyncio.sleep(0)
 	await test.message(':gun:', general, user)
 	await test.verify_message('<@1> won the duel!')
+
+
+@pytest.mark.asyncio
+async def test_counter(client, test, channel):
+	await test.message('!counter', channel)
+	await test.verify_message('1')
