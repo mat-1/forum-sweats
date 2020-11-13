@@ -4,15 +4,15 @@ from datetime import datetime
 import db
 
 name = 'clearinfractions'
-bot_channel = False
+channels = None
 
 
 async def run(message, member: Member, date: str = None):
 	'Checks the infractions that a user has (mutes, warns, bans, etc)'
 
 	if (
-		not has_role(message.author.id, 717904501692170260, 'helper')
-		and not has_role(message.author.id, 717904501692170260, 'trialhelper')
+		not has_role(message.author.id, 'helper')
+		and not has_role(message.author.id, 'trialhelper')
 	):
 		return
 

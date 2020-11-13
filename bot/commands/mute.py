@@ -9,14 +9,14 @@ import discord
 import db
 
 name = 'mute'
-bot_channel = False
+channels = None
 pad_none = False
 
 
 def can_mute(member):
 	return (
-		has_role(member.id, 717904501692170260, 'helper')
-		or has_role(member.id, 717904501692170260, 'trialhelper')
+		has_role(member.id, 'helper')
+		or has_role(member.id, 'trialhelper')
 	)
 
 
@@ -35,7 +35,7 @@ async def do_mute(message, member, length, reason):
 
 	try:
 		await member.send(f'You were muted for "**{reason}**"')
-	except:
+	except discord.errors.Forbidden:
 		pass
 
 	try:

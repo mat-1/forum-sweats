@@ -6,15 +6,15 @@ from ..discordbot import (
 import discord
 
 name = 'unmoot'
-bot_channel = False
+channels = None
 
 
 async def run(message, member: Member):
 	'Removes a moot from a member'
 
 	if not (
-		has_role(message.author.id, 717904501692170260, 'helper')
-		or has_role(message.author.id, 717904501692170260, 'trialhelper')
+		has_role(message.author.id, 'helper')
+		or has_role(message.author.id, 'trialhelper')
 	):
 		return
 

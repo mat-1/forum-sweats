@@ -4,15 +4,15 @@ import db
 
 name = 'clearinfraction'
 aliases = ['removeinfraction']
-bot_channel = False
+channels = None
 
 
 async def run(message, infraction_ids: str):
 	'Checks the infractions that a user has (mutes, warns, bans, etc)'
 
 	if (
-		not has_role(message.author.id, 717904501692170260, 'helper')
-		and not has_role(message.author.id, 717904501692170260, 'trialhelper')
+		not has_role(message.author.id, 'helper')
+		and not has_role(message.author.id, 'trialhelper')
 	):
 		return
 
@@ -28,7 +28,6 @@ async def run(message, infraction_ids: str):
 	for infraction_id in infraction_ids:
 		data = await db.clear_infraction_by_partial_id(infraction_id)
 		if not data:
-			# return await message.send(f'Infraction {infraction_id} not found')
 			pass
 		else:
 			cleared_count += 1

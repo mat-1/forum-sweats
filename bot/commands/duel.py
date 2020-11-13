@@ -1,9 +1,11 @@
 from .rigduel import rigged_duel_users
 from ..discordbot import mute_user
 from ..betterbot import Member
-import db
 import asyncio
+import discord
+import config
 import time
+import db
 
 duel_statuses = {}
 active_duelers = set()
@@ -54,21 +56,21 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 		await channel.send(f'<@{duel_winner.id}> won the duel because <@{duel_loser.id}> shot too early')
 	if channel.id == 750147192383078400:  # quaglet channel
 		mute_length = 0
-	elif channel.id == 719579620931797002:  # general
+	elif channel.id == config.channels['general']:  # general
 		mute_length = 60 * 60
 		try:
 			await duel_loser.send("You were muted for one hour because you lost a duel in general")
-		except:
+		except discord.errors.Forbidden:
 			pass
-	elif channel.id == 720073985412562975:  # gulag
+	elif channel.id == config.channels.get('gulag'):  # gulag
 		mute_end = await db.get_mute_end(duel_loser.id)
 		mute_remaining = mute_end - time.time()
 		mute_length = mute_remaining + 60 * 5
 	else:
 		mute_length = 60 * 1
 		try:
-			await duel_loser.send("You were muted for one minute because you lost a duel")
-		except:
+			await duel_loser.send('You were muted for one minute because you lost a duel')
+		except discord.errors.Forbidden:
 			pass
 	try:
 		del duel_statuses[duel_id]
@@ -86,7 +88,7 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 			channel.guild.id if channel.guild else None
 		)
 
-	if not rigged and duel_loser.id == message.guild.me.id and channel.id == 719579620931797002:
+	if not rigged and duel_loser.id == message.guild.me.id and channel.id == config.channels['general']:
 		print('won in general!', duel_winner.id)
 		# if you win against forum sweats in general, you get 50 bobux
 		await db.change_bobux(duel_winner.id, 50)
@@ -101,18 +103,11 @@ def get_duel_id(opponent_1, opponent_2):
 
 
 name = 'duel'
-bot_channel = False
+channels = ('general', 'bot-commands', 'gulag', 'staff-duel')
 
 
 async def run(message, opponent: Member):
 	global duel_statuses
-	print('doing duel maybe', message.channel.id)
-	if message.channel.id not in {
-		719579620931797002,  # general
-		718076311150788649,  # bot-commands
-		720073985412562975,  # gulag
-		750147192383078400,  # quaglet channel
-	}: return
 
 	if not opponent:
 		return await message.channel.send('You must choose an opponent (example: !duel quaglet)')
@@ -120,10 +115,10 @@ async def run(message, opponent: Member):
 		return await message.channel.send("You can't duel yourself")
 
 	mute_end = await db.get_mute_end(message.author.id)
-	if (mute_end and mute_end > time.time()) and not message.channel.id == 720073985412562975:
+	if (mute_end and mute_end > time.time()) and message.channel.id != config.channels['gulag']:
 		return await message.channel.send("You can't use this command while muted")
 	mute_end = await db.get_mute_end(opponent.id)
-	if (mute_end and mute_end > time.time()) and not message.channel.id == 720073985412562975:
+	if (mute_end and mute_end > time.time()) and message.channel.id != config.channels['gulag']:
 		return await message.channel.send('Your opponent is muted')
 	if message.author.id in active_duelers:
 		return await message.channel.send("You're already in a duel")
@@ -138,7 +133,7 @@ async def run(message, opponent: Member):
 		'zero': False,
 		'ended': False
 	}
-	if message.channel.id == 719579620931797002:
+	if message.channel.id == config.channels['general']:
 		duel_invite_text = (
 			f'<@{opponent.id}>, react to this message with :gun: to duel <@{message.author.id}>. '
 			'The loser will get muted for one hour'

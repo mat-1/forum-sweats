@@ -2,6 +2,7 @@ import bot.discordbot as bot
 import discordpytest
 import asyncio
 import pytest
+import config
 import time
 import db
 
@@ -57,12 +58,12 @@ def client(test):
 
 @pytest.fixture
 def guild(test):
-	return test.make_guild(id=717904501692170260)
+	return test.make_guild(id=config.main_guild)
 
 
 @pytest.fixture
 def channel(test, guild):
-	return test.make_channel(guild, id=718076311150788649)
+	return test.make_channel(guild, id=config.channels['bot-commands'])
 
 
 @pytest.mark.asyncio
@@ -122,8 +123,8 @@ async def test_debugmember(client, test, channel, guild):
 
 @pytest.mark.asyncio
 async def test_duel_general_win(client, test):
-	guild = test.make_guild(id=717904501692170260)
-	general = test.make_channel(guild, id=719579620931797002)
+	guild = test.make_guild(id=config.main_guild)
+	general = test.make_channel(guild, id=config.channels['general'])
 	user = test.make_member(guild, test.make_user(1, 'mat', 6207))
 	print('doing message')
 	await test.message('!duel <@719348452491919401>', general, user)

@@ -6,26 +6,28 @@ from ..discordbot import (
 from datetime import datetime, timedelta
 from utils import seconds_to_string
 import discord
+import config
 import db
 
 name = 'moot'
-bot_channel = False
+channels = None
 pad_none = False
+
 
 def can_moot(member):
 	return (
-		has_role(member.id, 717904501692170260, 'helper')
-		or has_role(member.id, 717904501692170260, 'trialhelper')
+		has_role(member.id, 'helper')
+		or has_role(member.id, 'trialhelper')
 	)
 
 
 async def do_moot(message, member, length, reason):
-	# for infraction in await db.get_infractions(member.id):
-		# if datetime.now() - infraction['date'] < timedelta(minutes=1):
-			# if the infraction was made less than 3 minutes ago, it should be removed as it was likely an accident
-			# await db.clear_infraction(infraction['_id'])
-			
-# I made it a comment because then I dont have to add it back later very big brain :sunglasses:
+	#  for infraction in await db.get_infractions(member.id):
+	#  	if datetime.now() - infraction['date'] < timedelta(minutes=1):
+	# 		if the infraction was made less than 3 minutes ago, it should be removed as it was likely an accident
+	# 		await db.clear_infraction(infraction['_id'])
+
+	# I made it a comment because then I dont have to add it back later very big brain :sunglasses:
 
 	await db.add_infraction(
 		member.id,
@@ -36,7 +38,7 @@ async def do_moot(message, member, length, reason):
 
 	try:
 		await member.send(f'You were mooted for "**{reason}**"')
-	except:
+	except discord.errors.Forbidden:
 		pass
 
 	try:
@@ -47,6 +49,7 @@ async def do_moot(message, member, length, reason):
 		)
 	except discord.errors.Forbidden:
 		await message.send("I don't have permission to do this")
+
 
 async def run(message, member: Member, moot_length: Time = 0, reason: str = None):
 	'Moots a member for a specified amount of time'

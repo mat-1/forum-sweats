@@ -7,16 +7,10 @@ import db
 
 name = 'mutelength'
 aliases = ['mutetime']
-bot_channel = False
+channels = ['bot-commands', 'gulag']
 
 
 async def run(message, member: Member = None):
-	if message.channel.id not in {
-		720073985412562975,  # gulag
-		718076311150788649,  # bot-commands
-		719518839171186698,  # staff-bot-commands
-	}: return
-
 	if not member:
 		member = message.author
 

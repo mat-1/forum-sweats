@@ -1,12 +1,12 @@
 from ..betterbot import Member
-import random
 import asyncio
 import discord
-import db
+import config
+import random
 
 name = 'tictactoe'
 aliases = ['ttt']
-bot_channel = False
+channels = ('bot-commands', 'gulag')
 
 
 class Game:
@@ -152,7 +152,7 @@ class Game:
 				(self.board[0] and self.board[8]) and self.board[0] == self.board[8] != self.turn
 				# topright/bottomleft is taken by opponent
 				or (self.board[2] and self.board[6]) and self.board[2] == self.board[6] != self.turn
-				and self.board[4] == self.turn # middle is taken by self
+				and self.board[4] == self.turn  # middle is taken by self
 				and (
 					self.board[1] is None
 					or self.board[3] is None
@@ -179,13 +179,7 @@ class Game:
 
 
 async def run(message, player2: Member = None):
-	if message.channel.id not in {
-		720073985412562975,  # gulag
-		718076311150788649,  # bot-commands
-		719518839171186698,  # staff-bot-commands
-	} and message.guild:
-		return
-	is_gulag = message.channel.id == 720073985412562975
+	is_gulag = message.channel.id == config.channels['gulag']
 
 	ttt_game = Game()
 	player1 = message.author
@@ -210,16 +204,22 @@ async def run(message, player2: Member = None):
 
 	while True:
 		# X
+		placing_spot = None
 		if player1:
 			placed = False
 			while not placed:
-				reaction, user = await message.client.wait_for('reaction_add', check=lambda reaction, user: user == player1 and reaction.emoji in number_emojis and reaction.message.id == board_msg.id)
+				reaction, user = await message.client.wait_for(
+					'reaction_add',
+					check=(
+						lambda reaction, user:
+						user == player1 and reaction.emoji in number_emojis and reaction.message.id == board_msg.id
+					)
+				)
 				placing_spot = number_emojis.index(reaction.emoji)
 				placed = ttt_game.board[placing_spot] is None
 		else:
 			await asyncio.sleep(1)
 			placing_spot = ttt_game.ai_choose()
-		print(placing_spot, ttt_game.turn)
 		ttt_game.place(placing_spot)
 		await update_board()
 		try:
@@ -238,7 +238,13 @@ async def run(message, player2: Member = None):
 		if player2:
 			placed = False
 			while not placed:
-				reaction, user = await message.client.wait_for('reaction_add', check=lambda reaction, user: user == player2 and reaction.emoji in number_emojis and reaction.message.id == board_msg.id)
+				reaction, user = await message.client.wait_for(
+					'reaction_add',
+					check=(
+						lambda reaction, user:
+						user == player2 and reaction.emoji in number_emojis and reaction.message.id == board_msg.id
+					)
+				)
 				placing_spot = number_emojis.index(reaction.emoji)
 				placed = ttt_game.board[placing_spot] is None
 		else:
