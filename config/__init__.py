@@ -25,6 +25,9 @@ class AnyListMatcher:
 	def __int__(self):
 		return self.data[0] if isinstance(self.data, list) else self.data
 
+	def __hash__(self):
+		return hash(self.data)
+
 
 bot_data = read_config_file('bot')
 
