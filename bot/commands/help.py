@@ -55,7 +55,7 @@ async def run(message):
 		},
 	]
 
-	if has_role(message.author.id, 717904501692170260, 'helper'):
+	if has_role(message.author.id, 'helper'):
 		help_commands.extend([
 			{
 				'name': 'mute',

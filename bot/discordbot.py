@@ -8,7 +8,6 @@ import modbot
 import forums
 import base64
 import config
-import json
 import time
 import os
 import db
@@ -18,11 +17,10 @@ intents.members = True
 intents.presences = True
 
 
-prefix = '!'
 token = os.getenv('token')
-is_dev = os.getenv('dev') == 'true'
+is_dev = os.getenv('dev', 'false').lower() == 'true'
 betterbot = BetterBot(
-	prefix=prefix,
+	prefix=config.prefix,
 	bot_id=int(base64.b64decode(token.split('.')[0])) if token else 0
 )
 
@@ -31,10 +29,12 @@ def get_role_id(guild_id, role_name):
 	return config.roles.get(str(guild_id), {}).get(role_name)
 
 
-def has_role(member_id, guild_id, role_name):
+def has_role(member_id, role_name, guild_id=None):
 	'Checks if a member has a role from roles.json'
 	if is_dev:
 		return True
+	if not guild_id:
+		guild_id = config.main_guild
 	guild = client.get_guild(guild_id)
 	member = guild.get_member(member_id)
 
@@ -53,7 +53,7 @@ cached_invites = []
 
 
 async def check_dead_chat():
-	guild = client.get_guild(717904501692170260)
+	guild = client.get_guild(config.main_guild)
 	general_channel = guild.get_channel(719579620931797002)
 	while True:
 		await asyncio.sleep(5)
@@ -96,7 +96,7 @@ async def on_ready():
 		active_mutes = await db.get_active_mutes()
 		for muted_id in active_mutes:
 			asyncio.ensure_future(unmute_user(muted_id, True))
-		guild = client.get_guild(717904501692170260)
+		guild = client.get_guild(config.main_guild)
 		cached_invites = await guild.invites()
 		asyncio.ensure_future(check_dead_chat())
 		asyncio.ensure_future(give_hourly_bobux())
@@ -107,7 +107,7 @@ async def on_member_join(member):
 	if is_dev: return
 	global cached_invites
 	cached_invites_dict = {invite.code: invite for invite in cached_invites}
-	guild = client.get_guild(717904501692170260)
+	guild = client.get_guild(config.main_guild)
 	new_invites = await guild.invites()
 	used_invite = None
 	for invite in new_invites:
@@ -282,7 +282,7 @@ async def on_message_edit(before, after):
 
 
 async def mute_user(member, length, guild_id=None, gulag_message=True):
-	guild_id = guild_id if guild_id else 717904501692170260
+	guild_id = guild_id if guild_id else config.main_guild
 	guild = client.get_guild(guild_id)
 
 	muted_role_id = get_role_id(guild_id, 'muted')
@@ -414,7 +414,7 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 
 
 async def moot_user(member, length, guild_id=None, gulag_message=True):
-	guild_id = guild_id if guild_id else 717904501692170260
+	guild_id = guild_id if guild_id else config.main_guild
 	guild = client.get_guild(guild_id)
 
 	mooted_role_id = get_role_id(guild_id, 'mooted')
@@ -532,7 +532,7 @@ async def on_raw_reaction_add(payload):
 
 
 def api_get_members():
-	guild_id = 717904501692170260
+	guild_id = config.main_guild
 	guild = client.get_guild(guild_id)
 
 	total_member_count = guild.member_count
@@ -604,7 +604,7 @@ async def check_bobux_roles(member_id, bobux=None):
 	if not bobux:
 		bobux = await db.get_bobux(member_id)
 
-	guild_id = 717904501692170260
+	guild_id = config.main_guild
 
 	applicable_bobux_roles_names = []
 	all_bobux_roles_names = ['rich', 'veryrich']

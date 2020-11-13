@@ -2,6 +2,7 @@ from utils import confirmed_emoji
 from ..discordbot import has_role
 from ..betterbot import Member
 import discord
+import config
 import db
 
 name = 'infractions'
@@ -18,8 +19,8 @@ async def run(message, member: Member = None):
 
 	if (
 		not is_checking_self
-		and not has_role(message.author.id, 717904501692170260, 'helper')
-		and not has_role(message.author.id, 717904501692170260, 'trialhelper')
+		and not has_role(message.author.id, 'helper')
+		and not has_role(message.author.id, 'trialhelper')
 	):
 		return
 

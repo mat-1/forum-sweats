@@ -10,8 +10,8 @@ bot_channel = False
 
 async def run(message, member: Member):
 	if (
-		not has_role(message.author.id, 717904501692170260, 'helper')
-		and not has_role(message.author.id, 717904501692170260, 'trialhelper')
+		not has_role(message.author.id, 'helper')
+		and not has_role(message.author.id, 'trialhelper')
 	):
 		return
 

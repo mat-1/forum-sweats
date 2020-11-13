@@ -13,8 +13,8 @@ async def run(message, member: Member):
 	'Removes a mute from a member'
 
 	if not (
-		has_role(message.author.id, 717904501692170260, 'helper')
-		or has_role(message.author.id, 717904501692170260, 'trialhelper')
+		has_role(message.author.id, 'helper')
+		or has_role(message.author.id, 'trialhelper')
 	):
 		return
 
