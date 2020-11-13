@@ -5,16 +5,11 @@ import db
 
 name = 'rock'
 aliases = ['stone']
-bot_channel = False
+channels = ['bot-commands', 'gulag']
 
 
 async def run(message, member: Member):
 	"Adds 5 minutes to someone's mute in gulag"
-
-	if message.channel.id not in {
-		720073985412562975,  # gulag
-		718076311150788649,  # bot-commands
-	}: return
 
 	if not member:
 		return await message.send('Unknown member. Example usage: **!rock pigsty**')

@@ -5,7 +5,7 @@ import db
 
 name = 'clearrecentinfraction'
 aliases = ['clearnewinfraction']
-bot_channel = False
+channels = None
 
 
 async def run(message, member: Member):

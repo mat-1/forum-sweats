@@ -9,7 +9,7 @@ import discord
 import db
 
 name = 'mute'
-bot_channel = False
+channels = None
 pad_none = False
 
 infraction_keywords = {

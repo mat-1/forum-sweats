@@ -6,7 +6,7 @@ from ..discordbot import (
 import discord
 
 name = 'unmoot'
-bot_channel = False
+channels = None
 
 
 async def run(message, member: Member):

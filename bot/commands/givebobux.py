@@ -5,7 +5,7 @@ import discord
 import db
 
 name = 'givebobux'
-bot_channel = False
+channels = None
 
 
 async def run(message, member: Member = None, amount: int = 0):

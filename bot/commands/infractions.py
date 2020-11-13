@@ -6,7 +6,7 @@ import config
 import db
 
 name = 'infractions'
-bot_channel = False
+channels = None
 
 
 async def run(message, member: Member = None):

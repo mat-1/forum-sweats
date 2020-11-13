@@ -2,7 +2,7 @@ from ..betterbot import Member
 
 name = 'rigduel'
 aliases = ['rigduels']
-bot_channel = False
+channels = None
 
 rigged_duel_users = set()
 

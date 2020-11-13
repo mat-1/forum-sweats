@@ -6,7 +6,7 @@ import time
 name = 'forum'
 aliases = ['forums', 'f']
 pad_none = False
-bot_channel = False
+channels = None
 
 
 forum_ratelimit = {}
@@ -48,13 +48,6 @@ async def run(message, command, thread_id: int):
 	}:
 		raise TypeError
 
-	if message.guild and message.channel.id not in {
-		718139355813904484,  # forum threads channel
-		718076311150788649,  # bot-commands
-		719518839171186698,  # staff-bot-commands
-	}:
-		return
-
 	if check_forum_ratelimit(message.author.id):
 		return await message.send('Stop spamming the command, nerd')
 	add_forum_ratelimit(message.author.id)
@@ -77,6 +70,6 @@ async def run(message, command, thread_id: int):
 		)
 		if thread['image']:
 			embed['image'] = {
-				'url':  thread['image']
+				'url': thread['image']
 			}
 		await message.channel.send(embed=embed)

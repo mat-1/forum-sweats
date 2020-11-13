@@ -5,7 +5,7 @@ import io
 
 name = 'exec'
 aliases = ['eval']
-bot_channel = False
+channels = None
 
 
 def execute(_code, loc):  # Executes code asynchronously

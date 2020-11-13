@@ -4,7 +4,7 @@ import db
 
 name = 'clearinfraction'
 aliases = ['removeinfraction']
-bot_channel = False
+channels = None
 
 
 async def run(message, infraction_ids: str):

@@ -54,7 +54,7 @@ cached_invites = []
 
 async def check_dead_chat():
 	guild = client.get_guild(config.main_guild)
-	general_channel = guild.get_channel(719579620931797002)
+	general_channel = guild.get_channel(config.channels['general'])
 	while True:
 		await asyncio.sleep(5)
 		time_since_message = time.time() - last_general_message
@@ -244,13 +244,13 @@ async def process_suggestion(message):
 @client.event
 async def on_message(message):
 	global last_general_message
-	if message.channel.id == 738937428378779659:  # skyblock-updates
+	if message.channel.id == config.channels.get('skyblock-updates'):  # skyblock-updates
 		await message.publish()
-	if message.channel.id == 719579620931797002:  # general
+	if message.channel.id == config.channels.get('general'):  # general
 		last_general_message = time.time()
-	if message.channel.id == 718114140119629847:  # suggestions
+	if message.channel.id == config.channels.get('suggestions'):  # suggestions
 		await process_suggestion(message)
-	if message.channel.id == 763088127287361586:  # spam
+	if message.channel.id == config.channels.get('spam'):  # spam
 		if message.content and message.content[0] != '!' and not message.author.bot:
 			uwuized_message = message.content\
 				.replace('@', '')\
@@ -337,7 +337,7 @@ async def mute_user(member, length, guild_id=None, gulag_message=True):
 	if og_role in member.roles:
 		await member.remove_roles(og_role)
 
-	gulag = client.get_channel(720073985412562975)
+	gulag = client.get_channel(config.channels['gulag'])
 	if gulag_message:
 		if not muted_before:
 			await gulag.send(f'Welcome to gulag, <@{member.id}>.')
@@ -405,7 +405,7 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 	await db.set_mute_end(user_id, time.time())
 
 	if gulag_message:
-		gulag = client.get_channel(720073985412562975)
+		gulag = client.get_channel(config.channels['gulag'])
 		await gulag.send(f'<@{user_id}> has left gulag.')
 
 	# await member.send(embed=discord.Embed(
@@ -441,7 +441,7 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 		extra_data
 	)
 
-	gulag = client.get_channel(720073985412562975)
+	gulag = client.get_channel(config.channels['gulag'])
 	if gulag_message:
 		if not mooted_before:
 			await gulag.send(f'Welcome to gulag, <@{member.id}>.')
@@ -493,7 +493,7 @@ async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 	await db.set_moot_end(user_id, time.time())
 
 	if gulag_message:
-		gulag = client.get_channel(720073985412562975)
+		gulag = client.get_channel(config.channels['gulag'])
 		await gulag.send(f'<@{user_id}> has left gulag.')
 
 	# await member.send(embed=discord.Embed(
@@ -526,8 +526,9 @@ async def on_raw_reaction_add(payload):
 			message = await client.get_channel(720258155900305488).fetch_message(756691321917276223)
 			await message.remove_reaction(payload.emoji, payload.member)
 			print('removed reaction!')
+			bot_commands_channel = config.channels['bot-commands']
 			await payload.member.send(
-				'Hey, you\'re a dum dum. If you disagree, please do `!gulag 15m` in <#718076311150788649>. Thanks!'
+				f'Hey, you\'re a dum dum. If you disagree, please do `!gulag 15m` in <#{bot_commands_channel}>. Thanks!'
 			)
 
 
@@ -591,13 +592,13 @@ for module_filename in os.listdir('./bot/commands'):
 		continue
 	module = importlib.import_module('bot.commands.' + module_filename[:-3])
 	command_modules.append(module)
+	print('Registering command from file', module_filename)
 	betterbot.command(
 		module.name,
 		aliases=getattr(module, 'aliases', []),
-		bot_channel=getattr(module, 'bot_channel', True),
 		pad_none=getattr(module, 'pad_none', True),
+		channels=getattr(module, 'channels', ['bot-commands'])
 	)(module.run)
-	print('Registered command from file', module_filename)
 
 
 async def check_bobux_roles(member_id, bobux=None):

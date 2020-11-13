@@ -1,14 +1,13 @@
-import discord
 from discord.ext import commands
-import re
-import time
 from . import discordbot
 import traceback
+import discord
+import config
+import time
+import re
 
-# this is just so i can customize command parsing more
 
-
-class Context():  # very unfinished but its fine probably
+class Context(discord.Message):  # very unfinished but its fine probably
 	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content', 'add_reaction', 'delete', 'edit')
 
 	async def send(self, *args, embed=None, **kwargs):
@@ -33,14 +32,6 @@ class Context():  # very unfinished but its fine probably
 
 class NothingFound(BaseException): pass
 
-
-bot_channels = {
-	717904501692170260: (
-		718076311150788649,
-		719518839171186698
-	),  # forum sweats, bot-commands
-	719349183974473851: 719349184750420010,  # bot testing, general
-}
 
 recent_members = {}
 
@@ -80,6 +71,7 @@ class BetterBot():
 			if arg in ann:
 				hint = ann[arg]
 				found = None
+				i = 0
 				for i in reversed([pos for pos, char in enumerate(parsing_left + ' ') if char == ' ']):
 					cmd_arg = parsing_left[:i]
 					tried = await self.try_converter(ctx, cmd_arg, hint)
@@ -112,6 +104,7 @@ class BetterBot():
 			return
 		parsing_left = message.content.replace('  ', ' ')
 		found = False
+		prefix = None
 		for prefix in self.prefixes:
 			if parsing_left.startswith(prefix):
 				found = True
@@ -122,13 +115,13 @@ class BetterBot():
 		command = command.lower()
 		for function in self.functions:
 			if command != function[0]: continue
-			func, bot_channel, pad_none = function[1]
-			if bot_channel:
-				if message.guild and not (
-					bot_channels[message.guild.id] == message.channel.id
-					or message.channel.id in bot_channels[message.guild.id]
-				):
-					return
+			func, channels, pad_none = function[1]
+			if not message.guild and 'dm' not in channels:
+				return
+
+			if channels is not None and not any(config.channels[channel] == message.channel.id for channel in channels):
+				return
+
 			ctx = Context(message, prefix=prefix)
 			if parsing_left:
 				try:
@@ -152,10 +145,10 @@ class BetterBot():
 					traceback.print_exc()
 					return
 
-	def command(self, name, aliases=[], bot_channel=True, pad_none=True):
+	def command(self, name, aliases=[], channels=['bot-commands'], pad_none=True):
 		def decorator(func):
 			for command_name in [name] + aliases:
-				self.functions.append((command_name.lower(), (func, bot_channel, pad_none)))
+				self.functions.append((command_name.lower(), (func, channels, pad_none)))
 			return func
 		return decorator
 

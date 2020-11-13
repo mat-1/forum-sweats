@@ -4,7 +4,7 @@ from datetime import datetime
 import db
 
 name = 'clearinfractions'
-bot_channel = False
+channels = None
 
 
 async def run(message, member: Member, date: str = None):

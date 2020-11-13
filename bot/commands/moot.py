@@ -10,7 +10,7 @@ import config
 import db
 
 name = 'moot'
-bot_channel = False
+channels = None
 pad_none = False
 
 
