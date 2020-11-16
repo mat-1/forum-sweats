@@ -300,17 +300,8 @@ async def mute_user(member, length, guild_id=None, gulag_message=True):
 	sweat_role_id = get_role_id(guild_id, 'sweat')
 	sweat_role = guild.get_role(sweat_role_id)
 
-	print(sweat_role, 'sweat_role')
-
 	og_role_id = get_role_id(guild_id, 'og')
 	og_role = guild.get_role(og_role_id)
-
-	# if length == 0:
-	# 	await message.send(str(length))
-
-	print('muted_role', muted_role)
-
-	print()
 
 	await member.add_roles(muted_role)
 	await member.remove_roles(member_role)
