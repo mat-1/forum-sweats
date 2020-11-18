@@ -3,6 +3,7 @@ from . import commands
 from datetime import datetime, timedelta
 import importlib
 import discord
+from discord import get
 import asyncio
 import modbot
 import forums
@@ -234,6 +235,10 @@ async def process_counting_channel(message):
 			f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})"
 		)
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
+		role = get(message.server.roles, name='degenerate loser (ruined counting)')
+        	await client.add_roles(message.author, role)
+		await asyncio.sleep(old_number * 600)
+		await client.remove_roles(message.author, role)
 
 last_general_message = time.time()
 
