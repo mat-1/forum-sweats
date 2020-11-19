@@ -397,6 +397,9 @@ lengths = {
 
 	'yoctosecond': 1 / 1000000000000000000000000,
 	'yoctoseconds': 1 / 1000000000000000000000000,
+	
+	'forum_ban': -1,
+	'forum_bans': -1,
 }
 
 
