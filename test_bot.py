@@ -122,6 +122,30 @@ async def test_debugmember(client, test, channel, guild):
 
 
 @pytest.mark.asyncio
+async def test_debugtime(client, test, channel):
+	time_tests = {
+		'1 second': '1 second',
+		'2 seconds': '2 seconds',
+		'59 seconds': '59 seconds',
+		'1s': '1 second',
+		'1seconds': '1 second',
+		'30     seconds': '30 seconds',
+		'60 seconds': '1 minute',
+		'599seconds': '9 minutes and 59 seconds',
+		'3600s': '1 hour',
+
+		'1 minute': '1 minute',
+		'2 minutes': '2 minutes',
+		'59 minute': '59 minutes',
+		'61m': '1 hour and 1 minute',
+	}
+	for test_input in time_tests:
+		test_expected_output = time_tests[test_input]
+		await test.message(f'!debugtime {test_input}', channel)
+		await test.verify_message(test_expected_output)
+
+
+@pytest.mark.asyncio
 async def test_duel_general_win(client, test):
 	guild = test.make_guild(id=config.main_guild)
 	general = test.make_channel(guild, id=config.channels['general'])
