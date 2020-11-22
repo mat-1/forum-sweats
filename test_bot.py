@@ -67,6 +67,32 @@ def channel(test, guild):
 
 
 @pytest.mark.asyncio
+async def test_avatar(test, channel, guild):
+	user_1 = test.make_member(guild, test.make_user(1, 'mat', 1234, avatar='asdf'))
+	await test.message('!avatar mat', channel)
+	await test.verify_message(lambda m: m['content'].startswith('https://cdn.discordapp.com/avatars/1/asdf.'))
+
+
+@pytest.mark.asyncio
+async def test_b(test, channel):
+	await test.message('!b', channel)
+	await test.verify_message('I like french bread')
+
+
+@pytest.mark.asyncio
+async def test_bleach(test, channel):
+	await test.message('!bleach', channel)
+	await test.verify_message(
+		lambda m: m['embed']['title'] == 'Here\'s a Clorox bleach if you want to unsee something weird:'
+	)
+
+
+# @pytest.mark.asyncio
+# async def test_bobux(test, channel):
+# 	await test.message('!bobux', channel)
+
+
+@pytest.mark.asyncio
 async def test_e(test, channel):
 	await test.message('!e', channel)
 	await test.verify_message('e')
@@ -119,6 +145,30 @@ async def test_debugmember(client, test, channel, guild):
 
 	await test.message('!debugmember g', channel)
 	await test.verify_message(lambda m: m['embed']['description'] == '<@3>')
+
+
+@pytest.mark.asyncio
+async def test_debugtime(client, test, channel):
+	time_tests = {
+		'1 second': '1 second',
+		'2 seconds': '2 seconds',
+		'59 seconds': '59 seconds',
+		'1s': '1 second',
+		'1seconds': '1 second',
+		'30     seconds': '30 seconds',
+		'60 seconds': '1 minute',
+		'599seconds': '9 minutes and 59 seconds',
+		'3600s': '1 hour',
+
+		'1 minute': '1 minute',
+		'2 minutes': '2 minutes',
+		'59 minute': '59 minutes',
+		'61m': '1 hour and 1 minute',
+	}
+	for test_input in time_tests:
+		test_expected_output = time_tests[test_input]
+		await test.message(f'!debugtime {test_input}', channel)
+		await test.verify_message(test_expected_output)
 
 
 @pytest.mark.asyncio

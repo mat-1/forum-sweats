@@ -177,12 +177,12 @@ class Tester:
 		self.client._connection.parse_channel_create(data)
 		return self.client._connection.get_channel(int(data['id']))
 
-	def make_user(self, user_id=1, username='user', discriminator='0001'):
+	def make_user(self, user_id=1, username='user', discriminator='0001', avatar=''):
 		data = {
 			'id': str(user_id),
 			'username': username,
 			'discriminator': str(discriminator),
-			'avatar': '',
+			'avatar': avatar,
 			'bot': False,
 		}
 		return self.client._connection.store_user(data)

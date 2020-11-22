@@ -1,6 +1,5 @@
-from .betterbot import BetterBot
-from . import commands
-from datetime import datetime, timedelta
+from bot.betterbot import BetterBot
+from bot import commands
 import importlib
 import discord
 import asyncio
