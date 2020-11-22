@@ -1,8 +1,8 @@
 import bot.discordbot as bot
+from bot import config
 import discordpytest
 import asyncio
 import pytest
-import config
 import time
 import db
 
@@ -64,6 +64,35 @@ def guild(test):
 @pytest.fixture
 def channel(test, guild):
 	return test.make_channel(guild, id=config.channels['bot-commands'])
+
+
+@pytest.mark.asyncio
+async def test_avatar(test, channel, guild):
+	user_1 = test.make_member(guild, test.make_user(1, 'mat', 1234, avatar='asdf'))
+	await test.message('!avatar mat', channel)
+	await test.verify_message(lambda m: m['content'].startswith('https://cdn.discordapp.com/avatars/1/asdf.'))
+
+
+@pytest.mark.asyncio
+async def test_b(test, channel):
+	await test.message('!b', channel)
+	await test.verify_message('I like french bread')
+
+
+@pytest.mark.asyncio
+async def test_bleach(test, channel):
+	await test.message('!bleach', channel)
+	await test.verify_message(
+		lambda m: m['embed']['title'] == 'Here\'s a Clorox bleach if you want to unsee something weird:'
+	)
+
+
+# @pytest.mark.asyncio
+# async def test_bleach(test, channel):
+# 	await test.message('!bobux', channel)
+# 	await test.verify_message(
+# 		lambda m: m['embed']['title'] == 'Here\'s a Clorox bleach if you want to unsee something weird:'
+# 	)
 
 
 @pytest.mark.asyncio

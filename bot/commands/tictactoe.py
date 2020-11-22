@@ -1,7 +1,7 @@
 from ..betterbot import Member
+from bot import config
 import asyncio
 import discord
-import config
 import random
 
 name = 'tictactoe'

@@ -1,9 +1,9 @@
 from .rigduel import rigged_duel_users
 from ..discordbot import mute_user
 from ..betterbot import Member
+from bot import config
 import asyncio
 import discord
-import config
 import time
 import db
 
