@@ -1,8 +1,8 @@
 import bot.discordbot as bot
-from bot import config
 import discordpytest
 import asyncio
 import pytest
+import config
 import time
 import db
 

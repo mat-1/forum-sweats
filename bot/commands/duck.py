@@ -1,7 +1,7 @@
-from bot import config
 from session import s
 import discord
 import random
+import config
 
 name = 'duck'
 aliases = ['duckpic', 'randomduck', 'duckpicture']

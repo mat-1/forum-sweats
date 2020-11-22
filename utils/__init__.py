@@ -1,4 +1,4 @@
-from bot import config
+import config
 
 roles = config.roles
 

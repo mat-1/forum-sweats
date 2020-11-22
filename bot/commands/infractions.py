@@ -1,8 +1,8 @@
 from utils import confirmed_emoji
 from ..discordbot import has_role
 from ..betterbot import Member
-from bot import config
 import discord
+import config
 import db
 
 name = 'infractions'

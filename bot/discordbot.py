@@ -1,12 +1,12 @@
 from bot.betterbot import BetterBot
 from bot import commands
-from bot import config
 import importlib
 import discord
 import asyncio
 import modbot
 import forums
 import base64
+import config
 import time
 import os
 import db
