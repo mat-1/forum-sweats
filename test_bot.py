@@ -87,12 +87,12 @@ async def test_bleach(test, channel):
 	)
 
 
-# @pytest.mark.asyncio
-# async def test_bleach(test, channel):
-# 	await test.message('!bobux', channel)
-# 	await test.verify_message(
-# 		lambda m: m['embed']['title'] == 'Here\'s a Clorox bleach if you want to unsee something weird:'
-# 	)
+@pytest.mark.asyncio
+async def test_bleach(test, channel):
+	await test.message('!bleach', channel)
+	await test.verify_message(
+		lambda m: m['embed']['title'] == 'Here\'s a Clorox bleach if you want to unsee something weird:'
+	)
 
 
 @pytest.mark.asyncio
