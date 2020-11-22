@@ -1,11 +1,10 @@
 import aiohttp
 
+
 async def upload(im_bytes, content_type):
 	data = aiohttp.FormData()
-	data.add_field('image',
-	  im_bytes,
-		content_type=content_type
-  )
+	data.add_field('image', im_bytes, content_type=content_type)
+
 	async with aiohttp.ClientSession() as s:
 		async with s.post(
 			'https://jpeg.repl.co',
