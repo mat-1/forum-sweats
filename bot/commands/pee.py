@@ -1,5 +1,3 @@
-import config
-
 name = 'pee'
 channels = ['gulag']
 

@@ -1,8 +1,8 @@
 from discord.ext import commands
 from . import discordbot
+from bot import config
 import traceback
 import discord
-import config
 import time
 import re
 

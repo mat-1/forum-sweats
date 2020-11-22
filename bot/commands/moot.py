@@ -5,8 +5,8 @@ from ..discordbot import (
 )
 from datetime import datetime, timedelta
 from utils import seconds_to_string
+from bot import config
 import discord
-import config
 import db
 
 name = 'moot'
