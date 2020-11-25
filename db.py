@@ -509,3 +509,86 @@ async def get_bobux_leaderboard(limit=10):
 		.limit(limit):
 		leaderboard.append(member)
 	return leaderboard
+
+
+async def bobux_get_subscriptions(user_id):
+	if not connection_url: return
+	data = await member_data.find_one(
+		{
+			'discord': int(user_id)
+		}
+	)
+	if data:
+		subs_raw = data.get('subs', [])
+	else:
+		return []
+
+	subs = []
+	for member_id in subs_raw:
+		sub_data = subs_raw[member_id]
+		subs.append({
+			'id': int(member_id),
+			'sender': int(user_id),
+			'tier': sub_data['tier'],
+			'next_payment': sub_data['next_payment'],
+			# whether the payment hasnt been given out yet (due to bot being down or something)
+			'owed': datetime.now() > sub_data['next_payment']
+		})
+
+	return subs
+
+
+async def bobux_get_all_subscriptions():
+	subs = []
+	async for member in member_data.find(
+		{
+			'subs': {
+				'$ne': None
+			}
+		}
+	):
+		subs_raw = member.get('subs', [])
+		for member_id in subs_raw:
+			sub_data = subs_raw[member_id]
+			subs.append({
+				'id': int(member_id),
+				'sender': int(member['discord']),
+				'tier': sub_data['tier'],
+				'next_payment': sub_data['next_payment'],
+				# whether the payment hasnt been given out yet (due to bot being down or something)
+				'owed': datetime.now() > sub_data['next_payment']
+			})
+	return subs
+
+
+async def bobux_subscribe_to(user_id, subbing_to_id, tier):
+	if not connection_url: return
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$set': {
+				f'subs.{subbing_to_id}': {
+					'tier': tier.lower().strip(),
+					'next_payment': datetime.now() + timedelta(days=7)
+				}
+			}
+		},
+		upsert=True
+	)
+
+
+async def bobux_unsubscribe_to(user_id, unsubbing_to_id):
+	if not connection_url: return
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$unset': {
+				f'subs.{unsubbing_to_id}': ''
+			}
+		},
+		upsert=True
+	)

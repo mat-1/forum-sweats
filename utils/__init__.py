@@ -11,15 +11,22 @@ def seconds_to_string(actual_seconds, extra_parts=1):
 	seconds = int(actual_seconds)
 	minutes = int(actual_seconds // 60)
 	hours = int(actual_seconds // (60 * 60))
+	days = int(actual_seconds // (60 * 60 * 24))
 	remaining_seconds = actual_seconds
-	if hours > 0:
+	if days > 0:
+		remaining_seconds -= days * 60 * 60 * 24
+	elif hours > 0:
 		remaining_seconds -= hours * 60 * 60
 	elif minutes > 0:
 		remaining_seconds -= minutes * 60
 	elif seconds > 0:
 		remaining_seconds -= seconds
 
-	if hours >= 2:
+	if days >= 2:
+		time_string = f'{days} days'
+	elif days == 1:
+		time_string = '1 day'
+	elif hours >= 2:
 		time_string = f'{hours} hours'
 	elif hours == 1:
 		time_string = '1 hour'
