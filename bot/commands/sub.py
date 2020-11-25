@@ -30,4 +30,11 @@ async def run(message, member: Member = None, tier: str = None):
 	print('ok making gui')
 	confirmed = await confirmgui.make_confirmation_gui(message.client, verify_message, message.author)
 
-	print('confirmed', confirmed)
+	if confirmed:
+		await verify_message.edit(embed=discord.Embed(
+			description=f'Subbed to {member.mention}!'
+		))
+	else:
+		await verify_message.edit(embed=discord.Embed(
+			description=f'Cancelled sub to to {member.mention}!'
+		))
