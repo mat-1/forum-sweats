@@ -48,9 +48,8 @@ async def run(message, member: Member = None, tier: str = None):
 		# Check again in case they sent bobux while the confirmation was active or something
 		return await message.channel.send(f'You don\'t have enough bobux to {tier} sub')
 
-	await subscribe(message.author, member, tier)
-
 	if confirmed:
+		await subscribe(message.author, member, tier)
 		await verify_message.edit(embed=discord.Embed(
 			description=f'Subbed to {member.mention}!'
 		))
