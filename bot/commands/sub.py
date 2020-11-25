@@ -1,4 +1,5 @@
-from ..betterbot import Member
+from bot.betterbot import Member
+from bot import confirmgui
 import discord
 
 name = 'sub'
@@ -10,9 +11,6 @@ tiers = {
 	't2': 80,
 	't3': 200
 }
-
-agree_reaction = '✅'
-disagree_reaction = '❌'
 
 
 async def run(message, member: Member = None, tier: str = None):
@@ -29,13 +27,7 @@ async def run(message, member: Member = None, tier: str = None):
 	verify_message = await message.channel.send(embed=discord.Embed(
 		description=f'Are you sure you want to **{tier}** sub to {member.mention} by sending **{tier_cost}** bobux per week?'
 	))
-	await verify_message.add_reaction(agree_reaction)
-	await verify_message.add_reaction(disagree_reaction)
+	print('ok making gui')
+	confirmed = await confirmgui.make_confirmation_gui(message.client, verify_message, message.author)
 
-	def check(reaction, user):
-		if user != message.author: return False
-		if reaction.emoji != agree_reaction and reaction.emoji != disagree_reaction: return False
-		if reaction.message != verify_message: return False
-		return True
-	reaction, user = await message.client.wait_for('reaction_add', check=check)
-	print(reaction, user)
+	print('confirmed', confirmed)
