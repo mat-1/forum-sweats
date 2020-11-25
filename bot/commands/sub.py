@@ -50,6 +50,13 @@ async def run(message, member: Member = None, tier: str = None):
 			'You\'re already subbed to this member. Unsub and resub if you\'d like to change your sub tier.'
 		)
 
+	subs = await db.bobux_get_subscriptions(member.id)
+	if len(subs) > 10:
+		return await message.channel.send(
+			'You\'re subbed to too many people! Use !subs to check who you\'re subbed to, '
+			'and !unsub <member> to unsubscribe from them'
+		)
+
 	if not await verify_required_bobux(message.author, tier):
 		return await message.channel.send(f'You don\'t have enough bobux to {tier} sub')
 
