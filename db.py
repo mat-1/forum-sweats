@@ -518,7 +518,10 @@ async def bobux_subscribe_to(user_id, subbing_to_id, tier):
 		},
 		{
 			'$set': {
-				f'subs.{subbing_to_id}': tier.lower().strip()
+				f'subs.{subbing_to_id}': {
+					'tier': tier.lower().strip(),
+					'next_payment': datetime.now() + timedelta(days=7)
+				}
 			}
 		},
 		upsert=True
