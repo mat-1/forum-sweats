@@ -12,3 +12,5 @@ forums/__pycache__/
 *.pyc
 pytest_cache
 .vscode/settings.json
+aiohttp/
+motor/
