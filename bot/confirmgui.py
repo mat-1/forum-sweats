@@ -1,3 +1,5 @@
+import discord
+
 agree_reaction = '✅'
 disagree_reaction = '❌'
 
@@ -14,4 +16,8 @@ async def make_confirmation_gui(client, message, user):
 		return True
 
 	reaction, user = await client.wait_for('reaction_add', check=check)
+	try:
+		await message.clear_reactions()
+	except discord.Forbidden:
+		pass
 	return reaction.emoji == agree_reaction
