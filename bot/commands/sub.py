@@ -25,7 +25,7 @@ async def is_subbed(subber, subbee):
 async def verify_required_bobux(member, tier):
 	tier_cost = tiers[tier]
 	bobux = await db.get_bobux(member.id)
-	# If you have at least the required amount of bobux to sub for a week,
+	# Check that you have at least the required amount of bobux to sub for a week
 	return bobux >= tier_cost
 
 

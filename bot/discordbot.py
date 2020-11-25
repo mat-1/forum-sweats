@@ -1,4 +1,5 @@
 from bot.betterbot import BetterBot
+from datetime import datetime
 from bot import commands
 import importlib
 import discord
@@ -79,6 +80,56 @@ async def give_hourly_bobux():
 			await db.change_bobux(member_id, given_bobux)
 
 
+async def renew_sub(sub):
+	tier = sub['tier']
+	tier_cost = commands.sub.tiers[tier]
+
+	bobux = await db.get_bobux(sub['sender'])
+
+	guild_id = config.main_guild
+
+	guild = client.get_guild(guild_id)
+
+	sender_member = guild.get_member(sub['sender'])
+	receiver_member = guild.get_member(sub['id'])
+
+	if tier_cost > bobux:
+		# too expensive :pensive:
+		await commands.unsub.unsubscribe(sender_member, receiver_member)
+		await sender_member.send(embed=discord.Embed(
+			description=(
+				f'You don\'t have enough bobux to continue your sub to {receiver_member.mention}, '
+				'so your subscription has been cancelled.'
+			)
+		))
+		return
+
+
+async def queue_renew_sub(sub):
+	next_payment_delta = sub['next_payment'] - datetime.now()
+	await asyncio.sleep(next_payment_delta.total_seconds())
+	await renew_sub(sub)
+
+
+async def give_subbed_bobux():
+	subs = await db.bobux_get_all_subscriptions()
+	tasks = []
+	for sub in subs:
+		if sub['owed']:
+			await renew_sub(sub)
+		else:
+			tasks.append(queue_renew_sub(sub))
+
+	if tasks:
+		await asyncio.gather(*tasks)
+
+
+async def give_active_mutes():
+	active_mutes = await db.get_active_mutes()
+	for muted_id in active_mutes:
+		asyncio.ensure_future(unmute_user(muted_id, True))
+
+
 @client.event
 async def on_ready():
 	global cached_invites
@@ -92,13 +143,13 @@ async def on_ready():
 		activity=discord.Game(name='your mom')
 	)
 	if not is_dev:
-		active_mutes = await db.get_active_mutes()
-		for muted_id in active_mutes:
-			asyncio.ensure_future(unmute_user(muted_id, True))
 		guild = client.get_guild(config.main_guild)
 		cached_invites = await guild.invites()
+
 		asyncio.ensure_future(check_dead_chat())
+		asyncio.ensure_future(give_active_mutes())
 		asyncio.ensure_future(give_hourly_bobux())
+		asyncio.ensure_future(give_subbed_bobux())
 
 
 @client.event
@@ -360,10 +411,8 @@ async def mute_user(member, length, guild_id=None, gulag_message=True):
 async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 	'Unmutes a user after a certain amount of seconds pass'
 	if wait:
-		print('unmuting in...')
 		unmute_time = await db.get_mute_end(user_id)
 		unmute_in = unmute_time - time.time()
-		print('unmute_in', unmute_in)
 		await asyncio.sleep(unmute_in)
 		if (await db.get_mute_end(user_id) != unmute_time):
 			return print('Mute seems to have been extended.')

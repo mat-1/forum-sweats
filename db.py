@@ -528,10 +528,36 @@ async def bobux_get_subscriptions(user_id):
 		sub_data = subs_raw[member_id]
 		subs.append({
 			'id': int(member_id),
+			'sender': int(user_id),
 			'tier': sub_data['tier'],
-			'next_payment': sub_data['next_payment']
+			'next_payment': sub_data['next_payment'],
+			# whether the payment hasnt been given out yet (due to bot being down or something)
+			'owed': datetime.now() > sub_data['next_payment']
 		})
 
+	return subs
+
+
+async def bobux_get_all_subscriptions():
+	subs = []
+	async for member in member_data.find(
+		{
+			'subs': {
+				'$ne': None
+			}
+		}
+	):
+		subs_raw = member.get('subs', [])
+		for member_id in subs_raw:
+			sub_data = subs_raw[member_id]
+			subs.append({
+				'id': int(member_id),
+				'sender': int(member['discord']),
+				'tier': sub_data['tier'],
+				'next_payment': sub_data['next_payment'],
+				# whether the payment hasnt been given out yet (due to bot being down or something)
+				'owed': datetime.now() > sub_data['next_payment']
+			})
 	return subs
 
 
