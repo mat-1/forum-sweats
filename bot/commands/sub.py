@@ -21,6 +21,10 @@ async def verify_required_bobux(member, tier):
 	return bobux >= tier_cost
 
 
+async def subscribe(user, subbing_to, tier):
+	await db.bobux_subscribe_to(user.id, subbing_to.id, tier)
+
+
 async def run(message, member: Member = None, tier: str = None):
 	if not member:
 		return await message.channel.send('Invalid member.')
@@ -44,6 +48,7 @@ async def run(message, member: Member = None, tier: str = None):
 		# Check again in case they sent bobux while the confirmation was active or something
 		return await message.channel.send(f'You don\'t have enough bobux to {tier} sub')
 
+	await subscribe(message.author, member, tier)
 
 	if confirmed:
 		await verify_message.edit(embed=discord.Embed(

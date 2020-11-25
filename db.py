@@ -509,3 +509,17 @@ async def get_bobux_leaderboard(limit=10):
 		.limit(limit):
 		leaderboard.append(member)
 	return leaderboard
+
+
+async def bobux_subscribe_to(user_id, subbing_to_id, tier):
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$set': {
+				f'subs.{subbing_to_id}': tier.lower().strip()
+			}
+		},
+		upsert=True
+	)
