@@ -56,5 +56,5 @@ async def run(message, member: Member = None, tier: str = None):
 		))
 	else:
 		await verify_message.edit(embed=discord.Embed(
-			description=f'Cancelled sub to to {member.mention}!'
+			description=f'Cancelled sub to {member.mention}!'
 		))
