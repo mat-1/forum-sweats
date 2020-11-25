@@ -30,6 +30,9 @@ async def verify_required_bobux(member, tier):
 
 
 async def subscribe(user, subbing_to, tier):
+	tier_cost = tiers[tier]
+	await db.change_bobux(user.id, -tier_cost)
+	await db.change_bobux(subbing_to.id, tier_cost)
 	await db.bobux_subscribe_to(user.id, subbing_to.id, tier)
 
 

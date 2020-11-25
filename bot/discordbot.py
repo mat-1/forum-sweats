@@ -103,6 +103,9 @@ async def renew_sub(sub):
 			)
 		))
 		return
+	else:
+		# this will also take and give bobux accordingly
+		await commands.sub.subscribe(sender_member, receiver_member, tier)
 
 
 async def queue_renew_sub(sub):
