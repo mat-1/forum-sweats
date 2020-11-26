@@ -320,6 +320,12 @@ async def on_message(message):
 				.replace('R', 'W')\
 				.replace('L', 'W')\
 				.replace('<!642466378254647296>', '<@642466378254647296>')
+			temp_uwuized_message = uwuized_message
+			temp_uwuized_message = re.sub(r'n([aeiou]))', r'ny\1', temp_uwuized_message)
+			temp_uwuized_message = re.sub(r'N([aeiou]))', r'Ny\1', temp_uwuized_message)
+			temp_uwuized_message = re.sub(r'N([AEIOU]))', r'NY\1', temp_uwuized_message)
+			if len(temp_uwuized_message) < 2000:
+				uwuized_message = temp_uwuized_message
 			await message.channel.send(uwuized_message)
 	asyncio.ensure_future(db.add_message(message.author.id))
 	await process_counting_channel(message)
