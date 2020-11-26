@@ -51,7 +51,7 @@ async def run(message, member: Member = None, tier: str = None):
 		)
 
 	subs = await db.bobux_get_subscriptions(member.id)
-	if len(subs) > 10:
+	if len(subs) >= 10:
 		return await message.channel.send(
 			'You\'re subbed to too many people! Use !subs to check who you\'re subbed to, '
 			'and !unsub <member> to unsubscribe from them'
