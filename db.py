@@ -146,7 +146,7 @@ async def add_infraction(user_id: int, infraction_type, reason, mute_length=0):
 		'user': user_id,
 		'type': infraction_type,
 		'reason': reason,
-		'date': datetime.now(),
+		'date': datetime.utcnow(),
 		'length': str(mute_length)  # must be a string otherwise mongodb gets mad on long mutes
 	})
 
@@ -156,7 +156,7 @@ async def get_infractions(user_id: int):
 	infractions = []
 	async for infraction in infractions_data.find({
 		'user': user_id,
-		'date': {'$gt': datetime.now() - timedelta(days=30)}
+		'date': {'$gt': datetime.utcnow() - timedelta(days=30)}
 	}):
 		infractions.append(infraction)
 	return infractions
@@ -317,7 +317,7 @@ async def set_last_general_duel(guild_id: int):
 		},
 		{
 			'$set': {
-				'last_duel': datetime.now()
+				'last_duel': datetime.utcnow()
 			}
 		},
 		upsert=True
@@ -532,13 +532,13 @@ async def bobux_get_subscriptions(user_id):
 			'tier': sub_data['tier'],
 			'next_payment': sub_data['next_payment'],
 			# whether the payment hasnt been given out yet (due to bot being down or something)
-			'owed': datetime.now() > sub_data['next_payment']
+			'owed': datetime.utcnow() > sub_data['next_payment']
 		})
 
 	return subs
 
 
-async def bobux_get_all_subscriptions():
+async def bobux_get_all_subscriptions(for_user=None):
 	subs = []
 	async for member in member_data.find(
 		{
@@ -549,6 +549,9 @@ async def bobux_get_all_subscriptions():
 	):
 		subs_raw = member.get('subs', [])
 		for member_id in subs_raw:
+			if for_user:
+				if int(for_user) != int(member_id):
+					continue
 			sub_data = subs_raw[member_id]
 			subs.append({
 				'id': int(member_id),
@@ -556,7 +559,7 @@ async def bobux_get_all_subscriptions():
 				'tier': sub_data['tier'],
 				'next_payment': sub_data['next_payment'],
 				# whether the payment hasnt been given out yet (due to bot being down or something)
-				'owed': datetime.now() > sub_data['next_payment']
+				'owed': datetime.utcnow() > sub_data['next_payment']
 			})
 	return subs
 
@@ -571,7 +574,7 @@ async def bobux_subscribe_to(user_id, subbing_to_id, tier):
 			'$set': {
 				f'subs.{subbing_to_id}': {
 					'tier': tier.lower().strip(),
-					'next_payment': datetime.now() + timedelta(days=7)
+					'next_payment': datetime.utcnow() + timedelta(days=7)
 				}
 			}
 		},

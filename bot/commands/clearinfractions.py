@@ -20,7 +20,7 @@ async def run(message, member: Member, date: str = None):
 		return await message.send('Please use `!clearinfractions @member date`')
 	# month, day, year = date.split('/')
 	if date == 'today':
-		date = datetime.now()
+		date = datetime.utcnow()
 	else:
 		try:
 			date = datetime.strptime(date.strip(), '%m/%d/%Y')
