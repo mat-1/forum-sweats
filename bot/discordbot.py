@@ -319,6 +319,21 @@ async def on_message(message):
 				.replace('l', 'w')\
 				.replace('R', 'W')\
 				.replace('L', 'W')\
+				.replace('na', 'nya')\
+				.replace('ne', 'nye')\
+				.replace('ni', 'nyi')\
+				.replace('no', 'nyo')\
+				.replace('nu', 'nyu')\
+				.replace('Na', 'Nya')\
+				.replace('Ne', 'Nye')\
+				.replace('Ni', 'Nyi')\
+				.replace('No', 'Nyo')\
+				.replace('Nu', 'Nyu')\
+				.replace('NA', 'NYA')\
+				.replace('NE', 'NYE')\
+				.replace('NI', 'NYI')\
+				.replace('NO', 'NYO')\
+				.replace('NU', 'NYU')\
 				.replace('<!642466378254647296>', '<@642466378254647296>')
 			await message.channel.send(uwuized_message)
 	asyncio.ensure_future(db.add_message(message.author.id))
