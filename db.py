@@ -146,7 +146,7 @@ async def add_infraction(user_id: int, infraction_type, reason, mute_length=0):
 		'user': user_id,
 		'type': infraction_type,
 		'reason': reason,
-		'date': datetime.now(),
+		'date': datetime.utcnow(),
 		'length': str(mute_length)  # must be a string otherwise mongodb gets mad on long mutes
 	})
 
@@ -156,7 +156,7 @@ async def get_infractions(user_id: int):
 	infractions = []
 	async for infraction in infractions_data.find({
 		'user': user_id,
-		'date': {'$gt': datetime.now() - timedelta(days=30)}
+		'date': {'$gt': datetime.utcnow() - timedelta(days=30)}
 	}):
 		infractions.append(infraction)
 	return infractions
@@ -317,7 +317,7 @@ async def set_last_general_duel(guild_id: int):
 		},
 		{
 			'$set': {
-				'last_duel': datetime.now()
+				'last_duel': datetime.utcnow()
 			}
 		},
 		upsert=True
@@ -509,3 +509,89 @@ async def get_bobux_leaderboard(limit=10):
 		.limit(limit):
 		leaderboard.append(member)
 	return leaderboard
+
+
+async def bobux_get_subscriptions(user_id):
+	if not connection_url: return
+	data = await member_data.find_one(
+		{
+			'discord': int(user_id)
+		}
+	)
+	if data:
+		subs_raw = data.get('subs', [])
+	else:
+		return []
+
+	subs = []
+	for member_id in subs_raw:
+		sub_data = subs_raw[member_id]
+		subs.append({
+			'id': int(member_id),
+			'sender': int(user_id),
+			'tier': sub_data['tier'],
+			'next_payment': sub_data['next_payment'],
+			# whether the payment hasnt been given out yet (due to bot being down or something)
+			'owed': datetime.utcnow() > sub_data['next_payment']
+		})
+
+	return subs
+
+
+async def bobux_get_all_subscriptions(for_user=None):
+	subs = []
+	async for member in member_data.find(
+		{
+			'subs': {
+				'$ne': None
+			}
+		}
+	):
+		subs_raw = member.get('subs', [])
+		for member_id in subs_raw:
+			if for_user:
+				if int(for_user) != int(member_id):
+					continue
+			sub_data = subs_raw[member_id]
+			subs.append({
+				'id': int(member_id),
+				'sender': int(member['discord']),
+				'tier': sub_data['tier'],
+				'next_payment': sub_data['next_payment'],
+				# whether the payment hasnt been given out yet (due to bot being down or something)
+				'owed': datetime.utcnow() > sub_data['next_payment']
+			})
+	return subs
+
+
+async def bobux_subscribe_to(user_id, subbing_to_id, tier):
+	if not connection_url: return
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$set': {
+				f'subs.{subbing_to_id}': {
+					'tier': tier.lower().strip(),
+					'next_payment': datetime.utcnow() + timedelta(days=7)
+				}
+			}
+		},
+		upsert=True
+	)
+
+
+async def bobux_unsubscribe_to(user_id, unsubbing_to_id):
+	if not connection_url: return
+	await member_data.update_one(
+		{
+			'discord': user_id
+		},
+		{
+			'$unset': {
+				f'subs.{unsubbing_to_id}': ''
+			}
+		},
+		upsert=True
+	)

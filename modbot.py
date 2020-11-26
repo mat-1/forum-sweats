@@ -78,7 +78,7 @@ def get_previous_messages(member, last_seconds=3600):
 	messages = []
 	recent_message_count = 0
 
-	now = datetime.now()
+	now = datetime.utcnow()
 	for message in reversed(previous_user_messages.get(member.id, [])):
 		if now - message.created_at < timedelta(seconds=last_seconds):
 			messages.append(message)

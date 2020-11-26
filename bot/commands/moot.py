@@ -23,7 +23,7 @@ def can_moot(member):
 
 async def do_moot(message, member, length, reason):
 	#  for infraction in await db.get_infractions(member.id):
-	#  	if datetime.now() - infraction['date'] < timedelta(minutes=1):
+	#  	if datetime.utcnow() - infraction['date'] < timedelta(minutes=1):
 	# 		if the infraction was made less than 3 minutes ago, it should be removed as it was likely an accident
 	# 		await db.clear_infraction(infraction['_id'])
 
