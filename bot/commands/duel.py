@@ -62,6 +62,9 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 			await duel_loser.send("You were muted for one hour because you lost a duel in general")
 		except discord.errors.Forbidden:
 			pass
+		except AttributeError:
+			pass
+
 	elif channel.id == config.channels.get('gulag'):  # gulag
 		mute_end = await db.get_mute_end(duel_loser.id)
 		mute_remaining = mute_end - time.time()
@@ -71,6 +74,8 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 		try:
 			await duel_loser.send('You were muted for one minute because you lost a duel')
 		except discord.errors.Forbidden:
+			pass
+		except AttributeError:
 			pass
 	try:
 		del duel_statuses[duel_id]
