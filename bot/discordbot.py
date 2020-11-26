@@ -109,7 +109,7 @@ async def renew_sub(sub):
 
 
 async def queue_renew_sub(sub):
-	next_payment_delta = sub['next_payment'] - datetime.now()
+	next_payment_delta = sub['next_payment'] - datetime.utcnow()
 	await asyncio.sleep(next_payment_delta.total_seconds())
 	await renew_sub(sub)
 
