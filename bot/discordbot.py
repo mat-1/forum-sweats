@@ -659,6 +659,10 @@ async def check_bobux_roles(member_id, bobux=None):
 	guild = client.get_guild(guild_id)
 	member = guild.get_member(member_id)
 
+	if not member:
+		# Member isn't in the server, doesn't need roles
+		return
+
 	if bobux >= 1000:
 		applicable_bobux_roles_names.append('rich')
 	if bobux >= 5000:
