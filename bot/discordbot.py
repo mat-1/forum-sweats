@@ -1,6 +1,7 @@
 from bot.betterbot import BetterBot
 from datetime import datetime
 from bot import commands
+from bot import uwuify
 import importlib
 import discord
 import asyncio
@@ -314,20 +315,7 @@ async def on_message(message):
 		await process_suggestion(message)
 	if message.channel.id == config.channels.get('spam'):  # spam
 		if message.content and message.content[0] != '!' and not message.author.bot:
-			uwuized_message = message.content\
-				.replace('@', '')\
-				.replace('r', 'w')\
-				.replace('l', 'w')\
-				.replace('R', 'W')\
-				.replace('L', 'W')\
-				.replace('<!642466378254647296>', '<@642466378254647296>')
-			temp_uwuized_message = uwuized_message
-			temp_uwuized_message = re.sub(r'n([aeiou])', r'ny\1', temp_uwuized_message)
-			temp_uwuized_message = re.sub(r'N([aeiou])', r'Ny\1', temp_uwuized_message)
-			temp_uwuized_message = re.sub(r'N([AEIOU])', r'NY\1', temp_uwuized_message)
-			temp_uwuized_message = re.sub(r'n([AEIOU])', r'nY\1', temp_uwuized_message)
-			if len(temp_uwuized_message) < 2000:
-				uwuized_message = temp_uwuized_message
+			uwuized_message = uwuify.uwuify(message.content, limit=2000)
 			await message.channel.send(uwuized_message)
 	asyncio.ensure_future(db.add_message(message.author.id))
 	await process_counting_channel(message)
