@@ -18,6 +18,7 @@ def add_nyvowel(message):
 
 def add_faces(message):
 	output = ''
+	previous_character = ''
 	face_chance = .7
 	sentence_length = 0
 	sentence_uppercase_count = 0
@@ -25,7 +26,7 @@ def add_faces(message):
 	sentence_enders = '.!?'
 
 	for character in message:
-		if character in sentence_enders:
+		if character in sentence_enders and character == ' ':
 			if random.random() <= face_chance and sentence_length > 10:
 				face = random.choice(faces)
 
@@ -44,6 +45,7 @@ def add_faces(message):
 			if character.islower():
 				sentence_lowercase_count += 1
 		output += character
+		previous_character = character
 
 	if random.random() <= face_chance and sentence_length > 10:
 		face = random.choice(faces)
