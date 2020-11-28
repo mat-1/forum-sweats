@@ -672,12 +672,16 @@ async def check_bobux_roles(member_id, bobux=None):
 	remove_roles = []
 	for role_name in applicable_bobux_roles_names:
 		role_id = get_role_id(guild_id, role_name)
-		add_roles.append(guild.get_role(role_id))
+		role = guild.get_role(role_id)
+		if role not in member.roles:
+			add_roles.append(role)
 
 	for role_name in all_bobux_roles_names:
 		if role_name not in applicable_bobux_roles_names:
 			role_id = get_role_id(guild_id, role_name)
-			remove_roles.append(guild.get_role(role_id))
+			role = guild.get_role(role_id)
+			if role in member.roles:
+				remove_roles.append(role)
 
 	if add_roles:
 		await member.add_roles(*add_roles)
