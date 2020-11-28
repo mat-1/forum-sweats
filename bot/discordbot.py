@@ -648,7 +648,7 @@ for module_filename in os.listdir('./bot/commands'):
 
 
 async def check_bobux_roles(member_id, bobux=None):
-	if not bobux:
+	if bobux is None:
 		bobux = await db.get_bobux(member_id)
 
 	guild_id = config.main_guild
