@@ -18,6 +18,7 @@ async def run(message):
 		member_id = member['discord']
 		bobux = member['bobux']
 		leaderboard_strings.append(f'{position}) <@{member_id}> (**{bobux}** bobux)')
+		await discordbot.check_bobux_roles(member_id, bobux)
 	print(leaderboard_strings)
 	embed = discord.Embed(
 		title='Bobux Leaderboard',
