@@ -178,7 +178,15 @@ async def process_messsage(message, warn=True):
 	content = unidecode.unidecode(content)\
 		.replace('Ⱡ', 'L')\
 		.replace('Ỻ', 'lL')
-
+	# antihoe for runic
+	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			1,
+			message.guild.id if message.guild else None
+		)
+		return
 	# antimoan
 	if re.match(r'[\w\W]*[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
