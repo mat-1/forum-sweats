@@ -9,7 +9,9 @@ aliases = ['unsimp', 'bobuxunsub', 'unbobuxsub', 'unsubscribe', 'bobuxunsubscrib
 
 
 async def unsubscribe(user, unsubbing_to):
-	await db.bobux_unsubscribe_to(user.id, unsubbing_to.id)
+	user_id = user.id if hasattr(user, 'id') else int(user)
+	unsubbing_to_id = unsubbing_to.id if hasattr(unsubbing_to, 'id') else int(unsubbing_to)
+	await db.bobux_unsubscribe_to(user_id, unsubbing_to_id)
 
 
 async def run(message, member: Member = None):

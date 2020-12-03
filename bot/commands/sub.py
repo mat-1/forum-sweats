@@ -30,10 +30,13 @@ async def verify_required_bobux(member, tier):
 
 
 async def subscribe(user, subbing_to, tier):
+	user_id = user.id if hasattr(user, 'id') else int(user)
+	subbing_to_id = subbing_to.id if hasattr(subbing_to, 'id') else int(subbing_to)
+
 	tier_cost = tiers[tier]
-	await db.change_bobux(user.id, -tier_cost)
-	await db.change_bobux(subbing_to.id, tier_cost)
-	await db.bobux_subscribe_to(user.id, subbing_to.id, tier)
+	await db.change_bobux(user_id, -tier_cost)
+	await db.change_bobux(subbing_to_id, tier_cost)
+	await db.bobux_subscribe_to(user_id, subbing_to_id, tier)
 
 
 async def run(message, member: Member = None, tier: str = None):

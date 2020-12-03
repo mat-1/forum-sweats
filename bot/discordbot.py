@@ -97,7 +97,7 @@ async def renew_sub(sub):
 
 	if tier_cost > bobux:
 		# too expensive :pensive:
-		await commands.unsub.unsubscribe(sender_member, receiver_member)
+		await commands.unsub.unsubscribe(sub['sender'], sub['id'])
 		try:
 			await sender_member.send(embed=discord.Embed(
 				description=(
@@ -110,7 +110,7 @@ async def renew_sub(sub):
 			pass
 	else:
 		# this will also take and give bobux accordingly
-		await commands.sub.subscribe(sender_member, receiver_member, tier)
+		await commands.sub.subscribe(sub['sender'], sub['id'], tier)
 
 
 async def queue_renew_sub(sub):
