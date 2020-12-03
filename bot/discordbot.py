@@ -98,13 +98,16 @@ async def renew_sub(sub):
 	if tier_cost > bobux:
 		# too expensive :pensive:
 		await commands.unsub.unsubscribe(sender_member, receiver_member)
-		await sender_member.send(embed=discord.Embed(
-			description=(
-				f'You don\'t have enough bobux to continue your sub to {receiver_member.mention}, '
-				'so your subscription has been cancelled.'
-			)
-		))
-		return
+		try:
+			await sender_member.send(embed=discord.Embed(
+				description=(
+					f'You don\'t have enough bobux to continue your sub to {receiver_member.mention}, '
+					'so your subscription has been cancelled.'
+				)
+			))
+			return
+		except:
+			pass
 	else:
 		# this will also take and give bobux accordingly
 		await commands.sub.subscribe(sender_member, receiver_member, tier)
