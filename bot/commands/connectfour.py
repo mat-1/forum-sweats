@@ -177,3 +177,4 @@ async def run(message, opponent: Member = None):
 	embed.title = f'{winner} won'
 	embed.description = game.render_board()
 	await game_msg.edit(embed=embed)
+	await game_msg.clear_reactions()
