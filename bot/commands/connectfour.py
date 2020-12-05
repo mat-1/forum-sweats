@@ -135,6 +135,7 @@ async def wait_for_number_reaction(client, message, member, emojis):
 				user == member and reaction.emoji in emojis and reaction.message.id == message.id
 			)
 		)
+		await message.remove_reaction(reaction.emoji, user)
 		number = emojis.index(reaction.emoji)
 		if number != -1:
 			return number
@@ -160,11 +161,11 @@ async def run(message, opponent: Member = None):
 	winner = None
 
 	while winner is None:
-		embed.content = game.render_board()
+		embed.description = game.render_board()
 		turn = players[game.turn]
 
 		embed.title = f'{turn}\'s turn'
-		game_msg.edit(embed=embed)
+		await game_msg.edit(embed=embed)
 
 		number = await wait_for_number_reaction(message.client, game_msg, turn, game.number_emojis[:game.width])
 		game.place(number, game.turn)
@@ -174,4 +175,5 @@ async def run(message, opponent: Member = None):
 			winner = players[winner]
 
 	embed.title = f'{winner} won'
-	embed.content = game.render_board()
+	embed.description = game.render_board()
+	await game_msg.edit(embed=embed)
