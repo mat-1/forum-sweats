@@ -16,7 +16,7 @@ class Game:
 
 		# player 0 and player 1
 		self.number_emojis = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣')
-		self.player_emojis = ['🔴', '🟡']
+		self.player_emojis = ['🔴', '🟡', '🔵', '🟢', '🟣', '🟤']
 		self.background_emoji = '⚪'
 		self.player_count = player_count
 		self.turn = 0
@@ -141,7 +141,7 @@ async def wait_for_number_reaction(client, message, member, emojis):
 			return number
 
 
-async def run(message, opponent: Member = None):
+async def run(message, opponent: Member = None, opponent2: Member = None, opponent3: Member = None, opponent4: Member = None, opponent5: Member = None):
 	print('connect4')
 	if not opponent:
 		return await message.channel.send('You must specify an opponent')
@@ -152,6 +152,10 @@ async def run(message, opponent: Member = None):
 	game_msg = await message.send(embed=embed)
 
 	players = [message.author, opponent]
+	if opponent2: players.append(opponent2)
+	if opponent3: players.append(opponent3)
+	if opponent4: players.append(opponent4)
+	if opponent5: players.append(opponent5)
 
 	game = Game(len(players))
 
