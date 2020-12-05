@@ -125,6 +125,14 @@ class Game:
 				return check_result
 		return None
 
+	def check_tie(self):
+		for row in range(self.height):
+			for column in range(self.width):
+				item = self.board[column][self.height - 1 - row]
+				if item is None:
+					return False
+		return True
+
 
 async def wait_for_number_reaction(client, message, member, emojis):
 	while True:
@@ -178,7 +186,13 @@ async def run(message, opponent: Member = None, opponent2: Member = None, oppone
 		if winner is not None:
 			winner = players[winner]
 
-	embed.title = f'{winner} won'
+		if game.check_tie():
+			break
+
+	if winner is None:
+		embed.title = 'It\'s a tie'
+	else:
+		embed.title = f'{winner} won'
 	embed.description = game.render_board()
 	await game_msg.edit(embed=embed)
 	await game_msg.clear_reactions()
