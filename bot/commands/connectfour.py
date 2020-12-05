@@ -128,25 +128,32 @@ class Game:
 	def check_tie(self):
 		for row in range(self.height):
 			for column in range(self.width):
-				item = self.board[column][self.height - 1 - row]
+				item = self.board[column][row]
 				if item is None:
 					return False
 		return True
 
 
 async def wait_for_number_reaction(client, message, member, emojis):
+	message = await message.channel.fetch_message(message.id)
+	for reaction in message.reactions:
+		if reaction.count > 1:
+			async for user in reaction.users():
+				if not user.bot:
+					await reaction.remove(user)
 	while True:
 		reaction, user = await client.wait_for(
 			'reaction_add',
 			check=(
 				lambda reaction, user:
-				user == member and reaction.emoji in emojis and reaction.message.id == message.id
+				reaction.emoji in emojis and reaction.message.id == message.id
 			)
 		)
 		await message.remove_reaction(reaction.emoji, user)
-		number = emojis.index(reaction.emoji)
-		if number != -1:
-			return number
+		if user == member:
+			number = emojis.index(reaction.emoji)
+			if number != -1:
+				return number
 
 
 async def run(message, opponent: Member = None, opponent2: Member = None, opponent3: Member = None, opponent4: Member = None, opponent5: Member = None):
