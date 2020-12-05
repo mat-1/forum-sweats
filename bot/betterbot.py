@@ -127,6 +127,7 @@ class BetterBot():
 				try:
 					return_args = await self.parse_args(parsing_left, func, ctx, ignore_extra=pad_none)
 				except Exception as e:
+					traceback.print_exc()
 					print('error parsing?', type(e), e, func.__code__.co_filename)
 					continue
 			else:
@@ -316,6 +317,8 @@ def check_nickname_contains_recent(ctx, arg):
 class Member(commands.Converter):
 	async def convert(self, ctx, arg):
 		arg = arg.strip()
+		if len(arg) == 0:
+			return None
 		if arg[0] == '@':
 			arg = arg[1:]
 
