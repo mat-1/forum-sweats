@@ -91,7 +91,7 @@ class Game:
 	def check_diagonal_1(self):
 		# bottom left to top right
 		for row in range(self.height - 4):
-			for column in range(self.width - 4):
+			for column in range(self.width - 3):
 				check_result = self.check_four_positions(
 					(column, row),
 					(column + 1, row + 1),
