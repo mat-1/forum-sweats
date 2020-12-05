@@ -64,7 +64,7 @@ class Game:
 
 	def check_horizontal(self):
 		for row in range(self.height):
-			for column in range(self.width - 4):
+			for column in range(self.width - 3):
 				check_result = self.check_four_positions(
 					(column, row),
 					(column + 1, row),
@@ -76,7 +76,7 @@ class Game:
 		return None
 
 	def check_vertical(self):
-		for row in range(self.height - 4):
+		for row in range(self.height - 3):
 			for column in range(self.width):
 				check_result = self.check_four_positions(
 					(column, row),
@@ -90,7 +90,7 @@ class Game:
 
 	def check_diagonal_1(self):
 		# bottom left to top right
-		for row in range(self.height - 4):
+		for row in range(self.height - 3):
 			for column in range(self.width - 3):
 				check_result = self.check_four_positions(
 					(column, row),
@@ -105,7 +105,7 @@ class Game:
 	def check_diagonal_2(self):
 		# top left to bottom right
 		for row in range(3, self.height):
-			for column in range(self.width - 4):
+			for column in range(self.width - 3):
 				check_result = self.check_four_positions(
 					(column, row),
 					(column + 1, row - 1),
