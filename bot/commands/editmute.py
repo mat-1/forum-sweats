@@ -53,15 +53,20 @@ async def run(message, member: Member, mute_length: Time = 0, reason: str = None
 		changed_message = f'<@{member.id}>\'s mute has been extended to {mute_length_string}'
 		dm_changed_message = f'Your mute has been extended to {mute_length_string}'
 
-	try:
-		await member.send(
-			dm_changed_message
-		)
-	except discord.errors.Forbidden:
-		pass
-	
-	await message.send(embed=discord.Embed(
-		description=changed_message
-	))
+	mute_remaining = int((await db.get_mute_end(member.id)) - time.time())
 
-	await do_mute(message, member, mute_length, reason)
+	if mute_remaining < 0:
+		return await message.channel.send('That user isn\'t muted')
+	else:
+		try:
+			await member.send(
+				dm_changed_message
+			)
+		except discord.errors.Forbidden:
+			pass
+	
+		await message.send(embed=discord.Embed(
+			description=changed_message
+		))
+
+		await do_mute(message, member, mute_length, reason)
