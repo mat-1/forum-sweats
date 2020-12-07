@@ -47,21 +47,21 @@ async def run(message, member: Member, mute_length: Time = 0, reason: str = None
 	mute_length_string = seconds_to_string(mute_length)
 
 	if reason:
-		extended_message = f'<@{member.id}>\'s mute has been extended to {mute_length_string} for "**{reason}**"'
-		dm_extended_message = f'Your mute has been extended to {mute_length_string} for "**{reason}**"'
+		changed_message = f'<@{member.id}>\'s mute has been extended to {mute_length_string} for "**{reason}**"'
+		dm_changed_message = f'Your mute has been extended to {mute_length_string} for "**{reason}**"'
 	else:
-		extended_message = f'<@{member.id}>\'s mute has been extended to {mute_length_string}'
-		dm_extended_message = f'Your mute has been extended to {mute_length_string}'
+		changed_message = f'<@{member.id}>\'s mute has been extended to {mute_length_string}'
+		dm_changed_message = f'Your mute has been extended to {mute_length_string}'
 
 	try:
 		await member.send(
-			dm_extended_message
+			dm_changed_message
 		)
 	except discord.errors.Forbidden:
 		pass
 	
 	await message.send(embed=discord.Embed(
-		description=extended_message
+		description=changed_message
 	))
 
 	await do_mute(message, member, mute_length, reason)
