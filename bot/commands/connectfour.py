@@ -1,9 +1,12 @@
 from ..betterbot import Member
 import discord
+import aiohttp
+import random
 
 name = 'connectfour'
 aliases = ['connect4', 'c4']
 
+s = aiohttp.ClientSession()
 
 class Game:
 	def __init__(self, player_count=2, width=7, height=6):
@@ -20,6 +23,7 @@ class Game:
 		self.background_emoji = '⚪'
 		self.player_count = player_count
 		self.turn = 0
+		self.pos = ''
 
 	def render_board(self):
 		rendered = ''
@@ -51,6 +55,7 @@ class Game:
 		self.board[column][row] = player
 		self.turn += 1
 		self.turn %= self.player_count
+		self.pos += str(column + 1)
 		return True
 
 	def get_position(self, position):
@@ -133,6 +138,23 @@ class Game:
 					return False
 		return True
 
+	async def ai(self):
+		async with s.get('https://connect4.gamesolver.org/solve?pos=' + self.pos) as r:
+			data = await r.json()
+		score = data['score']
+		best_columns = []
+		best_column_score = -100
+
+		for column, value in enumerate(score):
+			if None in self.board[column] and value >= best_column_score:
+				if value == best_column_score:
+					best_columns.append(column)
+				else:
+					best_columns = [column]
+				best_column_score = value
+		return random.choice(best_columns)
+
+
 
 async def wait_for_number_reaction(client, message, member, emojis):
 	message = await message.channel.fetch_message(message.id)
@@ -186,7 +208,10 @@ async def run(message, opponent: Member = None, opponent2: Member = None, oppone
 		embed.title = f'{turn}\'s turn'
 		await game_msg.edit(embed=embed)
 
-		number = await wait_for_number_reaction(message.client, game_msg, turn, game.number_emojis[:game.width])
+		if len(players) == 2 and turn.bot:
+			number = await game.ai()
+		else:
+			number = await wait_for_number_reaction(message.client, game_msg, turn, game.number_emojis[:game.width])
 		game.place(number, game.turn)
 
 		winner = game.check_winner()
