@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from bot import discordbot
 import unidecode
 from session import s
+import discord
 import time
 import json
 import os
