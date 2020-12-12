@@ -218,7 +218,7 @@ async def process_messsage(message, warn=True):
 		)
 		return
 	# anti n-word filter
-	if re.match(r'(n+i+g+)g{1,}(a+|e+r+)', content, flags=re.IGNORECASE):
+	if re.match(r'(n+ *i+ *g+ *)g+ *(a+|e+ *r+)', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t say racial slurs in chat, nerd')
 		except discord.errors.Forbidden:
