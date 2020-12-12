@@ -216,6 +216,16 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None
 		)
 		return
+	# anti n-word filter
+	if re.match(r'(n+i+g+)g{1,}(a+|e+r+)', content, flags=re.IGNORECASE):
+		await message.author.send('Don\'t say racial slurs in chat, nerd')
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			86400, # one day
+			message.guild.id if message.guild else None
+		)
+		return
 
 	await check_spam(message)
 
