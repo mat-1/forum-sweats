@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from bot import discordbot
 import unidecode
 from session import s
+import discord
 import time
 import json
 import os
@@ -213,6 +214,19 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			5,
+			message.guild.id if message.guild else None
+		)
+		return
+	# anti n-word filter
+	if re.match(r'(n+i+g+)g{1,}(a+|e+r+)', content, flags=re.IGNORECASE):
+		try:
+			await message.author.send('Don\'t say racial slurs in chat, nerd')
+		except discord.errors.Forbidden:
+			pass
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			86400, # one day
 			message.guild.id if message.guild else None
 		)
 		return
