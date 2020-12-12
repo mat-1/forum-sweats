@@ -218,7 +218,10 @@ async def process_messsage(message, warn=True):
 		return
 	# anti n-word filter
 	if re.match(r'(n+i+g+)g{1,}(a+|e+r+)', content, flags=re.IGNORECASE):
-		await message.author.send('Don\'t say racial slurs in chat, nerd')
+		try:
+			await message.author.send('Don\'t say racial slurs in chat, nerd')
+		except discord.errors.Forbidden:
+			pass
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
