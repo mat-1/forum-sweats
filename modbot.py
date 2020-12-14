@@ -207,9 +207,12 @@ async def process_messsage(message, warn=True):
 		)
 		return
 
-	if re.match(r'.*([1-2]?\d?\d)\.([1-2]?\d?\d)\.([1-2]?\d?\d)\.([1-2]?\d?\d).*', content):
+	if re.match(r'.*((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d?))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d?))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d?))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d?)).*', content):
 		# 69.420.69.420
-		await message.author.send('Don\'t post IP addresses in chat, nerd')
+		try:
+			await message.author.send('Don\'t post IP addresses in chat, nerd')
+		except discord.errors.Forbidden:
+			pass
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
