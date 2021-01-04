@@ -459,14 +459,14 @@ async def run(message, code_arg: str):
 		code = code_arg
 
 	i = Interpreter(code)
-	print('made Interpreter', i)
+
 	i.global_variables = {
 		'print': _print,
 		'int': int,
 		'str': str,
 		'range': range,
 	}
-	print('executing code', code)
+
 	try:
 		await i.execute(max_steps=100)
 	except ReachedMaxSteps:
@@ -475,8 +475,14 @@ async def run(message, code_arg: str):
 	except:
 		await message.channel.send('Something went wrong :(')
 		return
-	print('executed')
+
+	output_joined = '\n'.join(output)
+	
+	if output_joined.count('\n') > 30:
+		await message.channel.send('Too many lines :(')
+		return
+
 	await message.channel.send(embed=discord.Embed(
 		title='Safe exec',
-		description='\n'.join(output)
+		description=output_joined
 	))
