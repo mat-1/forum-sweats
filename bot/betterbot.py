@@ -40,10 +40,7 @@ class BetterBot():
 	functions = []
 
 	def __init__(self, prefix, bot_id):
-		'''
-		All the bot prefixes.
-		Also allows pings
-		'''
+		# This lists all the prefixes that can be used to trigger the bot, <@id> and <@!id> allow you to ping the bot instead of using the prefix.
 		self.prefixes = [
 			prefix,
 			f'<@{bot_id}>',
@@ -354,7 +351,7 @@ class Member(commands.Converter):
 Time converter
 '''
 
-lengths = {
+time_units = {
 	'milliseconds': 1 / 1000,
 	'millisecond': 1 / 1000,
 	'ms': 1 / 1000,
@@ -405,18 +402,21 @@ lengths = {
 
 def check_time(ctx, arg):
 	if arg.strip() == 'forever':
-		return lengths['eons'] * 1000
+		return time_units['eons'] * 1000
 	time_part = ''
 	for char in arg:
 		if char in '0123456789':
 			time_part += char
 		else:
 			break
-	time_type = arg[len(time_part):]
-	time_type = time_type.strip()
+	time_unit = arg[len(time_part):]
+	time_unit = time_unit.strip()
+	if not time_unit:
+		# if there's no unit, that means it's not a valid time
+		return
 	time_part = int(time_part)
-	if time_type in lengths:
-		return lengths[time_type] * time_part
+	if time_unit in time_units:
+		return time_units[time_unit] * time_part
 
 
 class Time(commands.Converter):
