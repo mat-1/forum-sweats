@@ -310,6 +310,27 @@ def check_nickname_contains_recent(ctx, arg):
 	)
 	return member
 
+def check_fakemember_id(ctx, arg):
+	try:
+		return FakeMember(int(arg))
+	except ValueError:
+		pass
+
+class FakeMember():
+	def __init__(self, id):
+		self.id = id
+		self.name = '<deleted user>'
+		self.display_name = self.name
+		self.discriminator = 0000
+
+	def __str__(self):
+		return f'{self.name}#{self.discriminator}'
+
+	async def add_roles(self, *args, **kwargs):
+		pass
+
+	async def remove_roles(self, *args, **kwargs):
+		pass
 
 class Member(commands.Converter):
 	async def convert(self, ctx, arg):
@@ -338,6 +359,8 @@ class Member(commands.Converter):
 
 			check_nickname_contains_recent,  # Nickname contains
 			check_nickname_contains,  # Nickname contains
+
+			check_fakemember_id  # Deleted member id
 		]
 		for checker in CHECKERS:
 			member = checker(ctx, arg)
