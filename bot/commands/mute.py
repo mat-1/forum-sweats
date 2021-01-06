@@ -37,8 +37,6 @@ async def do_mute(message, member, length, reason):
 		await member.send(f'You were muted for "**{reason}**"')
 	except discord.errors.Forbidden:
 		pass
-	except AttributeError:
-		pass
 
 	try:
 		await mute_user(
@@ -46,8 +44,8 @@ async def do_mute(message, member, length, reason):
 			length,
 			message.guild.id if message.guild else None
 		)
-	except discord.errors.Forbidden as e:
-		await message.send(f'I don\'t have permission to do this')
+	except discord.errors.Forbidden:
+		await message.send("I don't have permission to do this")
 
 
 async def run(message, member: Member, mute_length: Time = 0, reason: str = None):
