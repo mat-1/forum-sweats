@@ -60,7 +60,7 @@ async def check_dead_chat():
 	while True:
 		await asyncio.sleep(5)
 		time_since_message = time.time() - last_general_message
-		if time_since_message > 60 * 5:
+		if time_since_message > 60 * 15:
 			await general_channel.send('dead chat xD')
 
 
