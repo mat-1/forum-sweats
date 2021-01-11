@@ -272,10 +272,6 @@ async def process_counting_channel(message):
 		# if the message was sent by rembutquaglet, delete and ignore it
 		await message.delete()
 		return
-	elif message.author.id == 611557404013887507:
-		# if the message was sent by mrwithercrusher, delete and ignore it
-		await message.delete()
-		return
 	old_number = await db.get_counter(message.guild.id)
 	content = message.content.replace(',', '')
 	try:
