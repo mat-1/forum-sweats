@@ -55,13 +55,15 @@ cached_invites = []
 
 
 async def check_dead_chat():
+	global is_chat_dead
 	guild = client.get_guild(config.main_guild)
 	general_channel = guild.get_channel(config.channels['general'])
 	while True:
 		await asyncio.sleep(5)
 		time_since_message = time.time() - last_general_message
-		if time_since_message > 60 * 5:
+		if time_since_message > 60 * 15 and not is_chat_dead:
 			await general_channel.send('dead chat xD')
+			is_chat_dead = True
 
 
 async def give_hourly_bobux():
@@ -294,6 +296,7 @@ async def process_counting_channel(message):
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
 
 last_general_message = time.time()
+is_chat_dead = False
 
 
 async def process_suggestion(message):
@@ -306,10 +309,14 @@ async def process_suggestion(message):
 @client.event
 async def on_message(message):
 	global last_general_message
+	global is_chat_dead
+
 	if message.channel.id == config.channels.get('skyblock-updates'):  # skyblock-updates
 		await message.publish()
 	if message.channel.id == config.channels.get('general'):  # general
 		last_general_message = time.time()
+		if not message.author.bot:
+			is_chat_dead = False
 	if message.channel.id == config.channels.get('suggestions'):  # suggestions
 		await process_suggestion(message)
 	if message.channel.id == config.channels.get('spam'):  # spam
