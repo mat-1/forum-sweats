@@ -332,7 +332,8 @@ class FakeMember():
 	async def remove_roles(self, *args, **kwargs):
 		pass
 
-class Member(commands.Converter):
+class Member(discord.Member):
+	id: int
 	async def convert(self, ctx, arg):
 		arg = arg.strip()
 		if len(arg) == 0:
