@@ -1,8 +1,9 @@
 import random
 
 name = 'ducksweirdclickbaitthing'
-aliases = ['clickbait']
+aliases = ('clickbait',)
 
+# this code was written by duck, any loss of brain cells should be blamed on him
 
 gaming = "1"
 contacting = "2"

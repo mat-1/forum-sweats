@@ -7,7 +7,7 @@ name = 'clearinfractions'
 channels = None
 
 
-async def run(message, member: Member, date: str = None):
+async def run(message, member: Member, date_string: str = None):
 	'Checks the infractions that a user has (mutes, warns, bans, etc)'
 
 	if (
@@ -16,14 +16,14 @@ async def run(message, member: Member, date: str = None):
 	):
 		return
 
-	if not member or not date:
+	if not member or not date_string:
 		return await message.send('Please use `!clearinfractions @member date`')
 	# month, day, year = date.split('/')
-	if date == 'today':
+	if date_string == 'today':
 		date = datetime.utcnow()
 	else:
 		try:
-			date = datetime.strptime(date.strip(), '%m/%d/%Y')
+			date = datetime.strptime(date_string.strip(), '%m/%d/%Y')
 		except ValueError:
 			return await message.send('Invalid date (use format mm/dd/yyyy)')
 	cleared = await db.clear_infractions(member.id, date)

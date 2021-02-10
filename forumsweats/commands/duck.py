@@ -4,7 +4,7 @@ import random
 import config
 
 name = 'duck'
-aliases = ['duckpic', 'randomduck', 'duckpicture']
+aliases = ('duckpic', 'randomduck', 'duckpicture')
 channels = ('bot-commands', 'gulag')
 
 

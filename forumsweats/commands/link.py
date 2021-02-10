@@ -40,6 +40,8 @@ async def run(message, ign: str = None):
 	old_rank = await db.get_hypixel_rank(message.author.id)
 	new_rank = await hypixel.get_hypixel_rank(ign)
 
+	new_rank_role_id = None
+
 	# Give the user their rank in all servers
 	for guild in message.client.guilds:
 		member = guild.get_member(message.author.id)

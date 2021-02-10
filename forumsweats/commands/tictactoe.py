@@ -9,9 +9,11 @@ aliases = ['ttt']
 channels = ('bot-commands', 'gulag')
 
 
+NUMBER_EMOJIS: list = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
+
 class Game:
 	def __init__(self):
-		self.board = [None for _ in range(9)]
+		self.board: list = [None for _ in range(9)]
 		self.turn = 'x'
 		self.numbers = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
 
@@ -187,7 +189,8 @@ async def run(message, player2: Member = None):
 	title_msg = await message.send('**TIC TAC TOE**')
 	board_msg = await message.send('(loading)')
 
-	number_emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
+	number_emojis = list(NUMBER_EMOJIS)
+
 	if is_gulag:
 		number_emojis = list(reversed(number_emojis))
 		random.shuffle(ttt_game.numbers)
@@ -204,7 +207,7 @@ async def run(message, player2: Member = None):
 
 	while True:
 		# X
-		placing_spot = None
+		placing_spot = 0
 		if player1:
 			placed = False
 			while not placed:

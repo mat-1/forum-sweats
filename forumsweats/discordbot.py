@@ -1,6 +1,7 @@
+from typing import Any
 from forumsweats.betterbot import BetterBot
 from datetime import datetime
-from forumsweats import commands
+from forumsweats import commands as commands_module
 from forumsweats import uwuify
 from forumsweats import modbot
 import importlib
@@ -12,7 +13,8 @@ import config
 import time
 import os
 from forumsweats import db
-import re
+
+commands: Any = commands_module
 
 intents = discord.Intents.default()
 intents.members = True
@@ -638,7 +640,7 @@ command_modules = []
 for module_filename in os.listdir('./forumsweats/commands'):
 	if module_filename == '__init__.py' or module_filename[-3:] != '.py':
 		continue
-	module = importlib.import_module('forumsweats.commands.' + module_filename[:-3])
+	module: Any = importlib.import_module('forumsweats.commands.' + module_filename[:-3])
 	command_modules.append(module)
 	print('Registering command from file', module_filename)
 	betterbot.command(

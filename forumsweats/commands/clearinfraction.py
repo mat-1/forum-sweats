@@ -3,11 +3,11 @@ import discord
 from forumsweats import db
 
 name = 'clearinfraction'
-aliases = ['removeinfraction']
+aliases = ('removeinfraction',)
 channels = None
 
 
-async def run(message, infraction_ids: str):
+async def run(message, infraction_ids_string: str):
 	'Checks the infractions that a user has (mutes, warns, bans, etc)'
 
 	if (
@@ -16,7 +16,7 @@ async def run(message, infraction_ids: str):
 	):
 		return
 
-	infraction_ids = infraction_ids.split(' ')
+	infraction_ids = infraction_ids_string.split(' ')
 
 	for infraction_id in infraction_ids:
 		if len(infraction_id) != 8:

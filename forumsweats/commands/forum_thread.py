@@ -69,7 +69,5 @@ async def run(message, command, thread_id: int):
 			icon_url=thread['author']['avatar_url'],
 		)
 		if thread['image']:
-			embed['image'] = {
-				'url': thread['image']
-			}
+			embed.set_image(url=thread['image'])
 		await message.channel.send(embed=embed)

@@ -51,7 +51,7 @@ async def do_moot(message, member, length, reason):
 		await message.send("I don't have permission to do this")
 
 
-async def run(message, member: Member, moot_length: Time = 0, reason: str = None):
+async def run(message, member: Member, moot_length: Time = Time(0), reason: str = None):
 	'Moots a member for a specified amount of time'
 
 	if not can_moot(message.author): return

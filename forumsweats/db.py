@@ -1,3 +1,4 @@
+from typing import Any
 import motor.motor_asyncio
 import os
 import time
@@ -111,7 +112,7 @@ async def get_mute_end(user_id):
 		return 0
 
 
-async def get_mute_data(user_id):
+async def get_mute_data(user_id) -> Any:
 	if not connection_url: return {}
 	data = await member_data.find_one(
 		{
@@ -151,8 +152,8 @@ async def add_infraction(user_id: int, infraction_type, reason, mute_length=0):
 	})
 
 
-async def get_infractions(user_id: int):
-	if not connection_url: return
+async def get_infractions(user_id: int) -> list:
+	if not connection_url: return []
 	infractions = []
 	async for infraction in infractions_data.find({
 		'user': user_id,
@@ -511,8 +512,8 @@ async def get_bobux_leaderboard(limit=10):
 	return leaderboard
 
 
-async def bobux_get_subscriptions(user_id):
-	if not connection_url: return
+async def bobux_get_subscriptions(user_id) -> list:
+	if not connection_url: return []
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)

@@ -4,7 +4,7 @@ from ..betterbot import Member
 from forumsweats import db
 
 name = 'clearrecentinfraction'
-aliases = ['clearnewinfraction']
+aliases = ('clearnewinfraction',)
 channels = None
 
 

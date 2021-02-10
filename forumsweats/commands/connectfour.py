@@ -4,7 +4,7 @@ import aiohttp
 import random
 
 name = 'connectfour'
-aliases = ['connect4', 'c4']
+aliases = ('connect4', 'c4',)
 
 s = aiohttp.ClientSession()
 

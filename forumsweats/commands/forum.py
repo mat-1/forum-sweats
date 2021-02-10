@@ -1,5 +1,5 @@
 name = 'forum'
-aliases = ['forums', 'f']
+aliases = ('forums', 'f')
 pad_none = False
 
 

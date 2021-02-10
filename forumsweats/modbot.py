@@ -25,7 +25,7 @@ perspective_url = (
 
 
 async def get_perspective_score(message, models=['SEVERE_TOXICITY', 'TOXICITY', 'IDENTITY_ATTACK']):
-	if not perspective_key: return {}
+	if not perspective_key or not perspective_url: return {}
 	input_data = {
 		'comment': {
 			'text': message

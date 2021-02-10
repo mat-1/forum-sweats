@@ -50,7 +50,7 @@ class BetterBot():
 			f'<@!{bot_id}>'
 		]
 
-	async def try_converter(self, ctx, string, converter):
+	async def try_converter(self, ctx, string: str, converter):
 		if hasattr(converter, 'convert'):
 			return await converter.convert(converter, ctx, string)
 		try:
@@ -58,41 +58,41 @@ class BetterBot():
 		except ValueError:
 			return
 
-	async def parse_args(self, parsing_left, func, ctx, ignore_extra=True):
+	async def parse_args(self, parsing_remaining, func, ctx, ignore_extra=True):
 		'''
 		Parses the command arguments
 		'''
 		# Annotations are the expected types (str, int, Member, etc)
-		ann = func.__annotations__
+		expected_types = func.__annotations__
 		# Args is all the arguments for the function
 		args = func.__code__.co_varnames[1:]  # [1:] to skip ctx
 		return_args = []
 		for argnum, arg in enumerate(args):
-			if arg in ann:
-				hint = ann[arg]
+			if arg in expected_types:
+				converter = expected_types[arg]
 				found = None
 				i = 0
-				for i in reversed([pos for pos, char in enumerate(parsing_left + ' ') if char == ' ']):
-					cmd_arg = parsing_left[:i]
-					tried = await self.try_converter(ctx, cmd_arg, hint)
+				for i in reversed([pos for pos, char in enumerate(parsing_remaining + ' ') if char == ' ']):
+					cmd_arg = parsing_remaining[:i]
+					tried = await self.try_converter(ctx, cmd_arg, converter)
 					if tried is not None:
 						found = tried
 						break
 				if found:
-					parsing_left = parsing_left[i + 1:]
+					parsing_remaining = parsing_remaining[i + 1:]
 					if isinstance(found, str):
 						found = found.strip()
 					return_args.append(found)
 				else:
-					parsing_left = (parsing_left + ' ').split(' ', len(args) - argnum)[-1]
+					parsing_remaining = (parsing_remaining + ' ').split(' ', len(args) - argnum)[-1]
 					return_args.append(None)
 			else:
-				cmd_arg, parsing_left = (parsing_left + ' ').split(' ', 1)
+				cmd_arg, parsing_remaining = (parsing_remaining + ' ').split(' ', 1)
 				if cmd_arg:
 					if isinstance(cmd_arg, str):
 						cmd_arg = cmd_arg.strip()
 					return_args.append(cmd_arg)
-		if parsing_left.strip():
+		if parsing_remaining.strip():
 			if not ignore_extra:
 				raise Exception('Extra data left')
 		return return_args
@@ -102,16 +102,16 @@ class BetterBot():
 		recent_members[message.author] = time.time()
 		if message.author.bot:
 			return
-		parsing_left = message.content.replace('  ', ' ')
+		parsing_remaining = message.content.replace('  ', ' ')
 		found = False
 		prefix = None
 		for prefix in self.prefixes:
-			if parsing_left.startswith(prefix):
+			if parsing_remaining.startswith(prefix):
 				found = True
 				break
 		if not found: return
-		parsing_left = parsing_left[len(prefix):].strip()
-		command, parsing_left = (parsing_left + ' ').split(' ', 1)
+		parsing_remaining = parsing_remaining[len(prefix):].strip()
+		command, parsing_remaining = (parsing_remaining + ' ').split(' ', 1)
 		command = command.lower()
 		for function in self.functions:
 			if command != function[0]: continue
@@ -123,9 +123,9 @@ class BetterBot():
 				return
 
 			ctx = Context(message, prefix=prefix)
-			if parsing_left:
+			if parsing_remaining:
 				try:
-					return_args = await self.parse_args(parsing_left, func, ctx, ignore_extra=pad_none)
+					return_args = await self.parse_args(parsing_remaining, func, ctx, ignore_extra=pad_none)
 				except Exception as e:
 					traceback.print_exc()
 					print('error parsing?', type(e), e, func.__code__.co_filename)
@@ -148,7 +148,8 @@ class BetterBot():
 
 	def command(self, name, aliases=[], channels=['bot-commands'], pad_none=True):
 		def decorator(func):
-			for command_name in [name] + aliases:
+			command_names = [name] + list(aliases)
+			for command_name in command_names:
 				self.functions.append((command_name.lower(), (func, channels, pad_none)))
 			return func
 		return decorator
@@ -335,7 +336,11 @@ class FakeMember():
 	async def remove_roles(self, *args, **kwargs):
 		pass
 
-class Member(commands.Converter):
+class Member():
+	avatar_url: str
+	id: int
+	mention: str
+
 	async def convert(self, ctx, arg):
 		arg = arg.strip()
 		if len(arg) == 0:
@@ -442,7 +447,14 @@ def check_time(ctx, arg):
 		return lengths[time_type] * time_part
 
 
-class Time(commands.Converter):
+class Time():
+	def __init__(self, value):
+		self.value = value
+	def __gt__(self, other) -> bool: return float(self) > float(other)
+	def __lt__(self, other) -> bool: return float(self) < float(other)
+	def __int__(self) -> int: return int(self.value)
+	def __float__(self) -> float: return float(self.value)
+
 	async def convert(self, ctx, arg):
 		arg = arg.strip()
 		CHECKERS = [

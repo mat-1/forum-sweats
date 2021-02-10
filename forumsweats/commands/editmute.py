@@ -3,7 +3,6 @@ from ..discordbot import (
 	has_role,
 	mute_user
 )
-from datetime import datetime, timedelta
 from utils import seconds_to_string
 import discord
 from forumsweats import db

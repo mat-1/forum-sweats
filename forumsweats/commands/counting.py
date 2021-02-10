@@ -1,7 +1,7 @@
 from forumsweats import db
 
 name = 'counting'
-aliases = ['counter']
+aliases = ('counter',)
 
 
 async def run(message, value):

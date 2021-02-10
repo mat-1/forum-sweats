@@ -4,7 +4,7 @@ import discord
 import io
 
 name = 'exec'
-aliases = ['eval']
+aliases = ('eval',)
 channels = None
 
 

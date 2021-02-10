@@ -1,9 +1,8 @@
 from utils import confirmed_emoji
 from ..discordbot import has_role
 from ..betterbot import Member
-import discord
-import config
 from forumsweats import db
+import discord
 
 name = 'infractions'
 channels = None
