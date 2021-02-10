@@ -1,1 +1,1 @@
-import bot.main
+import forumsweats.main
