@@ -197,6 +197,16 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None
 		)
 		return
+
+	if re.match(r'[\w\W]*c\W*u\W*m[\w\W]*', content, flags=re.IGNORECASE):
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			60 * 5,
+			message.guild.id if message.guild else None
+		)
+		return
+
 	# antichilynn for someblanket
 	if message.author.id in {750815961942065252} and re.match(r'[\w\W]*c+[^a-z]*h+[^a-z]*[i1y][\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
