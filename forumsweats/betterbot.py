@@ -326,6 +326,7 @@ class FakeMember():
 		self.name = '<deleted user>'
 		self.display_name = self.name
 		self.discriminator = 0000
+		self.mention = f'<@{self.id}>'
 
 	def __str__(self):
 		return f'{self.name}#{self.discriminator}'
