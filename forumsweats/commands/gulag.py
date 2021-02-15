@@ -25,5 +25,6 @@ async def run(message, length_time: Time = Time(60)):
 	await mute_user(
 		message.author,
 		length,
-		message.guild.id if message.guild else None
+		message.guild.id if message.guild else None,
+		rock_immune=True
 	)

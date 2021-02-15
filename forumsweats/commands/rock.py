@@ -15,14 +15,19 @@ async def run(message, member: Member):
 		return await message.send('Unknown member. Example usage: **!rock pigsty**')
 
 	if member == message.author.id:
-		return await message.send("You can't throw a rock at yourself.")
+		return await message.send('You can\'t throw a rock at yourself.')
+	
 
 	mute_end = await db.get_mute_end(member.id)
 	if not (mute_end and mute_end > time.time()):
 		return await message.send('This person is not in gulag.')
-	mute_remaining = mute_end - time.time()
 
-	print('mute_remaining')
+	is_member_rock_immune = await db.get_rock_immune(member.id)
+	if is_member_rock_immune:
+		return await message.send('This person is immune to rocks.')
+
+
+	mute_remaining = mute_end - time.time()
 
 	# makes sure people havent thrown a rock in the last hour
 	last_rock_thrown = await db.get_rock(message.author.id)
