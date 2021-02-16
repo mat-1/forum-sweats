@@ -9,7 +9,7 @@ channels = ['bot-commands', 'gulag']
 
 
 async def run(message, member: Member):
-	"Adds 5 minutes to someone's mute in gulag"
+	"Adds 1 minute to someone's mute in gulag"
 
 	if not member:
 		return await message.send('Unknown member. Example usage: **!rock pigsty**')
@@ -50,12 +50,12 @@ async def run(message, member: Member):
 
 	await db.set_rock(message.author.id)
 
-	# Add 5 minutes to someone's mute
+	# Add 1 minute to someone's mute
 	has_bigger_rock = await db.spend_shop_item(message.author.id, 'bigger_rock')
 	if has_bigger_rock:
-		rock_length = 60 * 10
+		rock_length = 60 * 4
 	else:
-		rock_length = 60 * 5
+		rock_length = 60 * 1
 	new_mute_remaining = int(mute_remaining + rock_length)
 
 	print('muting again')

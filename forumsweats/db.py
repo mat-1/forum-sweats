@@ -212,8 +212,8 @@ async def set_rock(user_id: int):
 	)
 
 
-async def get_rock(user_id: int):
-	if not connection_url: return
+async def get_rock(user_id: int) -> int:
+	if not connection_url: return 0
 	data = await member_data.find_one(
 		{
 			'discord': int(user_id)

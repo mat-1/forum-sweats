@@ -21,7 +21,7 @@ SHOP_ITEMS = [
 		'name': 'Bigger rock',
 		'price': 25,
 		'id': 'bigger_rock',
-		'description': 'Next time you throw a rock, it\'ll mute for 10 minutes rather than 5',
+		'description': 'Next time you throw a rock, it\'ll mute for 4 minutes rather than 1',
 		'persistent': True
 	}
 ]

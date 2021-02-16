@@ -26,7 +26,7 @@ async def run(message):
 		{
 			'name': 'rock',
 			'args': '@member',
-			'desc': "Extends the length of a user's time in gulag by 5 minutes",
+			'desc': "Extends the length of a user's time in gulag by 1 minute",
 		},
 		{
 			'name': 'forum user',
