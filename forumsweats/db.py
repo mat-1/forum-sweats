@@ -86,6 +86,30 @@ async def set_mute_end(user_id, end_time, extra_data={}):
 	)
 
 
+async def set_rock_immune(user_id: int, rock_immune: bool):
+	if not connection_url: return
+	set_data = {
+		'muted_data.rock_immune': rock_immune
+	}
+	await member_data.update_one(
+		{ 'discord': user_id },
+		{ '$set': set_data },
+		upsert=True
+	)
+
+
+async def get_rock_immune(user_id: int) -> bool:
+	'Returns whether the user is temporarily immune to rocks (because they did !gulag)'
+	if not connection_url: return False
+	data = await member_data.find_one(
+		{ 'discord': int(user_id) }
+	)
+	if data:
+		return data.get('muted_data', {}).get('rock_immune', False)
+	else:
+		return False
+
+
 async def get_is_muted(user_id):
 	if not connection_url: return
 	data = await member_data.find_one(

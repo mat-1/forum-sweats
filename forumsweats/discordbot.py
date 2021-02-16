@@ -342,7 +342,7 @@ async def on_message_edit(before, after):
 	await modbot.process_messsage(after, warn=False)
 
 
-async def mute_user(member, length, guild_id=None, gulag_message=True):
+async def mute_user(member, length, guild_id=None, gulag_message=True, rock_immune=False):
 	guild_id = guild_id if guild_id else config.main_guild
 	guild = client.get_guild(guild_id)
 
@@ -382,6 +382,7 @@ async def mute_user(member, length, guild_id=None, gulag_message=True):
 		time.time() + length,
 		extra_data
 	)
+	await db.set_rock_immune(member.id, rock_immune)
 
 	if sweat_role in member.roles:
 		await member.remove_roles(sweat_role)
