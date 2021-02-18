@@ -104,12 +104,17 @@ class BetterBot():
 			return
 		parsing_remaining = message.content.replace('  ', ' ')
 		found = False
-		prefix = None
+
+		# set the prefix as an empty string as a placeholder
+		prefix: str = ''
 		for prefix in self.prefixes:
 			if parsing_remaining.startswith(prefix):
 				found = True
 				break
+				
+		# if no suitable prefix was found, just return
 		if not found: return
+
 		parsing_remaining = parsing_remaining[len(prefix):].strip()
 		command, parsing_remaining = (parsing_remaining + ' ').split(' ', 1)
 		command = command.lower()
