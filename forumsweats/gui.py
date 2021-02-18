@@ -1,5 +1,6 @@
-from typing import Iterator, Union
+from typing import Union
 import discord
+import asyncio
 import math
 
 
@@ -141,10 +142,50 @@ class Page:
 		)
 		await self.add_reactions(message)
 
-	async def wait_for_reaction(self, client: discord.Client, message: discord.Message, user: discord.User) -> str:
-		'Returns either an Option or an arrow_left/right'
+	async def check_existing_reactions(self, client: discord.Client, message: discord.Message, user: discord.User) -> Union[str, None]:
+		'Check if there\'s a valid reaction on the message'
 		valid_reactions = self.get_emojis()
 
+		left_arrow_expected = self.number > 0
+		right_arrow_expected = self.page_count > self.number + 1
+
+		if left_arrow_expected: valid_reactions.append(ARROW_LEFT)
+		if right_arrow_expected: valid_reactions.append(ARROW_RIGHT)
+
+		return_emoji = None
+
+		for reaction in message.reactions:
+			emoji = reaction.emoji
+			if emoji not in valid_reactions:
+				asyncio.ensure_future(message.clear_reaction(reaction.emoji))
+			elif reaction.count >= 2:
+				async for reaction_user in reaction.users():
+					if reaction_user.id == user:
+						# save the emoji to return later
+						return_emoji = emoji
+					if not reaction_user.bot:
+						# remove the reaction
+						asyncio.ensure_future(message.remove_reaction(reaction.emoji, reaction_user))
+
+		if return_emoji == ARROW_LEFT: return ARROW_LEFT
+		elif return_emoji == ARROW_RIGHT: return ARROW_RIGHT
+		elif return_emoji is None: return
+
+		reaction_index = valid_reactions.index(return_emoji)
+		reaction_index_total = (self.number * PAGE_SIZE) + reaction_index
+
+		return self.all_options[reaction_index_total]
+
+
+	async def wait_for_reaction(self, client: discord.Client, message: discord.Message, user: discord.User) -> str:
+		'Returns either an Option or an arrow_left/right'
+
+		# check if there's already a valid reaction on the message, and if so return that
+		existing_reaction = await self.check_existing_reactions(client, message, user)
+		if existing_reaction:
+			return existing_reaction
+
+		valid_reactions = self.get_emojis()
 
 		left_arrow_expected = self.number > 0
 		right_arrow_expected = self.page_count > self.number + 1
@@ -158,14 +199,22 @@ class Page:
 			elif reaction.message.id != message.id: return False
 			return True
 
-		reaction, user = await client.wait_for('reaction_add', check=check)
+		def check_and_delete(reaction: discord.Reaction, check_user: discord.User):
+			check_result = check(reaction, check_user)
+			# if the reaction is on the message and theyre not a bot, remove it
+			if reaction.message.id == message.id and not check_user.bot:
+				asyncio.ensure_future(message.remove_reaction(reaction.emoji, check_user))
+			if check_result: return True
+			return False
+
+		reaction, user = await client.wait_for('reaction_add', check=check_and_delete)
 
 		if reaction.emoji == ARROW_LEFT: return ARROW_LEFT
 		elif reaction.emoji == ARROW_RIGHT: return ARROW_RIGHT
 
 		reaction_index = valid_reactions.index(reaction.emoji)
 		reaction_index_total = (self.number * PAGE_SIZE) + reaction_index
-		print(reaction_index_total)
+
 		return self.all_options[reaction_index_total]
 
 
@@ -233,21 +282,9 @@ class PaginationGUI(GUI):
 
 		return self.message
 
-		# gui_open = True
-
-		# while gui_open:
-		# 	page: Page = pages[page_number]
-		# 	await page.edit_message_to_page(message)
-		# 	option = await page.wait_for_reaction(client, message, user)
-		# 	yield option
-
-		# 	if not forever:
-		# 		# if the gui isn't going to be open forever, close it now
-		# 		gui_open = False
 
 	async def set_page(self, page_number: int):
 		self.page_number = page_number
-		print('setting page to', page_number)
 		self.page = self.pages[self.page_number]
 
 		# because of a discord.py bug, the message reactions dont update unless we do this
@@ -256,6 +293,7 @@ class PaginationGUI(GUI):
 		await self.page.edit_message_to_page(self.message)
 
 	async def wait_for_reaction(self) -> str:
+		await self.refetch_message()
 		reaction = await self.page.wait_for_reaction(self.client, self.message, self.user)
 		return reaction
 
