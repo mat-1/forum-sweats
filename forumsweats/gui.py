@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, List, Union
 import discord
 import asyncio
 import math
@@ -13,7 +13,7 @@ ARROW_RIGHT = '➡️'
 
 class Page:
 	number: int
-	options: list[Any]
+	options: List[Any]
 	title: str
 	footer: str
 	empty: str
@@ -22,7 +22,7 @@ class Page:
 	page_count: int
 
 	def __init__(
-		self, number: int, title: str, all_options: list[Any], footer: str, empty: str, selectable: bool
+		self, number: int, title: str, all_options: List[Any], footer: str, empty: str, selectable: bool
 	):
 		self.number = number
 		self.title = title
@@ -39,7 +39,7 @@ class Page:
 		self.page_count = math.ceil(len(self.all_options) / PAGE_SIZE)
 
 	def make_embed(self) -> discord.Embed:
-		page_options_numbered: list[str] = []
+		page_options_numbered: List[str] = []
 
 		option_emojis = self.get_emojis()
 
@@ -62,10 +62,10 @@ class Page:
 
 		return embed
 
-	def get_emojis(self) -> list[str]:
+	def get_emojis(self) -> List[str]:
 		if not self.selectable:
 			return []
-		option_emojis: list[str] = []
+		option_emojis: List[str] = []
 		for option_number in range(len(self.options)):
 			option_emoji = NUMBER_EMOJIS[option_number]
 			option_emojis.append(option_emoji)
@@ -257,11 +257,11 @@ class GUI:
 		self.message = await self.message.channel.fetch_message(self.message.id)
 
 class PaginationGUI(GUI):
-	options: list[Any]
+	options: List[Any]
 
 	# the page number is 0 indexed
 	page_number: int
-	pages: list[Page]
+	pages: List[Page]
 	page: Page
 	page_count: int
 
@@ -271,7 +271,7 @@ class PaginationGUI(GUI):
 
 	def __init__(
 		self, client: discord.Client, user: discord.User, channel: discord.abc.Messageable, title: str,
-		options: list[Any], empty: str='<this GUI has no items>', selectable: bool=True,
+		options: List[Any], empty: str='<this GUI has no items>', selectable: bool=True,
 		footer: str=''
 	):
 		self.client = client
@@ -291,7 +291,7 @@ class PaginationGUI(GUI):
 
 		self.message = await self.channel.send('...')
 
-		pages: list[Page] = []
+		pages: List[Page] = []
 		for page_number in range(self.page_count):
 			# create the page object and add it to the pages list
 			page = Page(

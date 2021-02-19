@@ -1,5 +1,5 @@
 from forumsweats.commands.pets import Pet
-from typing import Any
+from typing import Any, List
 import motor.motor_asyncio
 import os
 import time
@@ -533,7 +533,7 @@ async def bobux_unsubscribe_to(user_id, unsubbing_to_id):
 		upsert=True
 	)
 
-async def get_pets(user_id: int) -> list[dict]:
+async def get_pets(user_id: int) -> List[dict]:
 	if not connection_url: return []
 	data = await member_data.find_one(
 		{ 'discord': user_id }

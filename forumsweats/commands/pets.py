@@ -1,3 +1,4 @@
+from typing import Dict, List
 from ..gui import PaginationGUI
 from ..betterbot import Member
 from forumsweats import db
@@ -6,7 +7,7 @@ import discord
 name = 'pets'
 channels = ['bot-commands']
 
-PET_META: dict[str, dict] = {
+PET_META: Dict[str, dict] = {
 	'bobux': {
 		'name': 'Bobux pet',
 		'description': None
@@ -43,17 +44,17 @@ class Pet:
 
 class PetsData:
 	__slots__ = {'pets'}
-	def __init__(self, pets: list[Pet]):
+	def __init__(self, pets: List[Pet]):
 		self.pets = pets
 
-async def get_member_pet_data_raw(member_id: int) -> list[dict]:
+async def get_member_pet_data_raw(member_id: int) -> List[dict]:
 	# returns the pets a member has in json format
 	return await db.get_pets(member_id)
 
 async def get_member_pet_data(member_id: int) -> PetsData:
 	# returns the pets a member has as a PetsData object
 	member_pet_data = await get_member_pet_data_raw(member_id)
-	pets: list[Pet] = []
+	pets: List[Pet] = []
 	for pet_data in member_pet_data:
 		pet: Pet = Pet(**pet_data)
 		pets.append(pet)
