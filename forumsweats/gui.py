@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Union
 import discord
 import asyncio
 import math
@@ -13,14 +13,18 @@ ARROW_RIGHT = '➡️'
 
 class Page:
 	number: int
-	options: list[str]
+	options: list[Any]
 	title: str
+	footer: str
 
 	page_count: int
 
-	def __init__(self, number: int, title: str, all_options: list[str]):
+	def __init__(
+		self, number: int, title: str, all_options: list[Any], footer: str
+	):
 		self.number = number
 		self.title = title
+		self.footer = footer
 		self.all_options = all_options
 
 		# find where the page starts and ends in relation to all the options
@@ -37,7 +41,7 @@ class Page:
 		option_emojis = self.get_emojis()
 
 		for option_emoji, page_option in zip(option_emojis, self.options):
-			page_options_numbered.append(f'{option_emoji} {page_option}')
+			page_options_numbered.append(f'{option_emoji} {str(page_option)}')
 
 		embed = discord.Embed(
 			title=self.title,
@@ -46,7 +50,12 @@ class Page:
 
 		# set the footer to page/total
 		page_number_1_indexed: int = self.number + 1
-		embed.set_footer(text=f'(Page {page_number_1_indexed}/{self.page_count})')
+		if self.page_count > 1:
+			entire_footer = f'{self.footer} (Page {page_number_1_indexed}/{self.page_count})'.strip()
+		else:
+			# if there's only 1 page, no point in showing the page count
+			entire_footer = self.footer
+		embed.set_footer(text=entire_footer)
 
 		return embed
 
@@ -142,7 +151,7 @@ class Page:
 		)
 		await self.add_reactions(message)
 
-	async def check_existing_reactions(self, client: discord.Client, message: discord.Message, user: discord.User) -> Union[str, None]:
+	async def check_existing_reactions(self, client: discord.Client, message: discord.Message, user: discord.User) -> Union[str, Any, None]:
 		'Check if there\'s a valid reaction on the message'
 		valid_reactions = self.get_emojis()
 
@@ -224,15 +233,20 @@ class GUI:
 	channel: discord.abc.Messageable
 
 	title: str
+	footer: str
 
 	message: discord.Message
 
-	def __init__(self, client: discord.Client, user: discord.User, channel: discord.abc.Messageable, title: str):
+	def __init__(
+		self, client: discord.Client, user: discord.User, channel: discord.abc.Messageable, title: str,
+		footer: str='',
+	):
 		self.client = client
 		self.user = user
 		self.channel = channel
 
 		self.title = title
+		self.footer = footer
 	
 	async def make_message(self):
 		raise NotImplementedError()
@@ -241,24 +255,27 @@ class GUI:
 		self.message = await self.message.channel.fetch_message(self.message.id)
 
 class PaginationGUI(GUI):
-	options: list[str]
+	options: list[Any]
 
-	# this is 0 indexed!
+	# the page number is 0 indexed
 	page_number: int
 	pages: list[Page]
 	page: Page
+	page_count: int
 
 	def __init__(
 		self, client: discord.Client, user: discord.User, channel: discord.abc.Messageable, title: str,
-		options: list[str],
+		options: list[Any],
+		footer: str=''
 	):
 		self.client = client
 		self.user = user
 		self.channel = channel
 
 		self.title = title
-		self.options = options
+		self.footer = footer
 
+		self.options = options
 		self.page_count = math.ceil(len(self.options) / PAGE_SIZE)
 
 	async def make_message(self) -> discord.Message:
@@ -272,6 +289,7 @@ class PaginationGUI(GUI):
 			page = Page(
 				number=page_number,
 				title=self.title,
+				footer=self.footer,
 				all_options=self.options
 			)
 			pages.append(page)
@@ -292,12 +310,12 @@ class PaginationGUI(GUI):
 
 		await self.page.edit_message_to_page(self.message)
 
-	async def wait_for_reaction(self) -> str:
+	async def wait_for_reaction(self) -> Any:
 		await self.refetch_message()
 		reaction = await self.page.wait_for_reaction(self.client, self.message, self.user)
 		return reaction
 
-	async def wait_for_and_process_reaction(self) -> str:
+	async def wait_for_option(self) -> Any:
 		while True:
 			reaction = await self.wait_for_reaction()
 			if reaction == ARROW_RIGHT:
@@ -307,9 +325,6 @@ class PaginationGUI(GUI):
 			else:
 				# number
 				return reaction
-
-	async def wait_for_option(self) -> str:
-		return await self.wait_for_and_process_reaction()
 
 	def __aiter__(self):
 		return self

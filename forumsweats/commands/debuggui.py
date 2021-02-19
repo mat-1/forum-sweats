@@ -13,6 +13,7 @@ async def run(message):
 		options=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 	)
 	await gui.make_message()
+	# option = await gui.wait_for_option()
+
 	async for option in gui:
-		print(option)
-		await message.send(option)
+		await message.author.send(f'You selected **{option}**')
