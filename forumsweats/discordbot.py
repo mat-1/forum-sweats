@@ -659,7 +659,7 @@ async def check_bobux_roles(member_id, bobux=None):
 	guild_id = config.main_guild
 
 	applicable_bobux_roles_names = []
-	all_bobux_roles_names = ['rich', 'veryrich']
+	all_bobux_roles_names = ['rich', 'veryrich', '100bobux']
 
 	guild = client.get_guild(guild_id)
 	member = guild.get_member(member_id)
@@ -668,10 +668,13 @@ async def check_bobux_roles(member_id, bobux=None):
 		# Member isn't in the server, doesn't need roles
 		return
 
+	if bobux >= 100:
+		applicable_bobux_roles_names.append('100bobux')
 	if bobux >= 1000:
 		applicable_bobux_roles_names.append('rich')
 	if bobux >= 5000:
 		applicable_bobux_roles_names.append('veryrich')
+		
 
 	add_roles = []
 	remove_roles = []
