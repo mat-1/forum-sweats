@@ -9,6 +9,61 @@ aliases = ['commands']
 async def run(message):
 	help_commands = [
 		{
+			'name': 'avatar',
+			'args': '@member',
+			'desc': 'Gets the Discord avatar for a member',
+		},
+		{
+			'name': 'bobux',
+			'args': '[@member]',
+			'desc': 'Tells you how much bobux you or another member has',
+		},
+		{
+			'name': 'bobuxleaderboard',
+			'args': '',
+			'desc': 'Lists the players with the most bobux',
+		},
+		{
+			'name': 'connectfour',
+			'args': '@member',
+			'desc': 'Play connect four against another member',
+		},
+		{
+			'name': 'counting',
+			'args': '',
+			'desc': 'Tells you the current number in #counting',
+		},
+		{
+			'name': 'counting',
+			'args': '',
+			'desc': 'Tells you the current number in #counting',
+		},
+		{
+			'name': 'duel',
+			'args': '@member',
+			'desc': 'Duels a member',
+		},
+		{
+			'name': 'forum user',
+			'args': '<username>',
+			'desc': 'Gets the forum stats for a username',
+		},
+		{
+			'name': 'gulag',
+			'args': '[time]',
+			'desc': 'Puts you in gulag for one minute',
+		},
+		{
+			'name': 'infractions',
+			'args': '',
+			'desc': 'Tells you your infractions',
+		},
+		{
+			'name': 'infractions',
+			'args': '',
+			'desc': 'Tells you your infractions',
+		},
+		{
 			'name': 'link',
 			'args': '<ign>',
 			'desc': 'Links your Discord account to your Minecraft account and gives you Hypixel rank roles',
@@ -19,24 +74,9 @@ async def run(message):
 			'desc': 'e',
 		},
 		{
-			'name': 'gulag',
-			'args': '',
-			'desc': 'Puts you in gulag for one minute',
-		},
-		{
 			'name': 'rock',
 			'args': '@member',
-			'desc': "Extends the length of a user's time in gulag by 1 minute",
-		},
-		{
-			'name': 'forum user',
-			'args': '<username>',
-			'desc': 'Gets the forum stats for a username',
-		},
-		{
-			'name': 'forum thread',
-			'args': '<id>',
-			'desc': 'Shows a forum thread',
+			'desc': "Extends the length of a user's time in gulag by 5 minutes",
 		},
 		{
 			'name': 'tictactoe',
@@ -47,11 +87,6 @@ async def run(message):
 			'name': 'shitpost',
 			'args': '',
 			'desc': 'Generates a shitpost using a markov chain',
-		},
-		{
-			'name': 'duel',
-			'args': '[@member]',
-			'desc': 'Duels a member',
 		},
 	]
 
