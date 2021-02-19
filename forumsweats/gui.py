@@ -16,23 +16,26 @@ class Page:
 	options: list[Any]
 	title: str
 	footer: str
+	empty: str
+	selectable: bool
 
 	page_count: int
 
 	def __init__(
-		self, number: int, title: str, all_options: list[Any], footer: str
+		self, number: int, title: str, all_options: list[Any], footer: str, empty: str, selectable: bool
 	):
 		self.number = number
 		self.title = title
 		self.footer = footer
 		self.all_options = all_options
+		self.empty = empty
+		self.selectable = selectable
 
 		# find where the page starts and ends in relation to all the options
 		page_start = self.number * PAGE_SIZE
 		page_end = (self.number + 1) * PAGE_SIZE
 		page_options = self.all_options[page_start:page_end]
 		self.options = page_options
-
 		self.page_count = math.ceil(len(self.all_options) / PAGE_SIZE)
 
 	def make_embed(self) -> discord.Embed:
@@ -45,7 +48,7 @@ class Page:
 
 		embed = discord.Embed(
 			title=self.title,
-			description='\n'.join(page_options_numbered)
+			description='\n'.join(page_options_numbered) or self.empty
 		)
 
 		# set the footer to page/total
@@ -60,6 +63,8 @@ class Page:
 		return embed
 
 	def get_emojis(self) -> list[str]:
+		if not self.selectable:
+			return []
 		option_emojis: list[str] = []
 		for option_number in range(len(self.options)):
 			option_emoji = NUMBER_EMOJIS[option_number]
@@ -72,8 +77,6 @@ class Page:
 
 		left_arrow_expected = self.number > 0
 		right_arrow_expected = self.page_count > self.number + 1
-
-		print('right_arrow_expected', right_arrow_expected, self.page_count, self.number)
 
 
 		left_arrow_found = False
@@ -90,21 +93,21 @@ class Page:
 				if emoji == ARROW_RIGHT:
 					right_arrow_found = True
 
-		expected_reaction_numbers = list(range(len(self.options)))
-
 		reactions_to_add = []
 		reactions_to_remove = []
 
-		# if there's expected numbers that aren't there, add them to reactions_to_add
-		for expected_number in expected_reaction_numbers:
-			if expected_number not in existing_reaction_numbers:
-				reactions_to_add.append(NUMBER_EMOJIS[expected_number])
+		if self.selectable:
+			expected_reaction_numbers = list(range(len(self.options)))
 
-		# if there's unexpected numbers that are there, add them to reactions_to_remove
-		for existing_number in existing_reaction_numbers:
-			if existing_number not in expected_reaction_numbers:
-				reactions_to_remove.append(NUMBER_EMOJIS[existing_number])
+			# if there's expected numbers that aren't there, add them to reactions_to_add
+			for expected_number in expected_reaction_numbers:
+				if expected_number not in existing_reaction_numbers:
+					reactions_to_add.append(NUMBER_EMOJIS[expected_number])
 
+			# if there's unexpected numbers that are there, add them to reactions_to_remove
+			for existing_number in existing_reaction_numbers:
+				if existing_number not in expected_reaction_numbers:
+					reactions_to_remove.append(NUMBER_EMOJIS[existing_number])
 
 		# remove left arrow
 		if left_arrow_found and not left_arrow_expected:
@@ -133,7 +136,6 @@ class Page:
 		# add right arrow
 		if right_arrow_expected and not right_arrow_found:
 			reactions_to_add.append(ARROW_RIGHT)
-
 
 		# remove and add the necessary reactions
 		for reaction_emoji in reactions_to_remove:
@@ -263,9 +265,13 @@ class PaginationGUI(GUI):
 	page: Page
 	page_count: int
 
+	# the message that shows up when theres no options
+	empty: str
+	selectable: bool
+
 	def __init__(
 		self, client: discord.Client, user: discord.User, channel: discord.abc.Messageable, title: str,
-		options: list[Any],
+		options: list[Any], empty: str='<this GUI has no items>', selectable: bool=True,
 		footer: str=''
 	):
 		self.client = client
@@ -276,7 +282,9 @@ class PaginationGUI(GUI):
 		self.footer = footer
 
 		self.options = options
-		self.page_count = math.ceil(len(self.options) / PAGE_SIZE)
+		self.page_count = math.ceil(len(self.options) / PAGE_SIZE) or 1
+		self.empty = empty
+		self.selectable = selectable
 
 	async def make_message(self) -> discord.Message:
 		'Make an embed GUI where the user can choose an option. Multiple pages are automatically created.'
@@ -290,7 +298,9 @@ class PaginationGUI(GUI):
 				number=page_number,
 				title=self.title,
 				footer=self.footer,
-				all_options=self.options
+				all_options=self.options,
+				empty=self.empty,
+				selectable=self.selectable
 			)
 			pages.append(page)
 

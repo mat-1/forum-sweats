@@ -1,5 +1,6 @@
 from ..gui import PaginationGUI
 from ..betterbot import Member
+from forumsweats import db
 import discord
 
 name = 'pets'
@@ -28,6 +29,11 @@ class Pet:
 		self.id = id
 		self.meta = PET_META[id]
 
+	def to_json(self):
+		return {
+			'id': self.id
+		}
+
 	def __str__(self):
 		return self.meta['name']
 
@@ -36,21 +42,15 @@ class PetsData:
 	def __init__(self, pets: list[Pet]):
 		self.pets = pets
 
-async def get_member_pet_data_raw(member_id: int):
+async def get_member_pet_data_raw(member_id: int) -> list[dict]:
 	# returns the pets a member has in json format
-	return {
-		'pets': [
-			{'id': 'bobux'},
-			{'id': 'gladiator'},
-			{'id': 'boulder'},
-		]
-	}
+	return await db.get_pets(member_id)
 
 async def get_member_pet_data(member_id: int) -> PetsData:
 	# returns the pets a member has as a PetsData object
 	member_pet_data = await get_member_pet_data_raw(member_id)
 	pets: list[Pet] = []
-	for pet_data in member_pet_data['pets']:
+	for pet_data in member_pet_data:
 		pet: Pet = Pet(**pet_data)
 		pets.append(pet)
 	return PetsData(pets)
@@ -63,13 +63,18 @@ async def make_pet_gui(
 	user: discord.User,
 	channel: discord.abc.Messageable,
 ) -> PaginationGUI:
+	is_owner = user.id == pet_owner.id
+	footer = 'React with the corresponding reaction to choose that pet. There is a 2 minute cooldown on switching pets.' if is_owner else ''
+	empty_message = 'You have no pets. Do **!help pets** (TODO) to learn how to get some!' if is_owner else 'This person has no pets.'
 	return PaginationGUI(
 		client,
 		user=user,
 		channel=channel,
-		title='Your pets' if user.id == pet_owner.id else f'{pet_owner}\'s pets',
+		title='Your pets' if is_owner else f'{pet_owner}\'s pets',
 		options=pet_data.pets,
-		footer='React with the corresponding reaction to choose that pet. There is a 2 minute cooldown on switching pets.'
+		footer=footer if len(pet_data.pets) >= 1 else '',
+		empty=empty_message,
+		selectable=is_owner
 	)
 
 async def run(message, member: Member=None):

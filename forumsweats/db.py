@@ -1,3 +1,4 @@
+from forumsweats.commands.pets import Pet
 from typing import Any
 import motor.motor_asyncio
 import os
@@ -19,9 +20,7 @@ servers_data = db['servers']
 async def set_minecraft_ign(user_id, ign, uuid):
 	if not connection_url: return
 	await member_data.update_one(
-		{
-			'discord': user_id
-		},
+		{ 'discord': user_id },
 		{
 			'$set': {
 				'minecraft': {
@@ -46,13 +45,9 @@ async def get_minecraft_data(user_id):
 async def set_hypixel_rank(user_id, rank):
 	if not connection_url: return
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
-		},
-		{
-			'$set': {
-				'hypixel_rank': rank
-			}
+			'$set': { 'hypixel_rank': rank }
 		},
 		upsert=True
 	)
@@ -76,12 +71,8 @@ async def set_mute_end(user_id, end_time, extra_data={}):
 		set_data[f'muted_data.{data}'] = extra_data[data]
 	set_data['muted'] = end_time > time.time()
 	await member_data.update_one(
-		{
-			'discord': user_id
-		},
-		{
-			'$set': set_data
-		},
+		{ 'discord': user_id },
+		{ '$set': set_data },
 		upsert=True
 	)
 
@@ -113,9 +104,7 @@ async def get_rock_immune(user_id: int) -> bool:
 async def get_is_muted(user_id):
 	if not connection_url: return
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('muted', False)
@@ -126,9 +115,7 @@ async def get_is_muted(user_id):
 async def get_mute_end(user_id):
 	if not connection_url: return 0
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('muted_until', 0)
@@ -139,9 +126,7 @@ async def get_mute_end(user_id):
 async def get_mute_data(user_id) -> Any:
 	if not connection_url: return {}
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('muted_data', {})
@@ -154,9 +139,7 @@ async def get_active_mutes():
 	active_mutes = {}
 	async for member in member_data.find(
 		{
-			'muted_until': {
-				'$gte': time.time()
-			}
+			'muted_until': { '$gte': time.time() }
 		}
 	):
 		active_mutes[member['discord']] = member['muted_until']
@@ -224,13 +207,9 @@ async def clear_infraction_by_partial_id(infraction_partial_id):
 async def set_rock(user_id: int):
 	if not connection_url: return
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
-		},
-		{
-			'$set': {
-				'last_rock': time.time()
-			}
+			'$set': { 'last_rock': time.time() }
 		},
 		upsert=True
 	)
@@ -239,9 +218,7 @@ async def set_rock(user_id: int):
 async def get_rock(user_id: int) -> int:
 	if not connection_url: return 0
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('last_rock', 0)
@@ -253,13 +230,9 @@ async def add_message(user_id: int):
 	if not connection_url: return
 	hour_id = int(time.time() / 3600)
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
-		},
-		{
-			'$inc': {
-				f'messages.{hour_id}': 1
-			}
+			'$inc': { f'messages.{hour_id}': 1 }
 		},
 		upsert=True
 	)
@@ -270,11 +243,8 @@ async def get_active_members_from_past_hour(hoursago=1):
 	hour_id = int((time.time()) / 3600) - hoursago
 	members = []
 	async for member in member_data.find(
-		{
-			f'messages.{hour_id}': {'$gte': 1}
-		}
+		{ f'messages.{hour_id}': {'$gte': 1} }
 	):
-		print('bruh', member, hour_id)
 		member_modified = member
 		member_modified['hourly_messages'] = member['messages'].get(str(hour_id), 0)
 		del member_modified['messages']
@@ -285,13 +255,9 @@ async def get_active_members_from_past_hour(hoursago=1):
 async def set_is_member(user_id: int):
 	if not connection_url: return
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
-		},
-		{
-			'$set': {
-				'member': True
-			}
+			'$set': { 'member': True }
 		},
 		upsert=True
 	)
@@ -300,9 +266,7 @@ async def set_is_member(user_id: int):
 async def get_is_member(user_id: int):
 	if not connection_url: return
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('member', False)
@@ -313,13 +277,9 @@ async def get_is_member(user_id: int):
 async def set_counter(guild_id: int, number: int):
 	if not connection_url: return
 	await servers_data.update_one(
+		{ 'id': guild_id },
 		{
-			'id': guild_id
-		},
-		{
-			'$set': {
-				'counter': number
-			}
+			'$set': { 'counter': number }
 		},
 		upsert=True
 	)
@@ -337,13 +297,9 @@ async def get_counter(guild_id: int):
 async def set_last_general_duel(guild_id: int):
 	if not connection_url: return
 	await servers_data.update_one(
+		{ 'id': guild_id },
 		{
-			'id': guild_id
-		},
-		{
-			'$set': {
-				'last_duel': datetime.utcnow()
-			}
+			'$set': { 'last_duel': datetime.utcnow() }
 		},
 		upsert=True
 	)
@@ -361,13 +317,9 @@ async def get_last_general_duel(guild_id: int):
 async def set_bobux(user_id: int, amount: int):
 	if not connection_url: return
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
-		},
-		{
-			'$set': {
-				'bobux': amount
-			}
+			'$set': { 'bobux': amount }
 		},
 		upsert=True
 	)
@@ -376,9 +328,7 @@ async def set_bobux(user_id: int, amount: int):
 async def get_bobux(user_id: int):
 	if not connection_url: return
 	data = await member_data.find_one(
-		{
-			'discord': user_id
-		}
+		{ 'discord': user_id }
 	)
 	return data.get('bobux', 0)
 
@@ -386,13 +336,9 @@ async def get_bobux(user_id: int):
 async def change_bobux(user_id: int, amount: int):
 	if not connection_url: return
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
-		},
-		{
-			'$inc': {
-				'bobux': amount
-			}
+			'$inc': { 'bobux': amount }
 		},
 		upsert=True
 	)
@@ -401,13 +347,9 @@ async def change_bobux(user_id: int, amount: int):
 async def get_shop_item(user_id: int, shop_item_id: str):
 	if not connection_url: return
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
-		},
-		{
-			'$set': {
-				f'shop.{shop_item_id}': True
-			}
+			'$set': { f'shop.{shop_item_id}': True }
 		},
 		upsert=True
 	)
@@ -416,9 +358,7 @@ async def get_shop_item(user_id: int, shop_item_id: str):
 async def get_bought_shop_items(user_id: int):
 	if not connection_url: return
 	data = await member_data.find_one(
-		{
-			'discord': user_id
-		}
+		{ 'discord': user_id }
 	)
 	shop_items = set()
 	for item in data.get('shop', {}):
@@ -443,13 +383,9 @@ async def spend_shop_item(user_id: int, shop_item_id: str):
 async def lose_shop_item(user_id: int, shop_item_id: str):
 	if not connection_url: return
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
-		},
-		{
-			'$set': {
-				f'shop.{shop_item_id}': False
-			}
+			'$set': { f'shop.{shop_item_id}': False }
 		},
 		upsert=True
 	)
@@ -464,12 +400,8 @@ async def set_moot_end(user_id, end_time, extra_data={}):
 		set_data[f'mooted_data.{data}'] = extra_data[data]
 	set_data['mooted'] = end_time > time.time()
 	await member_data.update_one(
-		{
-			'discord': user_id
-		},
-		{
-			'$set': set_data
-		},
+		{ 'discord': user_id },
+		{ '$set': set_data },
 		upsert=True
 	)
 
@@ -477,9 +409,7 @@ async def set_moot_end(user_id, end_time, extra_data={}):
 async def get_is_mooted(user_id):
 	if not connection_url: return
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('mooted', False)
@@ -490,9 +420,7 @@ async def get_is_mooted(user_id):
 async def get_mooted_end(user_id):
 	if not connection_url: return 0
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('mooted_until', 0)
@@ -503,9 +431,7 @@ async def get_mooted_end(user_id):
 async def get_moot_data(user_id):
 	if not connection_url: return {}
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('mooted_data', {})
@@ -516,9 +442,7 @@ async def get_moot_data(user_id):
 async def get_moot_end(user_id):
 	if not connection_url: return 0
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		return data.get('muted_until', 0)
@@ -539,9 +463,7 @@ async def get_bobux_leaderboard(limit=10):
 async def bobux_get_subscriptions(user_id) -> list:
 	if not connection_url: return []
 	data = await member_data.find_one(
-		{
-			'discord': int(user_id)
-		}
+		{ 'discord': int(user_id) }
 	)
 	if data:
 		subs_raw = data.get('subs', [])
@@ -566,11 +488,7 @@ async def bobux_get_subscriptions(user_id) -> list:
 async def bobux_get_all_subscriptions(for_user=None):
 	subs = []
 	async for member in member_data.find(
-		{
-			'subs': {
-				'$ne': None
-			}
-		}
+		{ 'subs': { '$ne': None } }
 	):
 		subs_raw = member.get('subs', [])
 		for member_id in subs_raw:
@@ -592,9 +510,7 @@ async def bobux_get_all_subscriptions(for_user=None):
 async def bobux_subscribe_to(user_id, subbing_to_id, tier):
 	if not connection_url: return
 	await member_data.update_one(
-		{
-			'discord': user_id
-		},
+		{ 'discord': user_id },
 		{
 			'$set': {
 				f'subs.{subbing_to_id}': {
@@ -610,13 +526,29 @@ async def bobux_subscribe_to(user_id, subbing_to_id, tier):
 async def bobux_unsubscribe_to(user_id, unsubbing_to_id):
 	if not connection_url: return
 	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'discord': user_id
+			'$unset': { f'subs.{unsubbing_to_id}': '' }
 		},
+		upsert=True
+	)
+
+async def get_pets(user_id: int) -> list[dict]:
+	if not connection_url: return []
+	data = await member_data.find_one(
+		{ 'discord': user_id }
+	)
+	if data:
+		return data.get('pets', [])
+	else:
+		return []
+
+async def give_pet(user_id, pet: Pet) -> None:
+	if not connection_url: return
+	await member_data.update_one(
+		{ 'discord': user_id },
 		{
-			'$unset': {
-				f'subs.{unsubbing_to_id}': ''
-			}
+			'$push': { 'pets': pet.to_json() }
 		},
 		upsert=True
 	)
