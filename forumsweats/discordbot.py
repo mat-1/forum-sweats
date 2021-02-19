@@ -196,7 +196,7 @@ async def on_member_join(member):
 	if 'ban speedrun' in member.name.lower() or 'forum sweats nsfw' in member.name.lower():
 		return await member.ban(reason='has blacklisted phrase in name')
 
-	moot_end = await db.get_moot_end(member.id)
+	moot_end = await db.get_mooted_end(member.id)
 	is_mooted = moot_end and moot_end > time.time()
 	if is_mooted:
 		moot_remaining = moot_end - time.time()
@@ -476,16 +476,13 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 
 	await member.add_roles(mooted_role)
 
-	unmoot_time = await db.get_moot_end(member.id)
+	unmoot_time = await db.get_mooted_end(member.id)
 	unmoot_in = unmoot_time - time.time()
-
-	mooted_before = False
 
 	if unmoot_in < 0:
 		extra_data = {}
 	else:
 		extra_data = await db.get_moot_data(member.id)
-		mooted_before = True
 
 	await db.set_moot_end(
 		member.id,
@@ -493,45 +490,20 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 		extra_data
 	)
 
-	gulag = client.get_channel(config.channels['gulag'])
-	if gulag_message:
-		if not mooted_before:
-			await gulag.send(f'Welcome to gulag, <@{member.id}>.')
-		else:
-			moot_remaining = int(length)
-			moot_remaining_minutes = int(moot_remaining // 60)
-			moot_remaining_hours = int(moot_remaining_minutes // 60)
-			if moot_remaining_hours >= 2:
-				moot_str = f'{moot_remaining_hours} hours'
-			elif moot_remaining_hours == 1:
-				moot_str = 'one hour'
-			elif moot_remaining_minutes >= 2:
-				moot_str = f'{moot_remaining_minutes} minutes'
-			elif moot_remaining_minutes == 1:
-				moot_str = 'one minute'
-			elif moot_remaining == 1:
-				moot_str = 'one second'
-			else:
-				moot_str = f'{moot_remaining} seconds'
-
-			await gulag.send(f'<@{member.id}>, your moot is now {moot_str}')
-
 	await unmoot_user(member.id, wait=True)
 
 
 async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 	'Unmoots a user after a certain amount of seconds pass'
 	if wait:
-		print('unmuting in...')
-		unmoot_time = await db.get_moot_end(user_id)
+		print('unmooting in...')
+		unmoot_time = await db.get_mooted_end(user_id)
 		unmoot_in = unmoot_time - time.time()
 		print('unmoot_in', unmoot_in)
 		await asyncio.sleep(unmoot_in)
-		if (await db.get_moot_end(user_id) != unmoot_time):
+		if (await db.get_mooted_end(user_id) != unmoot_time):
 			return print('Moot seems to have been extended.')
-	print('now unmuting')
-
-	moot_data = await db.get_moot_data(user_id)
+	print('now unmooting')
 
 	for guild in client.guilds:
 		member = guild.get_member(user_id)
@@ -543,10 +515,6 @@ async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 		await member.remove_roles(mooted_role, reason=reason)
 
 	await db.set_moot_end(user_id, time.time())
-
-	if gulag_message:
-		gulag = client.get_channel(config.channels['gulag'])
-		await gulag.send(f'<@{user_id}> has left gulag.')
 
 	# await member.send(embed=discord.Embed(
 	# 	description='You have been unmooted.'
