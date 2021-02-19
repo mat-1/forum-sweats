@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 from forumsweats.betterbot import BetterBot
 from datetime import datetime
 from forumsweats import commands as commands_module
@@ -84,6 +84,7 @@ async def give_hourly_bobux():
 			elif messages_in_past_hour >= 1:
 				given_bobux += 1
 			await db.change_bobux(member_id, given_bobux)
+			await check_bobux_roles(member_id)
 
 
 async def renew_sub(sub):
@@ -652,7 +653,7 @@ for module_filename in os.listdir('./forumsweats/commands'):
 	)(module.run)
 
 
-async def check_bobux_roles(member_id, bobux=None):
+async def check_bobux_roles(member_id: int, bobux: Union[int, None]=None):
 	if bobux is None:
 		bobux = await db.get_bobux(member_id)
 
