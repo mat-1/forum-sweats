@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 from ..gui import PaginationGUI
 from ..betterbot import Member
 from forumsweats import db
@@ -7,7 +7,7 @@ import discord
 name = 'pets'
 channels = ['bot-commands']
 
-PET_META: dict[str, dict] = {
+PET_META: Dict[str, dict] = {
 	'bobux': {
 		'name': 'Bobux pet',
 		'description': None
