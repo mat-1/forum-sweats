@@ -439,17 +439,6 @@ async def get_moot_data(user_id):
 		return 0
 
 
-async def get_moot_end(user_id):
-	if not connection_url: return 0
-	data = await member_data.find_one(
-		{ 'discord': int(user_id) }
-	)
-	if data:
-		return data.get('muted_until', 0)
-	else:
-		return 0
-
-
 async def get_bobux_leaderboard(limit=10):
 	leaderboard = []
 	async for member in member_data\
