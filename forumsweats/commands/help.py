@@ -1,3 +1,4 @@
+from ..gui import GUIOption, PaginationGUI, TextGUI
 from ..discordbot import has_role
 import discord
 
@@ -122,19 +123,36 @@ async def run(message):
 			}
 		])
 
-	description = []
+	# description = []
+
+	# for command in help_commands:
+	# 	command_name = command['name']
+	# 	command_args = command['args']
+	# 	command_desc = command['desc']
+	# 	if command_args:
+	# 		command_title = f'!**{command_name}** {command_args}'
+	# 	else:
+	# 		command_title = f'!**{command_name}**'
+	# 	description.append(
+	# 		f'{command_title} - {command_desc}'
+	# 	)
+
+	# embed = discord.Embed(title='Commands', description='\n'.join(description))
+
+	# PaginationGUI(message.client, message.author, message.channel, 'Commands')
+
+	# await message.send(embed=embed)
+
+	gui_options = {}
 
 	for command in help_commands:
 		command_name = command['name']
 		command_args = command['args']
 		command_desc = command['desc']
-		if command_args:
-			command_title = f'!**{command_name}** {command_args}'
-		else:
-			command_title = f'!**{command_name}**'
-		description.append(
-			f'{command_title} - {command_desc}'
-		)
+		gui_options[command_name] = GUIOption(TextGUI(f'**{command_name}** {command_args}', command_desc), command_name)
 
-	embed = discord.Embed(title='Commands', description='\n'.join(description))
-	await message.send(embed=embed)
+	gui = PaginationGUI('Commands', list(gui_options.values()))
+
+	await gui.make_message(message.client, message.author, message.channel)
+
+	await gui.wait_for_option()

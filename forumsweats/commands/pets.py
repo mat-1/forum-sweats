@@ -63,18 +63,12 @@ async def get_member_pet_data(member_id: int) -> PetsData:
 async def make_pet_gui(
 	pet_data: PetsData,
 	pet_owner,
-
-	client: discord.Client,
 	user: discord.User,
-	channel: discord.abc.Messageable,
 ) -> PaginationGUI:
 	is_owner = user.id == pet_owner.id
 	footer = 'React with the corresponding reaction to choose that pet. There is a 2 minute cooldown on switching pets.' if is_owner else ''
 	empty_message = 'You have no pets. Do **!help pets** (TODO) to learn how to get some!' if is_owner else 'This person has no pets.'
 	return PaginationGUI(
-		client,
-		user=user,
-		channel=channel,
 		title='Your pets' if is_owner else f'{pet_owner}\'s pets',
 		options=pet_data.pets,
 		footer=footer if len(pet_data.pets) >= 1 else '',
@@ -92,13 +86,14 @@ async def run(message, member: Member=None):
 	gui: PaginationGUI = await make_pet_gui(
 		pet_data=pet_data,
 		pet_owner=member,
-
-		channel=message.channel,
-		client=message.client,
 		user=message.author,
 	)
 
-	pet_message: discord.Message = await gui.make_message()
+	pet_message: discord.Message = await gui.make_message(
+		client=message.client,
+		user=message.author,
+		channel=message.channel,
+	)
 
 	option = await gui.wait_for_option()
 	print(option, option.meta)
