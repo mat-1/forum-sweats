@@ -230,7 +230,7 @@ def is_close_to_everyone(name):
 @client.event
 async def on_member_update(before, after):
 	# nick update
-	wacky_characters = ['𒈙', 'ٴٴ', '˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞T', '﷽']
+	wacky_characters = ['𒈙', 'ٴٴ', '˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞˞T', '﷽', '𒐪']
 	if after.nick:
 		if any([c in after.nick or '' for c in wacky_characters]):
 			return await after.edit(nick=before.nick)
