@@ -350,7 +350,11 @@ class PaginationGUI(GUI):
 
 		self.pages = pages
 
-		await self.set_page(0)
+		# if it has page_number then set the page to that, otherwise 0
+		if hasattr(self, 'page_number'):
+			await self.set_page(self.page_number)
+		else:
+			await self.set_page(0)
 
 
 	async def set_page(self, page_number: int):
