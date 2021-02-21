@@ -65,7 +65,7 @@ async def run(message, ign: str = None):
 			await member.add_roles(new_rank_role, reason='Update rank')
 
 	await db.set_hypixel_rank(message.author.id, new_rank)
-	await db.set_minecraft_ign(message.author.id, ign, data['uuid'])
+	await db.set_minecraft_ign(message.author.id, ign, data['player']['uuid'])
 
 	if new_rank_role_id:
 		await message.channel.send(
