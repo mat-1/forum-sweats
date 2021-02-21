@@ -1,5 +1,4 @@
-import asyncio
-from ..gui import PaginationGUI, TextGUI
+from ..gui import PaginationGUI
 
 name = 'debuggui'
 channels = ['bot-commands']
@@ -15,7 +14,6 @@ async def run(message):
 		user=message.author,
 		channel=message.channel,
 	)
-	# option = await gui.wait_for_option()
 
 	async for option in gui:
 		await message.author.send(f'You selected **{option}**')

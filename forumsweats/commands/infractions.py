@@ -6,10 +6,10 @@ import discord
 
 name = 'infractions'
 channels = None
-
+args = '<member>'
 
 async def run(message, member: Member = None):
-	'Checks the infractions that a user has (mutes, warns, bans, etc)'
+	'Tells you the times you have been muted and why.'
 
 	if not member:
 		member = message.author

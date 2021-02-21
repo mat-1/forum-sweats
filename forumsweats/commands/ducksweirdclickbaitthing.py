@@ -98,4 +98,5 @@ def generate_clickbait():
 
 
 async def run(message):
+	'Generates a clickbait title'
 	await message.channel.send(generate_clickbait())

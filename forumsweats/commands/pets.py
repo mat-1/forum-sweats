@@ -77,7 +77,7 @@ async def make_pet_gui(
 	)
 
 async def run(message, member: Member=None):
-	'Shows the pets menu'
+	'Shows the pets menu. Obtaining pets is currently impossible.'
 
 	if not member:
 		member = message.author

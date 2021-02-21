@@ -1,3 +1,4 @@
+from typing import List
 from discord.ext import commands
 from . import discordbot
 import traceback
@@ -114,13 +115,31 @@ class BetterBot():
 				
 		# if no suitable prefix was found, just return
 		if not found: return
-
 		parsing_remaining = parsing_remaining[len(prefix):].strip()
-		command, parsing_remaining = (parsing_remaining + ' ').split(' ', 1)
-		command = command.lower()
+
+		# figure out the command name
+		matching_command = None
 		for function in self.functions:
-			if command != function[0]: continue
-			func, channels, pad_none = function[1]
+			command_name = function[0]
+			if parsing_remaining.lower().startswith(command_name + ' ') or parsing_remaining.lower() == command_name:
+				# only replace the known matching command if there's none of if this one is longer
+				if not matching_command or len(command_name) > len(matching_command):
+					matching_command = command_name
+
+		# if no matching command was found, return
+		if not matching_command: return
+		command_name = matching_command
+
+		parsing_remaining = parsing_remaining[len(command_name):].strip()
+		for function in self.functions:
+			if function[0] != command_name: continue
+			func, channels, pad_none, roles = function[1]
+
+			# if roles exists and the user doesnt have any of the roles, return
+			if roles and not any(discordbot.has_role(message.author.id, role) for role in roles):
+				return
+
+			# if it's in a dm and dm isn't one of the allowed channels, return
 			if not message.guild and 'dm' not in channels:
 				return
 
@@ -137,6 +156,8 @@ class BetterBot():
 					continue
 			else:
 				return_args = []
+			
+			# try adding None as an argument
 			for attempt in range(10):
 				try:
 					print('doing function', func.__code__.co_filename)
@@ -151,11 +172,11 @@ class BetterBot():
 					traceback.print_exc()
 					return
 
-	def command(self, name, aliases=[], channels=['bot-commands'], pad_none=True):
+	def command(self, name: str, aliases: List[str]=[], channels: List[str]=['bot-commands'], pad_none: bool=True, roles: List[str]=[]):
 		def decorator(func):
 			command_names = [name] + list(aliases)
 			for command_name in command_names:
-				self.functions.append((command_name.lower(), (func, channels, pad_none)))
+				self.functions.append((command_name.lower(), (func, channels, pad_none, roles)))
 			return func
 		return decorator
 
@@ -346,6 +367,8 @@ class Member():
 	avatar_url: str
 	id: int
 	mention: str
+
+	async def send(self, message: str): pass
 
 	async def convert(self, ctx, arg):
 		arg = arg.strip()

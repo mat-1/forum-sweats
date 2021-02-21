@@ -3,10 +3,10 @@ import forums
 import time
 
 # !forum user
-name = 'forum'
-aliases = ('forums', 'f')
+name = 'forum user'
+aliases = ('forums user', 'f user')
 pad_none = False
-
+args = '<username>'
 
 forum_ratelimit = {}
 
@@ -40,13 +40,8 @@ def add_forum_ratelimit(user):
 	forum_ratelimit[user].append(time.time())
 
 
-async def run(message, command, user):
-	if command not in {
-		'member',
-		'user',
-	}:
-		raise TypeError
-
+async def run(message, user):
+	'Show the message count, follower count, and reaction count of a forum user.'
 	if check_forum_ratelimit(message.author.id):
 		return await message.send('Stop spamming the command, nerd')
 	add_forum_ratelimit(message.author.id)

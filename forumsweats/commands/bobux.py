@@ -4,9 +4,11 @@ import discord
 from forumsweats import db
 
 name = 'bobux'
+args = '<member>'
 
 
 async def run(message, member: Member = None):
+	'Tells you how much bobux you have'
 	if not member:
 		member = message.author
 	bobux = await db.get_bobux(member.id)

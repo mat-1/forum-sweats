@@ -84,7 +84,7 @@ class GUI:
 
 		# remove wrong emojis
 		i = 0
-		while expected_emojis_with_filler[i] and emojis_reconstruction[i]:
+		while i < len(emojis_reconstruction) and expected_emojis_with_filler[i] and emojis_reconstruction[i]:
 			while emojis_reconstruction[i] != expected_emojis_with_filler[i] and expected_emojis_with_filler[i] and i >= 0:
 				reactions_to_remove.append(emojis_reconstruction[i])
 				emojis_reconstruction = emojis_reconstruction[:i] + emojis_reconstruction[i + 1:] + [None]
@@ -164,6 +164,8 @@ class GUI:
 		while reaction != ARROW_RETURN:
 			reaction = await self.wait_for_reaction()
 
+	async def wait_for_option(self):
+		return
 
 
 class Page:

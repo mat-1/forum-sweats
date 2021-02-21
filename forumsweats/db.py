@@ -1,5 +1,5 @@
 from forumsweats.commands.pets import Pet
-from typing import Any, List
+from typing import Any, List, Set
 import motor.motor_asyncio
 import os
 import time
@@ -355,8 +355,8 @@ async def get_shop_item(user_id: int, shop_item_id: str):
 	)
 
 
-async def get_bought_shop_items(user_id: int):
-	if not connection_url: return
+async def get_bought_shop_items(user_id: int) -> Set[Any]:
+	if not connection_url: return set()
 	data = await member_data.find_one(
 		{ 'discord': user_id }
 	)

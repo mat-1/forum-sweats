@@ -5,9 +5,11 @@ import time
 
 
 name = 'link'
+args = '<ign>'
 
 
 async def run(message, ign: str = None):
+	'Links your Discord account to your Minecraft account and gives you your rank roles'
 	if not ign:
 		return await message.send(
 			'Do `!link yourusername` to link to your Hypixel account.'

@@ -7,7 +7,7 @@ import config
 name = 'tictactoe'
 aliases = ['ttt']
 channels = ('bot-commands', 'gulag')
-
+args = '[opponent]'
 
 NUMBER_EMOJIS: list = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 
@@ -181,6 +181,8 @@ class Game:
 
 
 async def run(message, player2: Member = None):
+	'Play tic-tac-toe agaisnt the bot or an opponent'
+
 	is_gulag = message.channel.id == config.channels['gulag']
 
 	ttt_game = Game()

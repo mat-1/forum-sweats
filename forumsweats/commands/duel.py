@@ -7,6 +7,11 @@ import config
 import time
 from forumsweats import db
 
+
+name = 'duel'
+channels = ('general', 'bot-commands', 'gulag', 'staff-duel')
+args = '<member>'
+
 duel_statuses = {}
 active_duelers = set()
 
@@ -107,11 +112,10 @@ def get_duel_id(opponent_1, opponent_2):
 		return f'{opponent_2.id} {opponent_1.id}'
 
 
-name = 'duel'
-channels = ('general', 'bot-commands', 'gulag', 'staff-duel')
-
 
 async def run(message, opponent: Member):
+	'Duel another member by waiting for a countdown and sending the 🔫 emoji. '\
+	'You will get muted for an hour if you lose a duel in <#719579620931797002>'
 	global duel_statuses
 
 	if not opponent:

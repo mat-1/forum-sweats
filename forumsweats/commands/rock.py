@@ -6,10 +6,10 @@ from forumsweats import db
 name = 'rock'
 aliases = ['stone']
 channels = ['bot-commands', 'gulag']
-
+args = '<member>'
 
 async def run(message, member: Member):
-	"Adds 1 minute to someone's mute in gulag"
+	'Adds 1 minute to someone\'s time in gulag. You can\'t rock people who entered gulag by doing !gulag'
 
 	if not member:
 		return await message.send('Unknown member. Example usage: **!rock pigsty**')

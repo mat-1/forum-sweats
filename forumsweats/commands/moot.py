@@ -1,34 +1,18 @@
 from ..betterbot import Member, Time
-from ..discordbot import (
-	has_role,
-	moot_user
-)
+from ..discordbot import moot_user
 from datetime import datetime, timedelta
 from utils import seconds_to_string
 import discord
-import config
 from forumsweats import db
 
 name = 'moot'
 channels = None
 pad_none = False
-
-
-def can_moot(member):
-	return (
-		has_role(member.id, 'helper')
-		or has_role(member.id, 'trialhelper')
-	)
+roles = ('helper', 'trialhelper')
+args = '<member> <length> [reason]'
 
 
 async def do_moot(message, member, length, reason):
-	#  for infraction in await db.get_infractions(member.id):
-	#  	if datetime.utcnow() - infraction['date'] < timedelta(minutes=1):
-	# 		if the infraction was made less than 3 minutes ago, it should be removed as it was likely an accident
-	# 		await db.clear_infraction(infraction['_id'])
-
-	# I made it a comment because then I dont have to add it back later very big brain :sunglasses:
-
 	await db.add_infraction(
 		member.id,
 		'moot',
@@ -52,9 +36,8 @@ async def do_moot(message, member, length, reason):
 
 
 async def run(message, member: Member, moot_length: Time = Time(0), reason: str = None):
-	'Moots a member for a specified amount of time'
-
-	if not can_moot(message.author): return
+	'"Moots" (joke mutes) a member for a specified amount of time. '\
+	'They will still have all their normal permissions, but will have a gray name and access to the #the-mootlag'
 
 	if not member or not moot_length:
 		return await message.channel.send(

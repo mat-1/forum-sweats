@@ -1,20 +1,14 @@
 from ..betterbot import Member
-from ..discordbot import has_role
 from datetime import datetime
 from forumsweats import db
 
 name = 'clearinfractions'
 channels = None
-
+roles = ('helper', 'trialhelper')
+args = '<member> <mm/dd/yyyy>'
 
 async def run(message, member: Member, date_string: str = None):
 	'Checks the infractions that a user has (mutes, warns, bans, etc)'
-
-	if (
-		not has_role(message.author.id, 'helper')
-		and not has_role(message.author.id, 'trialhelper')
-	):
-		return
 
 	if not member or not date_string:
 		return await message.send('Please use `!clearinfractions @member date`')

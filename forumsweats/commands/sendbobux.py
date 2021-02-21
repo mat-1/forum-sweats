@@ -4,9 +4,10 @@ import discord
 from forumsweats import db
 
 name = 'sendbobux'
-
+args = '<member> <amount>'
 
 async def run(message, member: Member = None, amount: int = 0):
+	'Sends some of your bobux to another user.'
 	if not member:
 		return await message.channel.send('Invalid member')
 	if not amount or amount <= 0:

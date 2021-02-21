@@ -3,9 +3,10 @@ import discord
 from forumsweats import db
 
 name = 'whois'
-
+args = '<member>'
 
 async def run(message, member: Member = None):
+	'Tells you the Minecraft name and UUID for a server member'
 	if not member:
 		return await message.send('Do `!whois @member` to get information on that user.')
 	data = await db.get_minecraft_data(member.id)

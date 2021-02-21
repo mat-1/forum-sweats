@@ -5,6 +5,7 @@ import random
 
 name = 'connectfour'
 aliases = ('connect4', 'c4',)
+args = '<opponent> [opponent2] [opponent3] [opponent4] [opponent5]'
 
 s = aiohttp.ClientSession()
 
@@ -179,7 +180,7 @@ async def wait_for_number_reaction(client, message, member, emojis):
 
 
 async def run(message, opponent: Member = None, opponent2: Member = None, opponent3: Member = None, opponent4: Member = None, opponent5: Member = None):
-	print('connect4')
+	'Play connect 4 with up to 5 opponents'
 	if not opponent:
 		return await message.channel.send('You must specify an opponent')
 

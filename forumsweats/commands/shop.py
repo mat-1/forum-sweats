@@ -1,4 +1,5 @@
-from ..betterbot import Member
+# TODO: make this use gui.py
+
 import discord
 import asyncio
 import math
@@ -6,7 +7,6 @@ from forumsweats import db
 
 name = 'shop'
 aliases = ['bobuxshop']
-
 
 PAGE_LENGTH = 10
 
@@ -156,4 +156,5 @@ async def do_shop_gui(message, page_number=1, shop_message=None):
 
 
 async def run(message):
+	'Lets you buy items from the Bobux shop.'
 	await do_shop_gui(message)

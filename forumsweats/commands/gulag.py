@@ -5,10 +5,11 @@ from forumsweats import db
 
 
 name = 'gulag'
-
+args = '[time]'
 
 async def run(message, length_time: Time = Time(60)):
-	'Mutes you for one minute'
+	'Puts you in gulag for one minute (or however much time you specified). You cannot be rocked during this time.'
+
 	mute_remaining = int((await db.get_mute_end(message.author.id)) - time.time())
 	if mute_remaining > 0:
 		return await message.send('You are already in gulag')

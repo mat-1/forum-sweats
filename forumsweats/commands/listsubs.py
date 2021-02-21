@@ -6,6 +6,8 @@ import discord
 from forumsweats import db
 
 name = 'listsubs'
+args = '[member]'
+
 # hmm yes these aliases are definitely going to get used
 aliases = [
 	'subs', 'bobuxsubs', 'listbobuxsubs', 'listbobuxsub', 'subbed', 'sublist', 'subscribelist', 'subscriptionlist',
@@ -14,6 +16,7 @@ aliases = [
 
 
 async def run(message, member: Member = None):
+	'Lists who you\'re subbed to.'
 	if not member:
 		# Default to the message author if the member is omitted
 		member = message.author

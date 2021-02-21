@@ -11,6 +11,7 @@ with open('doors.json', 'r') as f:
 
 
 async def run(message):
+	'Shows a random image of a door'
 	url = random.choice(doors)
 	embed = discord.Embed(title='Random door')
 	embed.set_image(url=url)
