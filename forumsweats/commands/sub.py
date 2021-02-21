@@ -5,7 +5,7 @@ from forumsweats import db
 
 name = 'sub'
 aliases = ['simp', 'bobuxsub', 'subscribe', 'bobuxsubscribe', 'bobuxsimp']
-
+args = '<member> <t1|t2|t3>'
 
 tiers = {
 	't1': 20,
@@ -40,6 +40,11 @@ async def subscribe(user, subbing_to, tier):
 
 
 async def run(message, member: Member = None, tier: str = None):
+	'"Subs" to a member. This means you will automatically send them a certain amount of bobux every week, depending on the tier.\n'\
+	't1: 20 bobux/week\n'\
+	't2: 80 bobux/week\n'\
+	't3: 200 bobux/week\n'
+
 	if not member:
 		return await message.channel.send('Invalid member.')
 	if not tier:

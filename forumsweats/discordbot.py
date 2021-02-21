@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, List, Union
 from forumsweats.betterbot import BetterBot
 from datetime import datetime
 from forumsweats import commands as commands_module
@@ -33,7 +33,7 @@ def get_role_id(guild_id, role_name):
 	return config.roles.get(str(guild_id), {}).get(role_name)
 
 
-def has_role(member_id, role_name, guild_id=None):
+def has_role(member_id: int, role_name: str, guild_id=None):
 	'Checks if a member has a role from roles.json'
 	if is_dev:
 		return True
@@ -424,8 +424,7 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 		unmute_in = unmute_time - time.time()
 		await asyncio.sleep(unmute_in)
 		if (await db.get_mute_end(user_id) != unmute_time):
-			return print('Mute seems to have been extended.')
-	print('now unmuting')
+			return
 
 	mute_data = await db.get_mute_data(user_id)
 
@@ -458,7 +457,8 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 
 	if gulag_message:
 		gulag = client.get_channel(config.channels['gulag'])
-		await gulag.send(f'<@{user_id}> has left gulag.')
+		if gulag:
+			await gulag.send(f'<@{user_id}> has left gulag.')
 
 	# await member.send(embed=discord.Embed(
 	# 	description='You have been unmuted.'
@@ -472,7 +472,7 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 	mooted_role_id = get_role_id(guild_id, 'mooted')
 	mooted_role = guild.get_role(mooted_role_id)
 
-	if not mooted_role: return print('mooted role not found')
+	if not mooted_role: return
 
 	await member.add_roles(mooted_role)
 
@@ -490,20 +490,18 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 		extra_data
 	)
 
+
 	await unmoot_user(member.id, wait=True)
 
 
 async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 	'Unmoots a user after a certain amount of seconds pass'
 	if wait:
-		print('unmooting in...')
 		unmoot_time = await db.get_mooted_end(user_id)
 		unmoot_in = unmoot_time - time.time()
-		print('unmoot_in', unmoot_in)
 		await asyncio.sleep(unmoot_in)
 		if (await db.get_mooted_end(user_id) != unmoot_time):
 			return print('Moot seems to have been extended.')
-	print('now unmooting')
 
 	for guild in client.guilds:
 		member = guild.get_member(user_id)
@@ -529,7 +527,6 @@ async def on_raw_reaction_add(payload):
 	if payload.message_id == 732551899374551171:
 		if str(payload.emoji.name).lower() != 'disagree':
 			message = await client.get_channel(720258155900305488).fetch_message(732551899374551171)
-			print('removed reaction')
 			await message.clear_reaction(payload.emoji)
 
 		if payload.message_id not in {732552573806051328, 732552579531407422}: return
@@ -539,13 +536,10 @@ async def on_raw_reaction_add(payload):
 		if str(payload.emoji.name).lower() != 'disagree':
 			message = await client.get_channel(720258155900305488).fetch_message(741806331484438549)
 			await message.remove_reaction(payload.emoji, payload.member)
-			print('removed reaction!')
 	elif payload.message_id == 756691321917276223:  # Blurrzy art
-		print(payload.emoji.name)
 		if str(payload.emoji.name).lower() != 'agree':
 			message = await client.get_channel(720258155900305488).fetch_message(756691321917276223)
 			await message.remove_reaction(payload.emoji, payload.member)
-			print('removed reaction!')
 			bot_commands_channel = config.channels['bot-commands']
 			await payload.member.send(
 				f'Hey, you\'re a dum dum. If you disagree, please do `!gulag 15m` in <#{bot_commands_channel}>. Thanks!'
@@ -606,7 +600,7 @@ def api_get_members():
 	}
 
 
-command_modules = []
+command_modules: List[Any] = []
 for module_filename in os.listdir('./forumsweats/commands'):
 	if module_filename == '__init__.py' or module_filename[-3:] != '.py':
 		continue
@@ -617,7 +611,8 @@ for module_filename in os.listdir('./forumsweats/commands'):
 		module.name,
 		aliases=getattr(module, 'aliases', []),
 		pad_none=getattr(module, 'pad_none', True),
-		channels=getattr(module, 'channels', ['bot-commands'])
+		channels=getattr(module, 'channels', ['bot-commands']),
+		roles=getattr(module, 'roles', [])
 	)(module.run)
 
 

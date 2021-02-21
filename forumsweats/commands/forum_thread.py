@@ -3,11 +3,11 @@ import discord
 import forums
 import time
 
-name = 'forum'
-aliases = ['forums', 'f']
+name = 'forum thread'
+aliases = ('forums thread', 'f thread')
 pad_none = False
 channels = None
-
+args = '<thread id>'
 
 forum_ratelimit = {}
 
@@ -41,12 +41,8 @@ def add_forum_ratelimit(user):
 	forum_ratelimit[user].append(time.time())
 
 
-async def run(message, command, thread_id: int):
-	if command not in {
-		'post',
-		'thread',
-	}:
-		raise TypeError
+async def run(message, thread_id: int):
+	'Show the contents of a Hypixel forums thread from its id'
 
 	if check_forum_ratelimit(message.author.id):
 		return await message.send('Stop spamming the command, nerd')

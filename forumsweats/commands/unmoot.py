@@ -1,22 +1,14 @@
 from ..betterbot import Member
-from ..discordbot import (
-	has_role,
-	unmoot_user
-)
+from ..discordbot import unmoot_user
 import discord
 
 name = 'unmoot'
 channels = None
-
+roles = ('helper', 'trialhelper')
+args = '<member>'
 
 async def run(message, member: Member):
 	'Removes a moot from a member'
-
-	if not (
-		has_role(message.author.id, 'helper')
-		or has_role(message.author.id, 'trialhelper')
-	):
-		return
 
 	await unmoot_user(
 		member.id,

@@ -1,8 +1,5 @@
 from ..betterbot import Member, Time
-from ..discordbot import (
-	has_role,
-	mute_user
-)
+from ..discordbot import mute_user
 from datetime import datetime, timedelta
 from utils import seconds_to_string
 import discord
@@ -11,13 +8,8 @@ from forumsweats import db
 name = 'mute'
 channels = None
 pad_none = False
-
-
-def can_mute(member):
-	return (
-		has_role(member.id, 'helper')
-		or has_role(member.id, 'trialhelper')
-	)
+roles = ('helper', 'trialhelper')
+args = '<member> <length> [reason]'
 
 
 async def do_mute(message, member, length, reason):
@@ -53,10 +45,8 @@ async def do_mute(message, member, length, reason):
 		await message.send("I don't have permission to do this")
 
 
-async def run(message, member: Member, mute_length: Time = 0, reason: str = None):
-	'Mutes a member for a specified amount of time'
-
-	if not can_mute(message.author): return
+async def run(message, member: Member, mute_length: Time = Time(0), reason: str = None):
+	'Mutes a member for a specified amount of time. They will not be able to send any messages except in #the-gulag'
 
 	if not member or not mute_length:
 		return await message.channel.send(

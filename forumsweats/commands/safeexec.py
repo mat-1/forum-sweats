@@ -1,4 +1,3 @@
-from dis import dis
 from types import FunctionType
 import functools
 import asyncio
@@ -7,7 +6,7 @@ import traceback
 
 name = 'safeexec'
 aliases = ['safeeval', 'execsafe', 'evalsafe']
-
+args = '<code>'
 
 class ReachedMaxSteps(Exception): pass
 
@@ -130,10 +129,10 @@ class Interpreter():
 		))
 
 	async def SETUP_LOOP(self, delta):  # 120
-		self.add_to_block_stack('loop', delta)
+		await self.add_to_block_stack('loop', delta)
 
 	async def SETUP_EXCEPT(self, delta):  # 121
-		self.add_to_block_stack('except', delta)
+		await self.add_to_block_stack('except', delta)
 
 	async def GET_ITER(self, _):
 		TOS = await self.POP_TOP()
@@ -444,8 +443,9 @@ class Interpreter():
 
 
 async def run(message, code_arg: str):
+	'Safely executes Python code. Try to hack this, I bet you can\'t.'
+
 	global output
-	print('running')
 	output = []
 	def _print(*content, sep=' '):
 		global output

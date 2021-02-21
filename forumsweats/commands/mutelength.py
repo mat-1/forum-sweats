@@ -8,9 +8,11 @@ from forumsweats import db
 name = 'mutelength'
 aliases = ['mutetime']
 channels = ['bot-commands', 'gulag']
-
+args = '[member]'
 
 async def run(message, member: Member = None):
+	'Tells you how long you (or another member) is muted for.'
+
 	if not member:
 		member = message.author
 

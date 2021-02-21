@@ -1,105 +1,78 @@
-from ..discordbot import has_role
+from typing import List
 import discord
-
+from ..gui import GUIOption, PaginationGUI, TextGUI
+from ..discordbot import has_role, command_modules
 
 name = 'help'
 aliases = ['commands']
+args = '[command]'
+
+def get_data_from_module(command_module, member: discord.User):
+	module_docstring: str = command_module.run.__doc__
+	module_roles: List[str] = command_module.roles if hasattr(command_module, 'roles') else []
+	module_name: str = command_module.name
+	module_args: str = command_module.args if hasattr(command_module, 'args') else ''
+	if module_roles:
+		# if the user doesn't have any of the roles, dont add it
+		if not any(has_role(member.id, role) for role in module_roles):
+			return
+	if module_docstring:
+		return {
+			'name': module_name,
+			'args': module_args,
+			'desc':module_docstring
+		}
 
 
-async def run(message):
-	help_commands = [
-		{
-			'name': 'link',
-			'args': '<ign>',
-			'desc': 'Links your Discord account to your Minecraft account and gives you Hypixel rank roles',
-		},
-		{
-			'name': 'e',
-			'args': '',
-			'desc': 'e',
-		},
-		{
-			'name': 'gulag',
-			'args': '',
-			'desc': 'Puts you in gulag for one minute',
-		},
-		{
-			'name': 'rock',
-			'args': '@member',
-			'desc': "Extends the length of a user's time in gulag by 1 minute",
-		},
-		{
-			'name': 'forum user',
-			'args': '<username>',
-			'desc': 'Gets the forum stats for a username',
-		},
-		{
-			'name': 'forum thread',
-			'args': '<id>',
-			'desc': 'Shows a forum thread',
-		},
-		{
-			'name': 'tictactoe',
-			'args': '[@member]',
-			'desc': 'Lets you play tic-tac-toe against another member or against AI',
-		},
-		{
-			'name': 'shitpost',
-			'args': '',
-			'desc': 'Generates a shitpost using a markov chain',
-		},
-		{
-			'name': 'duel',
-			'args': '[@member]',
-			'desc': 'Duels a member',
-		},
-	]
+def get_help_commands(member: discord.User):
+	help_commands = []
 
-	if has_role(message.author.id, 'helper'):
-		help_commands.extend([
-			{
-				'name': 'mute',
-				'args': '@member <length> [reason]',
-				'desc': 'Mutes a user from sending messages for a certain amount of time',
-			},
-			{
-				'name': 'unmute',
-				'args': '@member',
-				'desc': 'Unmutes a user early so they can send messages',
-			},
-			{
-				'name': 'infractions',
-				'args': '@member',
-				'desc': 'View the infractions of another member (mutes, warns, etc)',
-			},
-			{
-				'name': 'clearinfractions',
-				'args': '@member <mm/dd/yyyy>',
-				'desc': 'Clear the infractions for a member from a specific date',
-			}
-		])
-	else:
-		help_commands.extend([
-			{
-				'name': 'infractions',
-				'args': '',
-				'desc': 'View your own infractions (mutes, warns, etc)',
-			}
-		])
+	# sort the modules by name alphabetically
+	command_modules_sorted = sorted(command_modules, key=lambda m: m.name)
 
-	description = []
+	for command_module in command_modules_sorted:
+		data = get_data_from_module(command_module, member)
+		if data:
+			help_commands.append(data)
+	return help_commands
 
-	for command in help_commands:
-		command_name = command['name']
-		command_args = command['args']
-		command_desc = command['desc']
-		if command_args:
-			command_title = f'!**{command_name}** {command_args}'
+def get_command_help(command_name: str, member: discord.User):
+	command_name = command_name.lower()
+	for command_module in command_modules:
+		aliases = list(command_module.aliases if hasattr(command_module, 'aliases') else [])
+		command_names = [command_module.name] + aliases
+		if command_name in command_names:
+			return get_data_from_module(command_module, member)
+
+
+def make_text_gui(command_name: str, command_args: str, command_desc: str) -> TextGUI:
+	return TextGUI(f'**{command_name}** {command_args}', command_desc)
+
+async def run(message, command: str=None):
+	'Shows an interactive GUI with all the commands this bot has.'
+
+	help_commands = get_help_commands(message.author)
+
+	gui_options = []
+
+	for c in help_commands:
+		command_name = c['name']
+		command_args = c['args']
+		command_desc = c['desc']
+		gui_options.append(GUIOption(make_text_gui(command_name, command_args, command_desc), command_name))
+
+	if command:
+		c = get_command_help(command, message.author)
+		if c:
+			command_name = c['name']
+			command_args = c['args']
+			command_desc = c['desc']
+			gui = make_text_gui(command_name, command_args, command_desc)
 		else:
-			command_title = f'!**{command_name}**'
-		description.append(
-			f'{command_title} - {command_desc}'
-		)
+			return await message.send('That command doesn\'t exist. Do !help to see all the commands')
+	else:
+		gui = PaginationGUI('Commands', list(gui_options))
 
-	embed = discord.Embed(title='Commands', description='\n'.join(description))
-	await message.send(embed=embed)
+	await gui.make_message(message.client, message.author, message.channel)
+
+	await gui.wait_for_option()

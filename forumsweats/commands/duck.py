@@ -9,6 +9,7 @@ channels = ('bot-commands', 'gulag')
 
 
 async def run(message):
+	'Shows a random image of a duck'
 	show = 'duck'
 
 	if message.channel.id == config.channels['gulag']:

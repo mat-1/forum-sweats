@@ -4,6 +4,7 @@ name = 'bleach'
 
 
 async def run(message):
+	'Shows an image of clorox Bleach'
 	embed = discord.Embed(
 		title='Here\'s a Clorox bleach if you want to unsee something weird:'
 	)

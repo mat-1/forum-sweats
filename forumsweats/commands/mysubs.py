@@ -7,9 +7,10 @@ from forumsweats import db
 
 name = 'mysubs'
 aliases = ['mysimps', 'mysubscribers', 'simps']
-
+args = '[member]'
 
 async def run(message, member: Member = None):
+	'Says who is subbed to you (or another member). Use !subs to see who you\'re subbed to.'
 	if not member:
 		member = message.author
 	subs = await db.bobux_get_all_subscriptions(member.id)

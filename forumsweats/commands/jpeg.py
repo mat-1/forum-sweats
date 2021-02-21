@@ -4,7 +4,7 @@ import io
 import aiohttp
 
 name = 'jpeg'
-
+args = '[member]'
 
 async def upload(im_bytes, content_type):
 	data = aiohttp.FormData()
@@ -25,6 +25,7 @@ async def upload(im_bytes, content_type):
 
 
 async def run(message, member: Member):
+	'Compresses a user\'s avatar. A lot.'
 	async with message.channel.typing():
 		img_size = 128
 		user = message.client.get_user(member.id)

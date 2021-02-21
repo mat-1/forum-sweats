@@ -6,7 +6,7 @@ from forumsweats import db
 
 name = 'unsub'
 aliases = ['unsimp', 'bobuxunsub', 'unbobuxsub', 'unsubscribe', 'bobuxunsubscribe', 'bobuxunsimp']
-
+args = '<member>'
 
 async def unsubscribe(user, unsubbing_to):
 	user_id = user.id if hasattr(user, 'id') else int(user)
@@ -15,6 +15,8 @@ async def unsubscribe(user, unsubbing_to):
 
 
 async def run(message, member: Member = None):
+	'Unsubs from a member. You don\'t get a refund from this!'
+
 	if not member:
 		return await message.channel.send('Invalid member.')
 

@@ -1,15 +1,15 @@
 import forumsweats.discordbot as discordbot
-from ..discordbot import has_role
 from ..betterbot import Member
 import discord
 from forumsweats import db
 
 name = 'givebobux'
 channels = None
-
+roles = ('admin',)
+args = '<member> <amount>'
 
 async def run(message, member: Member = None, amount: int = 0):
-	if not has_role(message.author.id, 'admin'): return
+	'Gives bobux to a user. Don\'t abuse this!'
 	if not member:
 		return await message.channel.send('Invalid member')
 	if not amount:

@@ -7,11 +7,11 @@ import discord
 
 name = 'givepet'
 channels = None
-
+roles = ('admin',)
+args = '<member> <pet id>'
 
 async def run(message, member: Member = None, pet_id: str = ''):
-	if not has_role(message.author.id, 'admin'): return
-
+	'Gives a pet to a user. Don\'t abuse this!'
 	if not member:
 		return await message.channel.send('Invalid member')
 	if pet_id not in PET_META:

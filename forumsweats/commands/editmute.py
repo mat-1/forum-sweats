@@ -1,8 +1,5 @@
 from ..betterbot import Member, Time
-from ..discordbot import (
-	has_role,
-	mute_user
-)
+from ..discordbot import mute_user
 from utils import seconds_to_string
 import discord
 from forumsweats import db
@@ -11,13 +8,8 @@ import time
 name = 'editmute'
 channels = None
 pad_none = False
-
-
-def can_mute(member):
-	return (
-		has_role(member.id, 'helper')
-		or has_role(member.id, 'trialhelper')
-	)
+roles = ('helper', 'trialhelper')
+args = '<member> <length> [reason]'
 
 
 async def do_mute(message, member, length, reason):
@@ -31,10 +23,8 @@ async def do_mute(message, member, length, reason):
 		await message.send("I don't have permission to do this")
 
 
-async def run(message, member: Member, mute_length: Time = 0, reason: str = None):
+async def run(message, member: Member, mute_length: Time = Time(0), reason: str = None):
 	'Changes the mute length of a user without adding a new infraction'
-
-	if not can_mute(message.author): return
 
 	if not member or not mute_length:
 		return await message.channel.send(
@@ -59,9 +49,7 @@ async def run(message, member: Member, mute_length: Time = 0, reason: str = None
 		return await message.channel.send('That user isn\'t muted')
 	else:
 		try:
-			await member.send(
-				dm_changed_message
-			)
+			await member.send(dm_changed_message)
 		except discord.errors.Forbidden:
 			pass
 	

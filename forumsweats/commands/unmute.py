@@ -1,22 +1,14 @@
 from ..betterbot import Member
-from ..discordbot import (
-	has_role,
-	unmute_user
-)
+from ..discordbot import unmute_user
 import discord
 
 name = 'unmute'
 channels = None
-
+roles = ('helper', 'trialhelper')
+args = '<member>'
 
 async def run(message, member: Member):
 	'Removes a mute from a member'
-
-	if not (
-		has_role(message.author.id, 'helper')
-		or has_role(message.author.id, 'trialhelper')
-	):
-		return
 
 	await unmute_user(
 		member.id,

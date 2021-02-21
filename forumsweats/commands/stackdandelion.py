@@ -5,6 +5,7 @@ fix_dandelion_stacking_fixed = False
 
 
 async def run(message):
+	'Fixes dandelion stacking.'
 	global fix_dandelion_stacking_fixed
 	if not fix_dandelion_stacking_fixed:
 		await message.send('Dandelion stacking has been fixed.')

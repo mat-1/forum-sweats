@@ -6,6 +6,7 @@ import time
 
 name = 'shitpost'
 aliases = ['markovshitpost']
+args = '[title]'
 
 forums_data = []
 title_words = []
@@ -61,7 +62,6 @@ def remove_punctuation(string):
 		.replace(',', '')\
 		.replace('!', '')\
 		.replace('?', '')\
-
 
 
 async def find_random_next_word(
@@ -185,6 +185,8 @@ users_generating_shitpost = {}
 
 
 async def run(message, title: str = ''):
+	'Automatically generates a shitpost using a markov chain'
+
 	if check_markov_ratelimit(message.author.id):
 		return await message.send('Stop spamming the command, nerd')
 	if users_generating_shitpost.get(message.author.id):
@@ -205,6 +207,7 @@ async def run(message, title: str = ''):
 		title=title,
 		description='loading...'
 	))
+	post_body = ''
 	async for post_body in generate_body(title):
 		await sent_message.edit(embed=discord.Embed(
 			title=title,
