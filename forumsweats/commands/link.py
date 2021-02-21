@@ -58,7 +58,7 @@ async def run(message, ign: str = None):
 				old_rank_role = guild.get_role(old_rank_role_id)
 				await member.remove_roles(old_rank_role, reason='Old rank')
 
-		new_rank = data['rank']
+		new_rank = data['player']['rank']['name']
 		new_rank_role_id = get_role_id(guild.id, new_rank)
 		if new_rank_role_id:
 			new_rank_role = guild.get_role(new_rank_role_id)
