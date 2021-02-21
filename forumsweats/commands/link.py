@@ -18,7 +18,7 @@ async def run(message, ign: str = None):
 	try:
 		data = await hypixel.get_user_data(ign)
 		try:
-			discord_name = data.get('socials', {}).get('discord')
+			discord_name = data.get('player', {}).get('socials', {}).get('discord')
 			assert discord_name is not None
 		except AssertionError:
 			raise hypixel.DiscordNotFound()

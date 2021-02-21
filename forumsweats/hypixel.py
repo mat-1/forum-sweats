@@ -2,7 +2,6 @@ from session import s
 import random
 import os
 
-# API keys are seperated by commas
 api_key = os.getenv('key')
 
 
@@ -16,7 +15,7 @@ class DiscordNotFound(Exception):
 
 async def get_user_data(ign):
 	'Returns the Discord username of a Hypixel IGN'
-	url = f'https://skyblock-api2.matdoes.dev/player/py5'
+	url = f'https://skyblock-api2.matdoes.dev/player/{ign}'
 	async with s.get(
 		url,
 		headers={
