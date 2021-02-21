@@ -457,7 +457,8 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 
 	if gulag_message:
 		gulag = client.get_channel(config.channels['gulag'])
-		await gulag.send(f'<@{user_id}> has left gulag.')
+		if gulag:
+			await gulag.send(f'<@{user_id}> has left gulag.')
 
 	# await member.send(embed=discord.Embed(
 	# 	description='You have been unmuted.'
@@ -493,7 +494,7 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 	)
 
 	gulag = client.get_channel(config.channels['gulag'])
-	if gulag_message:
+	if gulag_message and gulag:
 		if not mooted_before:
 			await gulag.send(f'Welcome to gulag, <@{member.id}>.')
 		else:
