@@ -287,7 +287,6 @@ async def set_counter(guild_id: int, number: int):
 		upsert=True
 	)
 
-
 async def get_counter(guild_id: int):
 	if not connection_url: return 0
 	data = await servers_data.find_one({
@@ -296,13 +295,44 @@ async def get_counter(guild_id: int):
 	if data:
 		return data.get('counter', 0)
 
+async def set_infinite_counter(guild_id: int, number: int):
+	if not connection_url: return
+	await servers_data.update_one(
+		{ 'id': guild_id },
+		{
+			'$set': { 'infinite_counter': number }
+		},
+		upsert=True
+	)
+
+
 async def get_infinite_counter(guild_id: int):
 	if not connection_url: return 0
 	data = await servers_data.find_one({
 		'id': guild_id,
 	})
 	if data:
-		return data.get('counter', 0)
+		return data.get('infinite_counter', 0)
+
+
+async def get_last_person_in_infinite_counting(guild_id: int):
+	if not connection_url: return 0
+	data = await servers_data.find_one({
+		'id': guild_id,
+	})
+	if data:
+		return data.get('last_infinite_counter', 0)
+
+
+async def set_last_person_in_infinite_counting(guild_id: int, member_id: int):
+	if not connection_url: return
+	await servers_data.update_one(
+		{ 'id': guild_id },
+		{
+			'$set': { 'last_infinite_counter': member_id }
+		},
+		upsert=True
+	)
 
 
 async def set_last_general_duel(guild_id: int):

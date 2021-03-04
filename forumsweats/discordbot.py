@@ -305,6 +305,12 @@ async def process_infinite_counting_channel(message):
 		# if the message was sent by forum sweats, ignore it
 		return
 	old_number = await db.get_infinite_counter(message.guild.id)
+	last_person_to_count = await db.get_last_person_in_infinite_counting(message.guild.id)
+
+	# the same person can't count twice in a row in #infinite-counting
+	if last_person_to_count == message.author.id:
+		return await message.delete()
+
 	content = message.content.replace(',', '')
 	try:
 		new_number = float(content)
@@ -314,8 +320,9 @@ async def process_infinite_counting_channel(message):
 		await message.delete()
 		await message.channel.send(f'<@{message.author.id}>, please start at 1', delete_after=10)
 	elif new_number == old_number + 1:
-		await db.set_counter(message.guild.id, int(new_number))
 		most_recent_counting_message_id = message.id
+		await db.set_infinite_counter(message.guild.id, int(new_number))
+		await db.set_last_person_in_infinite_counting(message.guild.id, message.author.id)
 	else:
 		await message.delete()
 
