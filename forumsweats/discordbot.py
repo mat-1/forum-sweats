@@ -265,6 +265,7 @@ async def on_member_update(before, after):
 
 
 most_recent_counting_message_id = None
+most_recent_infinite_counting_message_id = None
 
 
 async def process_counting_channel(message):
@@ -297,7 +298,7 @@ async def process_counting_channel(message):
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
 
 async def process_infinite_counting_channel(message):
-	global most_recent_counting_message_id
+	global most_recent_infinite_counting_message_id
 	if message.channel.id != config.channels.get('infinite-counting'):
 		# if the message wasn't in the counting channel, you can ignore all of this
 		return
@@ -320,7 +321,7 @@ async def process_infinite_counting_channel(message):
 		await message.delete()
 		await message.channel.send(f'<@{message.author.id}>, please start at 1', delete_after=10)
 	elif new_number == old_number + 1:
-		most_recent_counting_message_id = message.id
+		most_recent_infinite_counting_message_id = message.id
 		await db.set_infinite_counter(message.guild.id, int(new_number))
 		await db.set_last_person_in_infinite_counting(message.guild.id, message.author.id)
 	else:
@@ -366,6 +367,9 @@ async def on_message_delete(message):
 	print('deleted:', message.author, message.content)
 	if message.id == most_recent_counting_message_id:
 		counter = await db.get_counter(message.guild.id)
+		await message.channel.send(str(counter))
+	elif message.id == most_recent_infinite_counting_message_id:
+		counter = await db.get_infinite_counter(message.guild.id)
 		await message.channel.send(str(counter))
 
 
