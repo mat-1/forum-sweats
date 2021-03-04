@@ -1,11 +1,11 @@
+from . import commands as commands_module
 from typing import Any, List, Union
-
-from discord.message import Message
-from forumsweats.betterbot import BetterBot
+from .betterbot import BetterBot
 from datetime import datetime
-from forumsweats import commands as commands_module
-from forumsweats import uwuify
-from forumsweats import modbot
+from . import uwuify
+from . import modbot
+from . import w2n
+from . import db
 import importlib
 import discord
 import asyncio
@@ -14,7 +14,6 @@ import base64
 import config
 import time
 import os
-from forumsweats import db
 
 commands: Any = commands_module
 
@@ -277,9 +276,8 @@ async def process_counting_channel(message):
 		# if the message was sent by forum sweats, ignore it
 		return
 	old_number = await db.get_counter(message.guild.id)
-	content = message.content.replace(',', '')
 	try:
-		new_number = float(content)
+		new_number = w2n.word_to_num(message.content)
 	except ValueError:
 		new_number = 0
 	if old_number == 0 and new_number != 1:
@@ -312,10 +310,9 @@ async def process_infinite_counting_channel(message):
 	if last_person_to_count == message.author.id:
 		return await message.delete()
 
-	content = message.content.replace(',', '')
 	try:
-		new_number = float(content)
-	except ValueError:
+		new_number = w2n.word_to_num(message.content)
+	except:
 		new_number = 0
 	if old_number == 0 and new_number != 1:
 		await message.delete()
