@@ -17,16 +17,14 @@ async def run(message, ign: str = None):
 	ign = ign.strip()
 	try:
 		data = await hypixel.get_user_data(ign)
-		try:
-			discord_name = data.get('player', {}).get('socials', {}).get('discord')
-			assert discord_name is not None
-		except AssertionError:
+		discord_name = data.get('player', {}).get('socials', {}).get('discord')
+		if discord_name is None:
 			raise hypixel.DiscordNotFound()
 	except hypixel.PlayerNotFound:
 		return await message.send('Invalid username.')
 	except hypixel.DiscordNotFound:
 		return await message.send(
-			"You haven't set your Discord username in Hypixel yet."
+			'You haven\'t set your Discord username in Hypixel yet.'
 		)
 	if str(message.author) == discord_name:
 		pass  # good
@@ -41,6 +39,27 @@ async def run(message, ign: str = None):
 
 	old_rank = await db.get_hypixel_rank(message.author.id)
 	new_rank = await hypixel.get_hypixel_rank(ign)
+
+	joined_seconds_ago = time.time() - data['player']['first_join']
+	joined_years_ago = joined_seconds_ago / 31536000
+
+	veteran_role_names = []
+	if joined_years_ago >= 6:
+		veteran_role_names.append('hypixel6years')
+	if joined_years_ago >= 5:
+		veteran_role_names.append('hypixel5years')
+	elif joined_years_ago >= 3:
+		veteran_role_names.append('hypixel3years')
+	if veteran_role_names:
+		for guild in message.client.guilds:
+			member = guild.get_member(message.author.id)
+			if not member:
+				# Member isn't in the guild
+				continue
+			veteran_roles = [guild.get_role(get_role_id(guild.id, role)) for role in veteran_role_names]
+			veteran_roles = [role for role in veteran_roles if role]
+			if veteran_roles:
+				await member.add_roles(veteran_roles, reason='Veteran roles')
 
 	new_rank_role_id = None
 
