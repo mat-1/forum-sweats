@@ -59,7 +59,7 @@ async def run(message, ign: str = None):
 			veteran_roles = [guild.get_role(get_role_id(guild.id, role)) for role in veteran_role_names]
 			veteran_roles = [role for role in veteran_roles if role]
 			if veteran_roles:
-				await member.add_roles(veteran_roles, reason='Veteran roles')
+				await member.add_roles(*veteran_roles, reason='Veteran roles')
 
 	new_rank_role_id = None
 
