@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 
 connection_url = os.getenv('dburi')
 
+if not connection_url:
+	print('WARNING: dburi not found in env')
+
 client = motor.motor_asyncio.AsyncIOMotorClient(connection_url)
 
 db = client.discord
@@ -286,7 +289,15 @@ async def set_counter(guild_id: int, number: int):
 
 
 async def get_counter(guild_id: int):
-	if not connection_url: return
+	if not connection_url: return 0
+	data = await servers_data.find_one({
+		'id': guild_id,
+	})
+	if data:
+		return data.get('counter', 0)
+
+async def get_infinite_counter(guild_id: int):
+	if not connection_url: return 0
 	data = await servers_data.find_one({
 		'id': guild_id,
 	})

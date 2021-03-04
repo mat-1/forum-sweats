@@ -1,4 +1,6 @@
 from typing import Any, List, Union
+
+from discord.message import Message
 from forumsweats.betterbot import BetterBot
 from datetime import datetime
 from forumsweats import commands as commands_module
@@ -267,10 +269,10 @@ most_recent_counting_message_id = None
 
 async def process_counting_channel(message):
 	global most_recent_counting_message_id
-	if message.channel.id != 738449805218676737:
+	if message.channel.id != config.channels.get('counting'):
 		# if the message wasn't in the counting channel, you can ignore all of this
 		return
-	elif message.author.id == 719348452491919401:
+	elif message.author.bot:
 		# if the message was sent by forum sweats, ignore it
 		return
 	old_number = await db.get_counter(message.guild.id)
@@ -293,6 +295,29 @@ async def process_counting_channel(message):
 			f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})"
 		)
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
+
+async def process_infinite_counting_channel(message):
+	global most_recent_counting_message_id
+	if message.channel.id != config.channels.get('infinite-counting'):
+		# if the message wasn't in the counting channel, you can ignore all of this
+		return
+	elif message.author.bot:
+		# if the message was sent by forum sweats, ignore it
+		return
+	old_number = await db.get_infinite_counter(message.guild.id)
+	content = message.content.replace(',', '')
+	try:
+		new_number = float(content)
+	except ValueError:
+		new_number = 0
+	if old_number == 0 and new_number != 1:
+		await message.delete()
+		await message.channel.send(f'<@{message.author.id}>, please start at 1', delete_after=10)
+	elif new_number == old_number + 1:
+		await db.set_counter(message.guild.id, int(new_number))
+		most_recent_counting_message_id = message.id
+	else:
+		await message.delete()
 
 last_general_message = time.time()
 is_chat_dead = False
@@ -324,6 +349,7 @@ async def on_message(message):
 			await message.channel.send(uwuized_message)
 	asyncio.ensure_future(db.add_message(message.author.id))
 	await process_counting_channel(message)
+	await process_infinite_counting_channel(message)
 	await betterbot.process_commands(message)
 	await modbot.process_messsage(message)
 
@@ -338,7 +364,10 @@ async def on_message_delete(message):
 
 @client.event
 async def on_message_edit(before, after):
-	if after.channel.id == 738449805218676737:
+	if (
+		after.channel.id == config.channels.get('counting')
+		or after.channel.id == config.channels.get('infinite-counting')
+	):
 		await after.delete()
 	await modbot.process_messsage(after, warn=False)
 
