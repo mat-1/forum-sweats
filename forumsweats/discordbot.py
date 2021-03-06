@@ -284,10 +284,16 @@ async def process_counting_channel(message):
 		await message.delete()
 		await message.channel.send(f'<@{message.author.id}>, please start at 1', delete_after=10)
 	elif new_number == old_number + 1:
+		try:
+			await message.add_reaction('✅')
+		except:
+			# if there was an error adding the reaction, just delete the message
+			return await message.delete()
 		await db.set_counter(message.guild.id, int(new_number))
 		most_recent_counting_message_id = message.id
 		# give 1 bobux every time you count
 		await db.change_bobux(message.author.id, 1)
+		# we do a try except in case the user blocked the bot
 	else:
 		await db.set_counter(message.guild.id, 0)
 		await message.channel.send(
@@ -318,6 +324,11 @@ async def process_infinite_counting_channel(message):
 		await message.delete()
 		await message.channel.send(f'<@{message.author.id}>, please start at 1', delete_after=10)
 	elif new_number == old_number + 1:
+		try:
+			await message.add_reaction('✅')
+		except:
+			# if there was an error adding the reaction, just delete the message
+			return await message.delete()
 		most_recent_infinite_counting_message_id = message.id
 		await db.set_infinite_counter(message.guild.id, int(new_number))
 		await db.set_last_person_in_infinite_counting(message.guild.id, message.author.id)
