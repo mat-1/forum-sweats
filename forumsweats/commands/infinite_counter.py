@@ -1,7 +1,9 @@
 from forumsweats import db
 
 name = 'infinite-counting'
-aliases = ('infinitecounting', 'infcount', 'infcounting', 'infcounter', 'infinitecount', 'infinitecounting', 'infinitecounter')
+aliases = (
+	'inf-count', 'inf-counting', 'inf-counter', 'infinite-count', 'infinite-counter'
+	'infinitecounting', 'infcount', 'infcounting', 'infcounter', 'infinitecount', 'infinitecounter')
 
 
 async def run(message):
