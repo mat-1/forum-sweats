@@ -465,7 +465,6 @@ async def run(message, code_arg: str):
 		'int': int,
 		'str': str,
 		'range': range,
-		'yourmom': 'Your mother.'
 	}
 
 	try:
