@@ -34,6 +34,22 @@ num_names = {
 	'ninety': 90,
 }
 
+emoji_numbers = {
+	'0️⃣': '0',
+	'1️⃣': '1',
+	'2️⃣': '2',
+	'3️⃣': '3',
+	'4️⃣': '4',
+	'5️⃣': '5',
+	'6️⃣': '6',
+	'7️⃣': '7',
+	'8️⃣': '8',
+	'9️⃣': '9',
+	'🔟': '10',
+	'💯': '100',
+	'🔢': '1234'
+}
+
 place_abbrev = {
 	'k': 1000,
 	'm': 1000000,
@@ -77,6 +93,11 @@ word_to_number = { **num_names, **place_names, **dec_names, **neg_names }
 def num_generator(phrase):
 	# remove dirty characters - commonly put in numbers but not "part of" the number
 	cleanphrase = ''.join(char for char in phrase if char not in ignore_chars)
+
+	# replace all emojis with numbers
+	for emoji in emoji_numbers:
+		cleanphrase = cleanphrase.replace(emoji, emoji_numbers[emoji])
+
 	# make . its own word so we can treat it like the other decimal words
 	splitphrase = cleanphrase.replace('.', ' . ').lower()
 	
