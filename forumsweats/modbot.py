@@ -246,6 +246,20 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None
 		)
 		return
+	
+	# anti r-word filter
+	if re.search(r'retard', content, flags=re.IGNORECASE):
+		try:
+			await message.author.send('Don\'t say slurs in chat, nerd')
+		except discord.errors.Forbidden:
+			pass
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			21600, # 6 hours
+			message.guild.id if message.guild else None
+		)
+		return
 
 	await check_spam(message)
 
