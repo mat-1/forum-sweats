@@ -573,8 +573,10 @@ async def add_starboard_message(message_id: int, starboard_message_id: int, star
 	await starboard_data.update_one(
 		{ 'message_id': message_id },
 		{
-			'starboard_message_id': starboard_message_id,
-			'star_count': star_count
+			'$set': {
+				'starboard_message_id': starboard_message_id,
+				'star_count': star_count
+			}
 		}
 	)
 
