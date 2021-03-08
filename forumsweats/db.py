@@ -577,7 +577,8 @@ async def add_starboard_message(message_id: int, starboard_message_id: int, star
 				'starboard_message_id': starboard_message_id,
 				'star_count': star_count
 			}
-		}
+		},
+		upsert=True
 	)
 
 async def fetch_starboard_message(message_id: int) -> dict:
