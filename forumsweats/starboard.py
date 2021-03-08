@@ -35,6 +35,9 @@ async def add_message_to_starboard(message: discord.Message):
 
 
 	message_content = message.content
+	if not isinstance(message_content, str):
+		message_content = ''
+
 	if len(message.embeds) > 0:
 		message_content += '\n' + message.embeds[0].description
 
