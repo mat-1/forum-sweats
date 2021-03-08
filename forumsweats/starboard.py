@@ -41,7 +41,6 @@ async def add_message_to_starboard(message: discord.Message):
 	embed = discord.Embed(
 		title=f'{STAR_EMOJI} {star_count} stars',
 		description=message_content,
-
 	)
 	embed.set_author(
 		name=str(message.author),
@@ -49,7 +48,16 @@ async def add_message_to_starboard(message: discord.Message):
 		url=message.jump_url
 	)
 	if len(message.attachments) > 0:
-		embed.set_image(message.attachments[0].url)
+		# we can do this to quickly check if its an image
+		if message.attachments[0].width:
+			embed.set_image(url=message.attachments[0].url)
+			extra_attachments = message.attachments
+		else:
+			extra_attachments = message.attachments
+		if len(extra_attachments) > 0:
+			for attachment in extra_attachments:
+				embed.description += '\n' + attachment.url
+		
 	
 	embed.add_field(name='Link', value=f'[Click to go to message]({message.jump_url})')
 
