@@ -36,7 +36,6 @@ async def add_message_to_starboard(message: discord.Message):
 
 	message_content = message.content
 	if len(message.embeds) > 0:
-		print(message.embeds)
 		message_content += '\n' + message.embeds[0].description
 
 	embed = discord.Embed(
@@ -66,24 +65,19 @@ async def add_message_to_starboard(message: discord.Message):
 
 
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
-	print('on_raw_reaction_add')
 	# if there's no starboard channel in config, return
 	if not config.channels['starboard']:
-		print('no starboard')
 		return
 
 	# if the guild id is different, return
 	if payload.guild_id != config.main_guild:
-		print('wrong guild')
 		return
 
 	# you can't star messages already in #starboard
 	if payload.channel_id == config.channels['starboard']:
-		print('already in starboard')
 		return
 	
 	channel: Union[discord.abc.Messageable, None] = client.get_channel(payload.channel_id)
-	print(channel)
 
 	# if the channel doesnt exist for some reason, return
 	if not channel: return
