@@ -51,7 +51,7 @@ async def add_message_to_starboard(message: discord.Message):
 		# we can do this to quickly check if its an image
 		if message.attachments[0].width:
 			embed.set_image(url=message.attachments[0].url)
-			extra_attachments = message.attachments
+			extra_attachments = message.attachments[1:]
 		else:
 			extra_attachments = message.attachments
 		if len(extra_attachments) > 0:
