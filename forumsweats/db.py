@@ -18,51 +18,49 @@ db = client.discord
 member_data = db['members']
 infractions_data = db['infractions']
 servers_data = db['servers']
+starboard_data = db['starboard']
 
-
-async def set_minecraft_ign(user_id, ign, uuid):
+async def modify_member(user_id: int, data: dict):
 	if not connection_url: return
 	await member_data.update_one(
 		{ 'discord': user_id },
-		{
-			'$set': {
+		data,
+		upsert=True
+	)
+
+async def get_member_attribute(user_id: int, attribute: str):
+	if not connection_url: return
+	data = await member_data.find_one({
+		'discord': int(user_id),
+	})
+	if data:
+		return data.get(attribute)
+
+async def set_minecraft_ign(user_id: int, ign, uuid):
+	if not connection_url: return
+	await modify_member(int(user_id), {
+		'$set': {
 				'minecraft': {
 					'ign': ign,
 					'uuid': uuid
 				}
 			}
-		},
-		upsert=True
+		}
 	)
 
 
-async def get_minecraft_data(user_id):
-	if not connection_url: return
-	data = await member_data.find_one({
-		'discord': user_id,
-	})
-	if data:
-		return data.get('minecraft')
+async def get_minecraft_data(user_id: int):
+	return await get_member_attribute(user_id, 'minecraft')
 
 
 async def set_hypixel_rank(user_id, rank):
-	if not connection_url: return
-	await member_data.update_one(
-		{ 'discord': user_id },
-		{
-			'$set': { 'hypixel_rank': rank }
-		},
-		upsert=True
-	)
+	await modify_member(user_id, {
+		'$set': { 'hypixel_rank': rank }
+	})
 
 
 async def get_hypixel_rank(user_id):
-	if not connection_url: return
-	data = await member_data.find_one({
-		'discord': user_id,
-	})
-	if data:
-		return data.get('hypixel_rank')
+	return await get_member_attribute(user_id, 'hypixel_rank')
 
 
 async def set_mute_end(user_id, end_time, extra_data={}):
@@ -73,11 +71,7 @@ async def set_mute_end(user_id, end_time, extra_data={}):
 	for data in extra_data:
 		set_data[f'muted_data.{data}'] = extra_data[data]
 	set_data['muted'] = end_time > time.time()
-	await member_data.update_one(
-		{ 'discord': user_id },
-		{ '$set': set_data },
-		upsert=True
-	)
+	return await modify_member(user_id, { '$set': set_data })
 
 
 async def set_rock_immune(user_id: int, rock_immune: bool):
@@ -85,23 +79,14 @@ async def set_rock_immune(user_id: int, rock_immune: bool):
 	set_data = {
 		'muted_data.rock_immune': rock_immune
 	}
-	await member_data.update_one(
-		{ 'discord': user_id },
-		{ '$set': set_data },
-		upsert=True
-	)
+	return await modify_member(user_id, { '$set': set_data })
 
 
 async def get_rock_immune(user_id: int) -> bool:
 	'Returns whether the user is temporarily immune to rocks (because they did !gulag)'
 	if not connection_url: return False
-	data = await member_data.find_one(
-		{ 'discord': int(user_id) }
-	)
-	if data:
-		return data.get('muted_data', {}).get('rock_immune', False)
-	else:
-		return False
+	muted_data = await get_member_attribute(user_id, 'muted_data') or {}
+	return muted_data.get('rock_immune', False)
 
 
 async def get_is_muted(user_id):
@@ -582,3 +567,20 @@ async def give_pet(user_id, pet: Pet) -> None:
 		},
 		upsert=True
 	)
+
+async def add_starboard_message(message_id: int, starboard_message_id: int, star_count: int):
+	if not connection_url: return
+	await starboard_data.update_one(
+		{ 'message_id': message_id },
+		{
+			'starboard_message_id': starboard_message_id,
+			'star_count': star_count
+		}
+	)
+
+async def fetch_starboard_message(message_id: int) -> dict:
+	if not connection_url: return {}
+	starboard_message_data = await starboard_data.find_one({
+		'message_id': message_id
+	})
+	return starboard_message_data or {}

@@ -50,6 +50,10 @@ def has_role(member_id: int, role_name: str, guild_id=None):
 client = discord.Client(intents=intents)
 
 
+# this has to be here for there to not be an error
+from . import starboard
+
+
 async def start_bot():
 	print('starting bot pog')
 	await client.start(token)
@@ -567,8 +571,7 @@ async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 	# ))
 
 
-@client.event
-async def on_raw_reaction_add(payload):
+async def custom_reaction_messages(payload):
 	# ignore reactions from mat
 	# if payload.user_id == 224588823898619905:
 	# 	return
@@ -593,6 +596,11 @@ async def on_raw_reaction_add(payload):
 				f'Hey, you\'re a dum dum. If you disagree, please do `!gulag 15m` in <#{bot_commands_channel}>. Thanks!'
 			)
 
+
+@client.event
+async def on_raw_reaction_add(payload):
+	await custom_reaction_messages(payload)
+	await starboard.on_raw_reaction_add(payload)
 
 def api_get_members():
 	guild_id = config.main_guild
