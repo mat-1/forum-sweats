@@ -26,7 +26,7 @@ def add_faces(message):
 	sentence_enders = '.!?'
 
 	for character in message:
-		if character in sentence_enders and character == ' ':
+		if previous_character in sentence_enders and character == ' ':
 			if random.random() <= face_chance and sentence_length > 10:
 				face = random.choice(faces)
 
@@ -34,7 +34,7 @@ def add_faces(message):
 					# if 90% of the sentence is uppercase, make the face uppercase as well
 					face = face.upper()
 
-				output += ' ' + face
+				output = output[:-1] + ' ' + face + output[-1]
 			sentence_length = 0
 			sentence_uppercase_count = 0
 			sentence_lowercase_count = 0
@@ -54,7 +54,10 @@ def add_faces(message):
 			# if 90% of the sentence is uppercase, make the face uppercase as well
 			face = face.upper()
 
-		output += ' ' + face
+		if previous_character in sentence_enders:
+			output = output[:-1] + ' ' + face + output[-1]
+		else:
+			output += ' ' + face
 
 	return output
 
