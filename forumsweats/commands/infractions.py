@@ -44,7 +44,8 @@ async def run(message, member: Member = None):
 			total_mutes += 1
 
 		if 'date' in infraction:
-			if datetime.now() - infraction['date'] > timedelta(days=30):
+			print(datetime.utcnow() - infraction['date'])
+			if datetime.utcnow() - infraction['date'] > timedelta(days=30):
 				continue
 
 			date_pretty = infraction['date'].strftime('%m/%d/%Y')
