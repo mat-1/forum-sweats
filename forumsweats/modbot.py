@@ -234,7 +234,7 @@ async def process_messsage(message, warn=True):
 		)
 		return
 	# anti n-word filter
-	if re.search(r'(n+ *i+ *g+ *)g+ *(a+|e+ *r+)', content, flags=re.IGNORECASE):
+	if re.search(r'[\w\W]*(n+ *i+ *g+ *)g+ *(a+|e+ *r+)[\w\W]*', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t say racial slurs in chat, nerd')
 		except discord.errors.Forbidden:
@@ -248,7 +248,7 @@ async def process_messsage(message, warn=True):
 		return
 	
 	# anti r-word filter
-	if re.search(r'retard', content, flags=re.IGNORECASE):
+	if re.search(r'[\w\W]*retard[\w\W]*', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t say slurs in chat, nerd')
 		except discord.errors.Forbidden:
@@ -261,7 +261,7 @@ async def process_messsage(message, warn=True):
 		)
 		return
 
-	if re.search(r's+\W*[e3]+\W*x+\b', content, flags=re.IGNORECASE):
+	if re.search(r'[\w\W]*s+\W*[e3]+\W*x+\b[\w\W]*', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t talk about sexual stuff in chat, nerd')
 		except discord.errors.Forbidden:
