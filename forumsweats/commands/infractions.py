@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from utils import confirmed_emoji
 from ..discordbot import has_role
 from ..betterbot import Member
@@ -23,20 +24,33 @@ async def run(message, member: Member = None):
 	):
 		return
 
-	infractions = await db.get_infractions(member.id)
+	infractions = await db.get_all_infractions(member.id)
 
 	embed_title = 'Your infractions' if is_checking_self else f'{member}\'s infractions'
 
 	embed = discord.Embed(
 		title=embed_title
 	)
+
+	total_mutes = 0
+	total_mutes_path_month = 0
+
 	for infraction in infractions[-30:]:
 		value = infraction.get('reason') or '<no reason>'
 		name = infraction['type']
 		infraction_partial_id = infraction['_id'][:8]
+
+		if name == 'mute':
+			total_mutes += 1
+
 		if 'date' in infraction:
+			if datetime.now() - infraction['date'] > timedelta(days=30):
+				continue
+
 			date_pretty = infraction['date'].strftime('%m/%d/%Y')
 			name += f' ({date_pretty} {infraction_partial_id})'
+			if name == 'mute':
+				total_mutes_path_month += 1
 		else:
 			name += f' ({infraction_partial_id})'
 		if len(value) > 1000:
@@ -45,6 +59,15 @@ async def run(message, member: Member = None):
 			name=name,
 			value=value,
 			inline=False
+		)
+	
+	if total_mutes > total_mutes_path_month:
+		embed.set_footer(
+			text=f'{total_mutes} total infractions, {total_mutes_path_month} from past month'
+		)
+	else:
+		embed.set_footer(
+			text=f'{total_mutes} total infractions'
 		)
 
 	if len(infractions) == 0:

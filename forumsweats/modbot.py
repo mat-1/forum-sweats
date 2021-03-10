@@ -261,7 +261,7 @@ async def process_messsage(message, warn=True):
 		)
 		return
 
-	if re.search(r's+\W*[e3]+\W*x+(\b|$)', content, flags=re.IGNORECASE):
+	if re.search(r's\W*[e3]\W*x\b', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t talk about sexual stuff in chat, nerd')
 		except discord.errors.Forbidden:

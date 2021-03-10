@@ -157,6 +157,15 @@ async def get_infractions(user_id: int) -> list:
 		infractions.append(infraction)
 	return infractions
 
+async def get_all_infractions(user_id: int) -> list:
+	if not connection_url: return []
+	infractions = []
+	async for infraction in infractions_data.find({
+		'user': user_id,
+	}):
+		infractions.append(infraction)
+	return infractions
+
 
 async def clear_infractions(user_id: int, date):
 	if not connection_url: return
