@@ -261,6 +261,19 @@ async def process_messsage(message, warn=True):
 		)
 		return
 
+	if re.search(r's+\W*[e3]+\W*x+\b', content, flags=re.IGNORECASE):
+		try:
+			await message.author.send('Don\'t talk about sexual stuff in chat, nerd')
+		except discord.errors.Forbidden:
+			pass
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			60 * 60, # 1 hours
+			message.guild.id if message.guild else None
+		)
+		return
+
 	await check_spam(message)
 
 	perspectives = await get_perspectives_from_message(message)

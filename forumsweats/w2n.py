@@ -81,7 +81,7 @@ place_abbrev = {
 place_names = {
 	'dozen': 12,
 	'score': 20,
-	'hundred':  100,
+	'hundred': 100,
 	'gross': 144,
 	'thousand': 1000,
 	'million': 1000000,
