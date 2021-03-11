@@ -201,6 +201,9 @@ async def on_member_join(member):
 	if 'ban speedrun' in member.name.lower() or 'forum sweats nsfw' in member.name.lower():
 		return await member.ban(reason='has blacklisted phrase in name')
 
+	if used_invite:
+		await db.add_invited_member(used_invite.inviter.id, member.id)
+
 	moot_end = await db.get_mooted_end(member.id)
 	is_mooted = moot_end and moot_end > time.time()
 	if is_mooted:

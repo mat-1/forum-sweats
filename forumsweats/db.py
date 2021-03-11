@@ -598,3 +598,14 @@ async def fetch_starboard_message(message_id: int) -> dict:
 		'message_id': message_id
 	})
 	return starboard_message_data or {}
+
+async def get_invited_members(user_id: int) -> List[int]:
+	if not connection_url: return []
+	invited_members = await get_member_attribute(user_id, 'invited_members')
+	return invited_members or []
+
+
+async def add_invited_member(user_id: int, invited_member_id: int):
+	await modify_member(user_id, {
+		'$addToSet': { 'invited_members': invited_member_id }
+	})
