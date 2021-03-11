@@ -371,8 +371,8 @@ async def get_activity_bobux(user_id: int) -> int:
 	return bobux or 0
 
 
-async def change_bobux(user_id: int, amount: int, is_activity_bobux: bool=False) -> int:
-	if not connection_url: return 0
+async def change_bobux(user_id: int, amount: int, is_activity_bobux: bool=False):
+	if not connection_url: return
 	data_inc = { 'bobux': amount }
 	if is_activity_bobux:
 		data_inc['activity_bobux'] = amount

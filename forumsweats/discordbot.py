@@ -1,3 +1,4 @@
+from .commands.promoter import check_promoter
 from . import commands as commands_module
 from typing import Any, List, Union
 from .betterbot import BetterBot
@@ -208,6 +209,7 @@ async def on_member_join(member):
 
 	if used_invite:
 		await db.add_invited_member(used_invite.inviter.id, member.id)
+		asyncio.ensure_future(check_promoter(member))
 
 	moot_end = await db.get_mooted_end(member.id)
 	is_mooted = moot_end and moot_end > time.time()
