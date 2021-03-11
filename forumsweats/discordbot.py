@@ -88,7 +88,7 @@ async def give_hourly_bobux():
 				given_bobux += 5
 			elif messages_in_past_hour >= 1:
 				given_bobux += 1
-			await db.change_bobux(member_id, given_bobux)
+			await db.change_bobux(member_id, given_bobux, is_activity_bobux=True)
 			await check_bobux_roles(member_id)
 
 

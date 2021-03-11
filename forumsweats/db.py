@@ -362,20 +362,22 @@ async def set_bobux(user_id: int, amount: int):
 
 async def get_bobux(user_id: int):
 	if not connection_url: return
-	data = await member_data.find_one(
-		{ 'discord': user_id }
-	)
-	return data.get('bobux', 0)
+	bobux = await get_member_attribute(user_id, 'bobux')
+	return bobux or 0
+
+async def get_activity_bobux(user_id: int) -> int:
+	if not connection_url: return 0
+	bobux = await get_member_attribute(user_id, 'activity_bobux')
+	return bobux or 0
 
 
-async def change_bobux(user_id: int, amount: int):
-	if not connection_url: return
-	await member_data.update_one(
-		{ 'discord': user_id },
-		{
-			'$inc': { 'bobux': amount }
-		},
-		upsert=True
+async def change_bobux(user_id: int, amount: int, is_activity_bobux: bool=False) -> int:
+	if not connection_url: return 0
+	data_inc = { 'bobux': amount }
+	if is_activity_bobux:
+		data_inc['activity_bobux'] = amount
+	await modify_member(user_id, 
+		{ '$inc': data_inc }
 	)
 
 
