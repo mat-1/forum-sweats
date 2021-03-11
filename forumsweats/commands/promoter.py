@@ -73,7 +73,7 @@ async def run(message, member: Member = None):
 	# be 100% sure the command is being run in the correct guild
 	if message.guild.id != config.main_guild:
 		return
-	
+
 	result_message = await message.channel.send(embed=discord.Embed(
 		title='Promoter',
 		description='Please wait, getting activity for members you invited...'
@@ -82,8 +82,8 @@ async def run(message, member: Member = None):
 	try:
 		embed = await check_promoter(member)
 	except HasntInvitedAnyone:
-		return await result_message.edit(content='You haven\'t invited anyone :(')
+		return await result_message.edit(content='You haven\'t invited anyone :(', embed=None)
 	except UnknownInvitedMembers:
-		return await result_message.edit(content='It looks like you invited someone, but they left :(')
+		return await result_message.edit(content='It looks like you invited someone, but they left :(', embed=None)
 
 	await result_message.edit(embed=embed)
