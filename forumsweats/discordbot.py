@@ -187,15 +187,20 @@ async def on_member_join(member):
 		if invite_uses_now > invite_uses_before:
 			used_invite = invite
 
-	bot_logs_channel = client.get_channel(718107452960145519)
-	if used_invite:
-		await bot_logs_channel.send(embed=discord.Embed(
-			description=f'<@{member.id}> joined using discord.gg/{used_invite.code} (created by <@{used_invite.inviter.id}>)'
-		))
-	else:
-		await bot_logs_channel.send(embed=discord.Embed(
-			description=f'<@{member.id}> joined using an unknown invite'
-		))
+	try:
+		bot_logs_channel = client.get_channel(718107452960145519)
+		if used_invite:
+			await bot_logs_channel.send(embed=discord.Embed(
+				description=f'<@{member.id}> joined using discord.gg/{used_invite.code} (created by <@{used_invite.inviter.id}>)'
+			))
+		else:
+			await bot_logs_channel.send(embed=discord.Embed(
+				description=f'<@{member.id}> joined using an unknown invite'
+			))
+	except:
+		# if theres an error, the channel probably just doesnt exist
+		pass
+
 	cached_invites = await guild.invites()
 
 	if 'ban speedrun' in member.name.lower() or 'forum sweats nsfw' in member.name.lower():
