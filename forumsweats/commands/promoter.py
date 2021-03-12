@@ -86,4 +86,4 @@ async def run(message, member: Member = None):
 	except UnknownInvitedMembers:
 		return await result_message.edit(content='It looks like you invited someone, but they left :(', embed=None)
 
-	await result_message.edit(embed=embed)
+	await result_message.edit(content=None, embed=embed)

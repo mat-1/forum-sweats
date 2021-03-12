@@ -269,7 +269,7 @@ async def process_messsage(message, warn=True):
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
-			60 * 60, # 1 hours
+			60 * 10, # 10 minutes
 			message.guild.id if message.guild else None
 		)
 		return
