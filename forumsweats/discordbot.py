@@ -454,7 +454,7 @@ async def mute_user(member, length, guild_id=None, gulag_message=True, rock_immu
 		await member.remove_roles(og_role)
 
 	gulag = client.get_channel(config.channels['gulag'])
-	if gulag_message:
+	if gulag_message and gulag:
 		if not muted_before:
 			await gulag.send(f'Welcome to gulag, <@{member.id}>.')
 		else:

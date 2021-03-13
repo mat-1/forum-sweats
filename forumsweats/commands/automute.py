@@ -36,6 +36,8 @@ infraction_keywords = {
 
 
 def get_mute_reason_keyword(reason) -> Union[str, None]:
+	if reason is None:
+		return None
 	mute_length = 0
 	mute_keyword = None
 	for possible_keyword in infraction_keywords:
@@ -67,8 +69,8 @@ async def guess_mute_length_for_member(member, reason):
 			# if the infraction was made less than 3 minutes ago, it should be removed as it was likely an accident
 			await db.clear_infraction(infraction['_id'])
 
-		infraction_mute_keyword = get_mute_reason_keyword(reason)
-		adding_length = get_base_mute_length_for_infraction(reason)
+		infraction_mute_keyword = get_mute_reason_keyword(infraction['reason'])
+		adding_length = get_base_mute_length_for_infraction(infraction['reason'])
 
 		if infraction_mute_keyword not in same_infraction_counts:
 			same_infraction_counts[infraction_mute_keyword] = 0
@@ -81,6 +83,8 @@ async def guess_mute_length_for_member(member, reason):
 			adding_length /= (same_infraction_count + 3)
 		else:
 			adding_length /= (same_infraction_count)
+
+		print('adding', adding_length, 'seconds', same_infraction_count, infraction_mute_keyword)
 
 		mute_length += adding_length
 
