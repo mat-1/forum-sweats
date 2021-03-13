@@ -1,3 +1,4 @@
+from typing import Union
 from .mute import do_mute
 from ..betterbot import Member
 from datetime import timedelta, datetime
@@ -34,7 +35,7 @@ infraction_keywords = {
 }
 
 
-def get_mute_reason_keyword(reason):
+def get_mute_reason_keyword(reason) -> Union[str, None]:
 	mute_length = 0
 	mute_keyword = None
 	for possible_keyword in infraction_keywords:
@@ -70,7 +71,7 @@ async def guess_mute_length_for_member(member, reason):
 		adding_length = get_base_mute_length_for_infraction(reason)
 
 		if infraction_mute_keyword not in same_infraction_counts:
-			same_infraction_counts[infraction_mute_keyword] = {}
+			same_infraction_counts[infraction_mute_keyword] = 0
 		
 		same_infraction_count: int = same_infraction_counts[infraction_mute_keyword] + 1
 		same_infraction_counts[infraction_mute_keyword] = same_infraction_count
@@ -88,8 +89,6 @@ async def guess_mute_length_for_member(member, reason):
 
 async def run(message, member: Member, reason: str = None):
 	'Automatically guess the mute length from the reason, and past infractions'
-
-	print('pogging', member, reason)
 
 	if not member or not reason:
 		return await message.channel.send(

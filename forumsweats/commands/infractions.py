@@ -40,22 +40,17 @@ async def run(message, member: Member = None):
 		if name == 'mute':
 			total_mutes += 1
 		if 'date' in infraction:
-			print(datetime.utcnow() - timedelta(days=30), infraction['date'])
 			if datetime.utcnow() - timedelta(days=30) > infraction['date']:
 				continue
 			if name == 'mute':
 				total_mutes_path_month += 1
 	
-	print('total_mutes', total_mutes)
-	print('total_mutes_path_month', total_mutes_path_month)
-
 	for infraction in infractions[-30:]:
 		value = infraction.get('reason') or '<no reason>'
 		name = infraction['type']
 		infraction_partial_id = infraction['_id'][:8]
 
 		if 'date' in infraction:
-			print(datetime.utcnow() - infraction['date'])
 			if datetime.utcnow() - infraction['date'] > timedelta(days=30):
 				continue
 
