@@ -31,6 +31,9 @@ infraction_keywords = {
 	# this catches both 'racist' and 'racism'
 	'racis': 60 * 60 * 24 * 3,
 
+	'bypassing filter': 60 * 30,
+	'filter bypass': 60 * 30,
+
 	None: 60 * 1
 }
 
