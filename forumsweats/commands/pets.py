@@ -1,6 +1,6 @@
+from typing import Dict, List, TypedDict, Union
 from ..gui import PaginationGUI
 from ..betterbot import Member
-from typing import Dict, List
 from forumsweats import db
 from uuid import uuid4
 import discord
@@ -8,14 +8,33 @@ import discord
 name = 'pets'
 channels = ['bot-commands']
 
-PET_META: Dict[str, dict] = {
+class PetMetaAbility(TypedDict):
+	name: str
+	description: str
+
+class PetMeta(TypedDict, total=False):
+	name: str
+	description: Union[str, None]
+	abilities: List[PetMetaAbility]
+
+PETS_META: Dict[str, PetMeta] = {
 	'bobux': {
 		'name': 'Bobux pet',
 		'description': None
 	},
 	'gladiator': {
 		'name': 'Gladiator pet',
-		'description': None
+		'description': None,
+		'abilities': [
+			{
+				'name': 'Harder blows',
+				'description': 'If you win a duel your opponent gets muted for 50% longer.'
+			},
+			{
+				'name': 'Gladiator',
+				'description': 'Adds a small chance to rig duels in the owner of the pet\'s favor.'
+			},
+		]
 	},
 	'boulder': {
 		'name': 'Boulder pet',
@@ -46,7 +65,7 @@ class Pet:
 			self.uuid = uuid4().hex
 			self.provided_uuid = False
 
-		self.meta = PET_META[id]
+		self.meta = PETS_META[id]
 
 	def to_json(self):
 		return {
@@ -151,23 +170,32 @@ async def run(message, member: Member=None):
 
 	if not member:
 		member = message.author
-	pet_data: PetsData = await get_member_pet_data(member.id)
 
-	gui: PaginationGUI = await make_pet_gui(
-		pet_data=pet_data,
-		pet_owner=member,
-		user=message.author,
-	)
-
-	pet_message: discord.Message = await gui.make_message(
-		client=message.client,
-		user=message.author,
-		channel=message.channel,
-	)
-
-	option: PetGUIOption = await gui.wait_for_option()
-	print(option, option.pet)
-
-	await db.set_active_pet_uuid(member.id, option.pet.uuid)
-
+	pet_message: Union[discord.Message, None] = None
 	
+	while True:
+		pet_data: PetsData = await get_member_pet_data(member.id)
+
+		gui: PaginationGUI = await make_pet_gui(
+			pet_data=pet_data,
+			pet_owner=member,
+			user=message.author,
+		)
+
+		if pet_message is not None:
+			gui.client = message.client
+			gui.user = message.author
+			gui.channel = message.channel
+			await gui.from_message(pet_message)
+		else:
+			pet_message = await gui.make_message(
+				client=message.client,
+				user=message.author,
+				channel=message.channel,
+			)
+
+		option: PetGUIOption = await gui.wait_for_option()
+
+		await db.set_active_pet_uuid(member.id, option.pet.uuid)
+
+		

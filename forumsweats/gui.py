@@ -166,7 +166,7 @@ class GUI:
 		embed: discord.Embed = self.message.embeds[0]
 		embed.title = '(Timed out) ' + str(embed.title or '')
 		self.ended = True
-		await self.message.edit(embed = embed)
+		await self.message.edit(embed=embed)
 		return
 
 	async def wait_for_end(self):

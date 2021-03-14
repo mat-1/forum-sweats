@@ -1,4 +1,4 @@
-from .pets import PET_META, Pet, get_member_pet_data
+from .pets import PETS_META, Pet, get_member_pet_data
 from ..betterbot import Member
 from forumsweats import db
 from typing import Union
@@ -31,7 +31,7 @@ async def run(message, member: Member = None, pet_id: str = ''):
 	'Gives a pet to a user. Don\'t abuse this!'
 	if not member:
 		return await message.channel.send('Invalid member')
-	if pet_id not in PET_META:
+	if pet_id not in PETS_META:
 		return await message.channel.send('Invalid pet id')
 
 	pet = await give_pet(member.id, pet_id)
