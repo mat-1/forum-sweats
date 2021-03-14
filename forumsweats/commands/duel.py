@@ -66,10 +66,8 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 	elif channel.id == config.channels['general']:  # general
 		mute_length = 60 * 15
 
-		try:
-			await duel_loser.send('You were muted for 15 minutes because you lost a duel in general')
-		except:
-			pass
+		try: await duel_loser.send('You were muted for 15 minutes because you lost a duel in general')
+		except: pass
 
 		# increase the winstreak of the winner
 		last_dueled_member_id = await db.fetch_last_dueled_member(duel_winner.id)
@@ -83,14 +81,14 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 		if last_dueled_member_id != duel_loser.id:
 			await db.increase_duel_winstreak(duel_winner.id)
 
-			member_winstreak = await db.fetch_duel_winstreak(duel_winner.id)
-			if member_winstreak == 1:
+			winstreak = await db.fetch_duel_winstreak(duel_winner.id)
+			if winstreak == 1:
 				await db.change_bobux(duel_winner.id, 20)
-			elif member_winstreak == 2:
+			elif winstreak == 2:
 				await db.change_bobux(duel_winner.id, 50)
-			elif member_winstreak == 3:
+			elif winstreak == 3:
 				await db.change_bobux(duel_winner.id, 100)
-			elif member_winstreak >= 4:
+			elif winstreak >= 4:
 				await db.change_bobux(duel_winner.id, 200)
 				await give_unique_pet(duel_winner, 'gladiator')
 

@@ -562,14 +562,14 @@ async def fetch_raw_pets(user_id: int) -> List[dict]:
 	return pets or []
 
 async def give_pet(user_id, pet: Pet) -> None:
-	if not connection_url: return
-	await member_data.update_one(
-		{ 'discord': user_id },
-		{
-			'$push': { 'pets': pet.to_json() }
-		},
-		upsert=True
-	)
+	await modify_member(user_id, { '$push': { 'pets': pet.to_json() } })
+
+async def set_pets(user_id, pets: List[Pet]) -> None:
+	raw_pets = []
+	for pet in pets:
+		raw_pets.append(pet.to_json())
+	
+	await modify_member(user_id, { '$set': { 'pets': raw_pets }})
 
 async def add_starboard_message(message_id: int, starboard_message_id: int, star_count: int):
 	if not connection_url: return
