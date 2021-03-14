@@ -1,5 +1,5 @@
 from forumsweats.commands.pets import Pet
-from typing import Any, List, Set
+from typing import Any, List, Set, Union
 import motor.motor_asyncio
 import os
 import time
@@ -28,7 +28,15 @@ async def modify_member(user_id: int, data: dict):
 		upsert=True
 	)
 
-async def get_member_attribute(user_id: int, attribute: str):
+async def set_member(user_id: int, key: str, value: Any):
+	if not connection_url: return
+	await modify_member(user_id, { '$set': { key: value }})
+
+async def inc_member(user_id: int, key: str, value: int):
+	if not connection_url: return
+	await modify_member(user_id, { '$inc': { key: value }})
+
+async def fetch_member(user_id: int, attribute: str):
 	if not connection_url: return
 	data = await member_data.find_one({
 		'discord': int(user_id),
@@ -38,29 +46,23 @@ async def get_member_attribute(user_id: int, attribute: str):
 
 async def set_minecraft_ign(user_id: int, ign, uuid):
 	if not connection_url: return
-	await modify_member(int(user_id), {
-		'$set': {
-				'minecraft': {
-					'ign': ign,
-					'uuid': uuid
-				}
-			}
-		}
+	await set_member(
+		user_id,
+		'minecraft',
+		{ 'ign': ign, 'uuid': uuid }
 	)
 
 
 async def get_minecraft_data(user_id: int):
-	return await get_member_attribute(user_id, 'minecraft')
+	return await fetch_member(user_id, 'minecraft')
 
 
 async def set_hypixel_rank(user_id, rank):
-	await modify_member(user_id, {
-		'$set': { 'hypixel_rank': rank }
-	})
+	await set_member(user_id, 'hypixel_rank', rank)
 
 
 async def get_hypixel_rank(user_id):
-	return await get_member_attribute(user_id, 'hypixel_rank')
+	return await fetch_member(user_id, 'hypixel_rank')
 
 
 async def set_mute_end(user_id, end_time, extra_data={}):
@@ -75,17 +77,13 @@ async def set_mute_end(user_id, end_time, extra_data={}):
 
 
 async def set_rock_immune(user_id: int, rock_immune: bool):
-	if not connection_url: return
-	set_data = {
-		'muted_data.rock_immune': rock_immune
-	}
-	return await modify_member(user_id, { '$set': set_data })
+	await set_member(user_id, 'muted_data.rock_immune', rock_immune)
 
 
 async def get_rock_immune(user_id: int) -> bool:
 	'Returns whether the user is temporarily immune to rocks (because they did !gulag)'
 	if not connection_url: return False
-	muted_data = await get_member_attribute(user_id, 'muted_data') or {}
+	muted_data = await fetch_member(user_id, 'muted_data') or {}
 	return muted_data.get('rock_immune', False)
 
 
@@ -362,12 +360,12 @@ async def set_bobux(user_id: int, amount: int):
 
 async def get_bobux(user_id: int):
 	if not connection_url: return
-	bobux = await get_member_attribute(user_id, 'bobux')
+	bobux = await fetch_member(user_id, 'bobux')
 	return bobux or 0
 
 async def get_activity_bobux(user_id: int) -> int:
 	if not connection_url: return 0
-	bobux = await get_member_attribute(user_id, 'activity_bobux')
+	bobux = await fetch_member(user_id, 'activity_bobux')
 	return bobux or 0
 
 
@@ -559,15 +557,9 @@ async def bobux_unsubscribe_to(user_id, unsubbing_to_id):
 		upsert=True
 	)
 
-async def get_pets(user_id: int) -> List[dict]:
-	if not connection_url: return []
-	data = await member_data.find_one(
-		{ 'discord': user_id }
-	)
-	if data:
-		return data.get('pets', [])
-	else:
-		return []
+async def fetch_raw_pets(user_id: int) -> List[dict]:
+	pets = await fetch_member(user_id, 'pets')
+	return pets or []
 
 async def give_pet(user_id, pet: Pet) -> None:
 	if not connection_url: return
@@ -601,7 +593,7 @@ async def fetch_starboard_message(message_id: int) -> dict:
 
 async def get_invited_members(user_id: int) -> List[int]:
 	if not connection_url: return []
-	invited_members = await get_member_attribute(user_id, 'invited_members')
+	invited_members = await fetch_member(user_id, 'invited_members')
 	return invited_members or []
 
 
@@ -609,3 +601,27 @@ async def add_invited_member(user_id: int, invited_member_id: int):
 	await modify_member(user_id, {
 		'$addToSet': { 'invited_members': invited_member_id }
 	})
+
+
+'''
+duel related stuff
+'''
+
+async def fetch_duel_winstreak(user_id: int) -> int:
+	'Fetches the current duel winstreak for the member'
+	return await fetch_member(user_id, 'duel_winstreak') or 0
+
+async def increase_duel_winstreak(user_id: int):
+	'Increase the member\'s duel winstreak by one'
+	await inc_member(user_id, 'duel_winstreak', 1)
+
+async def reset_duel_winstreak(user_id: int):
+	'Reset the member\'s duel winstreak back to zero'
+	await set_member(user_id, 'duel_winstreak', 0)
+
+async def set_last_dueled_member(user_id: int, last_dueled_member_id: int):
+	await set_member(user_id, 'last_dueled_member', last_dueled_member_id)
+
+async def fetch_last_dueled_member(user_id: int) -> Union[int, None]:
+	return await fetch_member(user_id, 'last_dueled_member')
+

@@ -49,7 +49,7 @@ class PetsData:
 
 async def get_member_pet_data_raw(member_id: int) -> List[dict]:
 	# returns the pets a member has in json format
-	return await db.get_pets(member_id)
+	return await db.fetch_raw_pets(member_id)
 
 async def get_member_pet_data(member_id: int) -> PetsData:
 	# returns the pets a member has as a PetsData object

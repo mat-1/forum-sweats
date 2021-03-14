@@ -1,11 +1,13 @@
 from .rigduel import rigged_duel_users
 from ..discordbot import mute_user
 from ..betterbot import Member
+from .givepet import give_pet, give_unique_pet
+from forumsweats import db
+from typing import Union
 import asyncio
 import discord
 import config
 import time
-from forumsweats import db
 
 
 name = 'duel'
@@ -39,7 +41,7 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 	duel_statuses[duel_id]['ended'] = True
 	rigged = False
 	if duel_at_zero:
-		duel_winner = message.author
+		duel_winner: Union[Member] = message.author
 		duel_loser = opponent_1 if duel_winner == opponent_2 else opponent_2
 		if duel_loser.id in rigged_duel_users:
 			rigged_duel_users.remove(duel_loser.id)
@@ -62,13 +64,35 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 	if channel.id == 750147192383078400:  # quaglet channel
 		mute_length = 0
 	elif channel.id == config.channels['general']:  # general
-		mute_length = 60 * 60
+		mute_length = 60 * 15
+
 		try:
-			await duel_loser.send("You were muted for one hour because you lost a duel in general")
-		except discord.errors.Forbidden:
+			await duel_loser.send('You were muted for 15 minutes because you lost a duel in general')
+		except:
 			pass
-		except AttributeError:
-			pass
+
+		# increase the winstreak of the winner
+		last_dueled_member_id = await db.fetch_last_dueled_member(duel_winner.id)
+
+		await db.set_last_dueled_member(duel_loser.id, duel_winner.id)
+		await db.set_last_dueled_member(duel_winner.id, duel_loser.id)
+		# reset the winstreak of the loser
+		await db.reset_duel_winstreak(duel_loser.id)
+
+		# make sure the last person the winner dueled was someone different
+		if last_dueled_member_id != duel_loser.id:
+			await db.increase_duel_winstreak(duel_winner.id)
+
+			member_winstreak = await db.fetch_duel_winstreak(duel_winner.id)
+			if member_winstreak == 1:
+				await db.change_bobux(duel_winner.id, 20)
+			elif member_winstreak == 2:
+				await db.change_bobux(duel_winner.id, 50)
+			elif member_winstreak == 3:
+				await db.change_bobux(duel_winner.id, 100)
+			elif member_winstreak >= 4:
+				await db.change_bobux(duel_winner.id, 200)
+				await give_unique_pet(duel_winner, 'gladiator')
 
 	elif channel.id == config.channels.get('gulag'):  # gulag
 		mute_end = await db.get_mute_end(duel_loser.id)
@@ -98,7 +122,7 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 			channel.guild.id if channel.guild else None
 		)
 
-	if not rigged and duel_loser.id == message.guild.me.id and channel.id == config.channels['general']:
+	if not rigged and duel_loser.id == message.guild.me.id and channel.id == config.channels.get('general'):
 		print('won in general!', duel_winner.id)
 		# if you win against forum sweats in general, you get 50 bobux
 		await db.change_bobux(duel_winner.id, 50)
@@ -115,7 +139,7 @@ def get_duel_id(opponent_1, opponent_2):
 
 async def run(message, opponent: Member):
 	'Duel another member by waiting for a countdown and sending the 🔫 emoji. '\
-	'You will get muted for an hour if you lose a duel in <#719579620931797002>'
+	'You will get muted for 15 minutes (or more) if you lose a duel in <#719579620931797002>'
 	global duel_statuses
 
 	if not opponent:
@@ -145,7 +169,7 @@ async def run(message, opponent: Member):
 	if message.channel.id == config.channels['general']:
 		duel_invite_text = (
 			f'<@{opponent.id}>, react to this message with :gun: to duel <@{message.author.id}>. '
-			'The loser will get muted for one hour'
+			'The loser will get muted for 15 minutes'
 		)
 	else:
 		duel_invite_text = f'<@{opponent.id}>, react to this message with :gun: to duel <@{message.author.id}>'
