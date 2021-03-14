@@ -36,13 +36,14 @@ async def inc_member(user_id: int, key: str, value: int):
 	if not connection_url: return
 	await modify_member(user_id, { '$inc': { key: value }})
 
-async def fetch_member(user_id: int, attribute: str):
+async def fetch_member(user_id: int, attribute: Union[str, None]):
 	if not connection_url: return
 	data = await member_data.find_one({
 		'discord': int(user_id),
 	})
-	if data:
+	if data and attribute:
 		return data.get(attribute)
+	return data
 
 async def set_minecraft_ign(user_id: int, ign, uuid):
 	if not connection_url: return
@@ -557,19 +558,33 @@ async def bobux_unsubscribe_to(user_id, unsubbing_to_id):
 		upsert=True
 	)
 
-async def fetch_raw_pets(user_id: int) -> List[dict]:
-	pets = await fetch_member(user_id, 'pets')
-	return pets or []
+'''
+Pets
+'''
 
-async def give_pet(user_id, pet: Pet) -> None:
+async def fetch_raw_pets(user_id: int) -> dict:
+	member = await fetch_member(user_id, None) or {}
+
+	return {
+		'pets': member.get('pets'),
+		'active_uuid': member.get('active_pet')
+	}
+
+async def give_pet(user_id: int, pet: Pet) -> None:
 	await modify_member(user_id, { '$push': { 'pets': pet.to_json() } })
 
-async def set_pets(user_id, pets: List[Pet]) -> None:
+async def set_pets(user_id: int, pets: List[Pet]) -> None:
 	raw_pets = []
 	for pet in pets:
 		raw_pets.append(pet.to_json())
-	
-	await modify_member(user_id, { '$set': { 'pets': raw_pets }})
+
+	await set_member(user_id, 'pets', raw_pets)
+
+async def set_active_pet_uuid(user_id: int, pet_uuid: str) -> None:
+	await set_member(user_id, 'active_pet', pet_uuid)
+
+
+
 
 async def add_starboard_message(message_id: int, starboard_message_id: int, star_count: int):
 	if not connection_url: return

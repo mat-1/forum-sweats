@@ -27,8 +27,6 @@ PET_META: Dict[str, dict] = {
 	}
 }
 
-NUMBER_EMOJIS = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣')
-
 class Pet:
 	__slots__ = {'id', 'meta', 'uuid', 'provided_uuid'}
 
@@ -66,11 +64,16 @@ class Pet:
 			return False
 
 class PetsData:
-	__slots__ = {'pets'}
-	def __init__(self, pets: List[Pet]):
-		self.pets = pets
+	__slots__ = {'pets', 'active_uuid'}
 
-async def get_member_pet_data_raw(member_id: int) -> List[dict]:
+	pets: List[Pet]
+	active_uuid: str
+
+	def __init__(self, pets: List[Pet], active_uuid: str):
+		self.pets = pets
+		self.active_uuid = active_uuid
+
+async def get_member_pet_data_raw(member_id: int) -> dict:
 	# returns the pets a member has in json format
 	return await db.fetch_raw_pets(member_id)
 
@@ -82,7 +85,7 @@ async def get_member_pet_data(member_id: int) -> PetsData:
 	# whether it found a pet without a uuid that should be updated
 	should_update_pets = False
 
-	for pet_data in member_pet_data:
+	for pet_data in member_pet_data['pets']:
 		pet: Pet = Pet(**pet_data)
 
 		# the uuid for this pet wasnt provided, we should update the pets
@@ -96,7 +99,25 @@ async def get_member_pet_data(member_id: int) -> PetsData:
 		print('Someone had a pet without a uuid, this is fixed')
 		await db.set_pets(member_id, pets)
 
-	return PetsData(pets)
+	return PetsData(
+		pets=pets,
+		active_uuid=member_pet_data['active_uuid']
+	)
+
+class PetGUIOption:
+	pet: Pet
+	is_active: bool
+
+	def __init__(self, pet: Pet, is_active: bool):
+		self.pet = pet
+		self.is_active = is_active
+
+	def __str__(self):
+		pet_name = self.pet.meta['name']
+		if self.is_active:
+			return f'**{pet_name}**'
+		else:
+			return pet_name
 
 async def make_pet_gui(
 	pet_data: PetsData,
@@ -104,11 +125,22 @@ async def make_pet_gui(
 	user: discord.User,
 ) -> PaginationGUI:
 	is_owner = user.id == pet_owner.id
+
 	footer = 'React with the corresponding reaction to choose that pet. There is a 2 minute cooldown on switching pets.' if is_owner else ''
-	empty_message = 'You have no pets. Do **!help pets** (TODO) to learn how to get some!' if is_owner else 'This person has no pets.'
+
+	empty_message = 'You have no pets. Do **!help pets** to learn how to get some!' if is_owner else 'This person has no pets.'
+
+	pet_options = []
+	for pet in pet_data.pets:
+		pet_options.append(PetGUIOption(
+			pet,
+			is_active=pet.uuid == pet_data.active_uuid
+		))
+
+
 	return PaginationGUI(
 		title='Your pets' if is_owner else f'{pet_owner}\'s pets',
-		options=pet_data.pets,
+		options=pet_options,
 		footer=footer if len(pet_data.pets) >= 1 else '',
 		empty=empty_message,
 		selectable=is_owner
@@ -133,5 +165,9 @@ async def run(message, member: Member=None):
 		channel=message.channel,
 	)
 
-	option = await gui.wait_for_option()
-	print(option, option.meta)
+	option: PetGUIOption = await gui.wait_for_option()
+	print(option, option.pet)
+
+	await db.set_active_pet_uuid(member.id, option.pet.uuid)
+
+	
