@@ -180,7 +180,9 @@ async def make_pet_gui(
 	)
 
 async def run(message, member: Member=None):
-	'Shows the pets menu. Obtaining pets is currently impossible.'
+	'Shows the pets menu.\n'
+	'The current pets you can obtain are:\n'
+	'- Gladiator pet: Win 4 duels in a row against different people in #general'
 
 	if not member:
 		member = message.author
