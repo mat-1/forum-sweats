@@ -92,13 +92,14 @@ class PetsData:
 	__slots__ = {'pets', 'active'}
 
 	pets: List[Pet]
-	active: Pet
+	active: Union[Pet, None]
 
 	def __init__(self, pets: List[Pet], active_uuid: str):
 		self.pets = pets
 		for pet in pets:
 			if pet.uuid == active_uuid:
 				self.active = pet
+		self.active = None
 
 async def get_member_pet_data_raw(member_id: int) -> dict:
 	# returns the pets a member has in json format
@@ -167,7 +168,7 @@ async def make_pet_gui(
 	for pet in pet_data.pets:
 		pet_options.append(PetGUIOption(
 			pet,
-			is_active=pet.uuid == pet_data.active.uuid
+			is_active=pet_data.active is not None and pet.uuid == pet_data.active.uuid
 		))
 
 
@@ -215,7 +216,7 @@ async def run(message, member: Member=None):
 		if not option.pet: return
 
 		# if the user selects the already active pet, disable it
-		if option.pet.uuid == pet_data.active.uuid:
+		if pet_data.active is not None and option.pet.uuid == pet_data.active.uuid:
 			await db.set_active_pet_uuid(member.id, None)
 		else:
 			await db.set_active_pet_uuid(member.id, option.pet.uuid)
