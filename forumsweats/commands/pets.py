@@ -96,10 +96,10 @@ class PetsData:
 
 	def __init__(self, pets: List[Pet], active_uuid: str):
 		self.pets = pets
+		self.active = None
 		for pet in pets:
 			if pet.uuid == active_uuid:
 				self.active = pet
-		self.active = None
 
 async def get_member_pet_data_raw(member_id: int) -> dict:
 	# returns the pets a member has in json format
@@ -168,7 +168,7 @@ async def make_pet_gui(
 	for pet in pet_data.pets:
 		pet_options.append(PetGUIOption(
 			pet,
-			is_active=pet_data.active is not None and pet.uuid == pet_data.active.uuid
+			is_active=(pet_data.active is not None and pet.uuid == pet_data.active.uuid)
 		))
 
 
