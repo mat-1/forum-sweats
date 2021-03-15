@@ -484,6 +484,9 @@ async def get_bobux_leaderboard(limit=10):
 		leaderboard.append(member)
 	return leaderboard
 
+'''
+Bobux subs
+'''
 
 async def bobux_get_subscriptions(user_id) -> list:
 	if not connection_url: return []
@@ -586,6 +589,10 @@ async def set_active_pet_uuid(user_id: int, pet_uuid: Union[str, None]) -> None:
 
 
 
+'''
+Starboard
+'''
+
 async def add_starboard_message(message_id: int, starboard_message_id: int, star_count: int):
 	if not connection_url: return
 	await starboard_data.update_one(
@@ -605,6 +612,11 @@ async def fetch_starboard_message(message_id: int) -> dict:
 		'message_id': message_id
 	})
 	return starboard_message_data or {}
+
+
+'''
+Invited members
+'''
 
 async def get_invited_members(user_id: int) -> List[int]:
 	if not connection_url: return []

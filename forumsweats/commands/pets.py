@@ -12,9 +12,11 @@ class PetMetaAbility(TypedDict):
 	name: str
 	description: str
 
-class PetMeta(TypedDict, total=False):
+class _PetMetaBase(TypedDict):
 	name: str
 	description: Union[str, None]
+
+class PetMeta(_PetMetaBase, total=False):
 	abilities: List[PetMetaAbility]
 	emoji: str
 
@@ -30,11 +32,11 @@ PETS_META: Dict[str, PetMeta] = {
 		'abilities': [
 			{
 				'name': 'Harder blows',
-				'description': 'If you win a duel your opponent gets muted for 50% longer.'
+				'description': 'If you win a duel in #general, your opponent will get muted for 50% longer.'
 			},
 			{
 				'name': 'Gladiator',
-				'description': 'Adds a small chance to rig duels in the owner of the pet\'s favor.'
+				'description': 'Adds a 10% chance to rig duels in the owner of the pet\'s favor.'
 			},
 		],
 		'emoji': '⚔️'
@@ -56,7 +58,7 @@ class Pet:
 	id: str
 	uuid: str
 	provided_uuid: bool
-	meta: dict
+	meta: PetMeta
 
 	def __init__(self, id: str, uuid: str=None):
 		self.id = id
@@ -87,14 +89,16 @@ class Pet:
 			return False
 
 class PetsData:
-	__slots__ = {'pets', 'active_uuid'}
+	__slots__ = {'pets', 'active'}
 
 	pets: List[Pet]
-	active_uuid: str
+	active: Pet
 
 	def __init__(self, pets: List[Pet], active_uuid: str):
 		self.pets = pets
-		self.active_uuid = active_uuid
+		for pet in pets:
+			if pet.uuid == active_uuid:
+				self.active = pet
 
 async def get_member_pet_data_raw(member_id: int) -> dict:
 	# returns the pets a member has in json format
@@ -127,6 +131,12 @@ async def get_member_pet_data(member_id: int) -> PetsData:
 		active_uuid=member_pet_data['active_uuid']
 	)
 
+
+async def get_active_pet(member_id: int):
+	pet_data = await get_member_pet_data(member_id)
+	return pet_data.active
+
+
 class PetGUIOption:
 	pet: Pet
 	is_active: bool
@@ -149,7 +159,7 @@ async def make_pet_gui(
 ) -> PaginationGUI:
 	is_owner = user.id == pet_owner.id
 
-	footer = 'React with the corresponding reaction to choose that pet. There is a 2 minute cooldown on switching pets.' if is_owner else ''
+	footer = 'React with the corresponding reaction to choose that pet.' if is_owner else ''
 
 	empty_message = 'You have no pets. Do **!help pets** to learn how to get some!' if is_owner else 'This person has no pets.'
 
@@ -157,7 +167,7 @@ async def make_pet_gui(
 	for pet in pet_data.pets:
 		pet_options.append(PetGUIOption(
 			pet,
-			is_active=pet.uuid == pet_data.active_uuid
+			is_active=pet.uuid == pet_data.active.uuid
 		))
 
 
@@ -200,8 +210,10 @@ async def run(message, member: Member=None):
 
 		option: PetGUIOption = await gui.wait_for_option()
 
+		if not option.pet: return
+
 		# if the user selects the already active pet, disable it
-		if option.pet.uuid == pet_data.active_uuid:
+		if option.pet.uuid == pet_data.active.uuid:
 			await db.set_active_pet_uuid(member.id, None)
 		else:
 			await db.set_active_pet_uuid(member.id, option.pet.uuid)

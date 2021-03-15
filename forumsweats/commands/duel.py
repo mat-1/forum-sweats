@@ -1,7 +1,9 @@
+from forumsweats.commands.pets import get_active_pet
 from .rigduel import rigged_duel_users
+from .givepet import give_unique_pet
+from utils import seconds_to_string
 from ..discordbot import mute_user
 from ..betterbot import Member
-from .givepet import give_pet, give_unique_pet
 from forumsweats import db
 from typing import Union
 import asyncio
@@ -40,6 +42,15 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 	duel_at_zero = duel_statuses[duel_id]['zero']
 	duel_statuses[duel_id]['ended'] = True
 	rigged = False
+
+	opponent_1_active_pet = await get_active_pet(opponent_1.id)
+	opponent_2_active_pet = await get_active_pet(opponent_2.id)
+
+	if opponent_1_active_pet and opponent_1_active_pet.id == 'gladiator':
+		rigged_duel_users.add(opponent_1.id)
+	if opponent_2_active_pet and opponent_2_active_pet.id == 'gladiator':
+		rigged_duel_users.add(opponent_2.id)
+
 	if duel_at_zero:
 		duel_winner: Union[Member] = message.author
 		duel_loser = opponent_1 if duel_winner == opponent_2 else opponent_2
@@ -64,9 +75,17 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 	if channel.id == 750147192383078400:  # quaglet channel
 		mute_length = 0
 	elif channel.id == config.channels['general']:  # general
-		mute_length = 60 * 15
+		mute_length: int = 60 * 15
 
-		try: await duel_loser.send('You were muted for 15 minutes because you lost a duel in general')
+		winner_active_pet = await get_active_pet(duel_winner.id)
+
+		# "Harder blows" gladiator pet ability
+		if winner_active_pet and winner_active_pet.id == 'gladiator':
+			mute_length = int(mute_length * 1.5)
+
+		mute_length_string = seconds_to_string(mute_length)
+
+		try: await duel_loser.send(f'You were muted for {mute_length_string} because you lost a duel in general')
 		except: pass
 
 		# increase the winstreak of the winner
@@ -94,7 +113,7 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 
 	elif channel.id == config.channels.get('gulag'):  # gulag
 		mute_end = await db.get_mute_end(duel_loser.id)
-		mute_remaining = mute_end - time.time()
+		mute_remaining = int(mute_end - time.time())
 		mute_length = mute_remaining + 60 * 5
 	else:
 		mute_length = 60 * 1
@@ -193,6 +212,7 @@ async def run(message, opponent: Member):
 
 	if opponent.id in active_duelers:
 		return
+
 	active_duelers.add(opponent.id)
 
 	asyncio.ensure_future(duel_wait_for(message.client, message.channel, message.author, opponent))
@@ -200,7 +220,9 @@ async def run(message, opponent: Member):
 	is_testing = message.author.id == 1
 
 	await message.channel.send('Duel starting in 10 seconds... First person to type :gun: once the countdown ends, wins.')
+
 	if not is_testing: await asyncio.sleep(5)
+
 	while (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
 		if (duel_id in duel_statuses) and (not duel_statuses[duel_id]['zero']):
 			await message.channel.send('5')

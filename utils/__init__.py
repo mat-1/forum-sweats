@@ -7,7 +7,7 @@ def get_role_id(guild_id, rank_name):
 	return roles.get(str(guild_id), {}).get(rank_name)
 
 
-def seconds_to_string(actual_seconds, extra_parts=1):
+def seconds_to_string(actual_seconds: int, extra_parts: int=1):
 	seconds = int(actual_seconds)
 	minutes = int(actual_seconds // 60)
 	hours = int(actual_seconds // (60 * 60))
