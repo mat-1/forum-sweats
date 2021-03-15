@@ -580,7 +580,7 @@ async def set_pets(user_id: int, pets: List[Pet]) -> None:
 
 	await set_member(user_id, 'pets', raw_pets)
 
-async def set_active_pet_uuid(user_id: int, pet_uuid: str) -> None:
+async def set_active_pet_uuid(user_id: int, pet_uuid: Union[str, None]) -> None:
 	await set_member(user_id, 'active_pet', pet_uuid)
 
 

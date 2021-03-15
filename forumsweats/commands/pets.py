@@ -16,11 +16,13 @@ class PetMeta(TypedDict, total=False):
 	name: str
 	description: Union[str, None]
 	abilities: List[PetMetaAbility]
+	emoji: str
 
 PETS_META: Dict[str, PetMeta] = {
 	'bobux': {
 		'name': 'Bobux pet',
-		'description': None
+		'description': None,
+		'emoji': '💰'
 	},
 	'gladiator': {
 		'name': 'Gladiator pet',
@@ -34,11 +36,13 @@ PETS_META: Dict[str, PetMeta] = {
 				'name': 'Gladiator',
 				'description': 'Adds a small chance to rig duels in the owner of the pet\'s favor.'
 			},
-		]
+		],
+		'emoji': '⚔️'
 	},
 	'boulder': {
 		'name': 'Boulder pet',
-		'description': None
+		'description': None,
+		'emoji': '🪨'
 	},
 	'useless': {
 		'name': 'Useless pet',
@@ -196,6 +200,10 @@ async def run(message, member: Member=None):
 
 		option: PetGUIOption = await gui.wait_for_option()
 
-		await db.set_active_pet_uuid(member.id, option.pet.uuid)
+		# if the user selects the already active pet, disable it
+		if option.pet.uuid == pet_data.active_uuid:
+			await db.set_active_pet_uuid(member.id, None)
+		else:
+			await db.set_active_pet_uuid(member.id, option.pet.uuid)
 
 		
