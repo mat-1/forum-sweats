@@ -9,6 +9,7 @@ from typing import Union
 import asyncio
 import discord
 import config
+import random
 import time
 
 
@@ -46,10 +47,13 @@ async def duel_wait_for(client, channel, opponent_1, opponent_2):
 	opponent_1_active_pet = await get_active_pet(opponent_1.id)
 	opponent_2_active_pet = await get_active_pet(opponent_2.id)
 
+	# "Gladiator" gladiator pet ability
 	if opponent_1_active_pet and opponent_1_active_pet.id == 'gladiator':
-		rigged_duel_users.add(opponent_1.id)
+		if random.random() >= .9:
+			rigged_duel_users.add(opponent_1.id)
 	if opponent_2_active_pet and opponent_2_active_pet.id == 'gladiator':
-		rigged_duel_users.add(opponent_2.id)
+		if random.random() >= .9:
+			rigged_duel_users.add(opponent_2.id)
 
 	if duel_at_zero:
 		duel_winner: Union[Member] = message.author
