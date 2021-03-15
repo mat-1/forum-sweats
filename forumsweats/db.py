@@ -569,7 +569,7 @@ async def fetch_raw_pets(user_id: int) -> dict:
 	member = await fetch_member(user_id, None) or {}
 
 	return {
-		'pets': member.get('pets'),
+		'pets': member.get('pets', []),
 		'active_uuid': member.get('active_pet')
 	}
 
