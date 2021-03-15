@@ -1,10 +1,10 @@
-from typing import Union
-from .mute import do_mute
-from ..betterbot import Member
 from datetime import timedelta, datetime
 from utils import seconds_to_string
-import discord
+from ..betterbot import Member
 from forumsweats import db
+from .mute import do_mute
+from typing import Union
+import discord
 
 name = 'automute'
 channels = None

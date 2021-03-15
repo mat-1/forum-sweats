@@ -349,9 +349,9 @@ def check_fakemember_id(ctx, arg):
 class FakeMember():
 	def __init__(self, id):
 		self.id = id
-		self.name = '<deleted user>'
+		self.name = '<Dummy>'
 		self.display_name = self.name
-		self.discriminator = 0000
+		self.discriminator = '0000'
 		self.mention = f'<@{self.id}>'
 
 	def __str__(self):

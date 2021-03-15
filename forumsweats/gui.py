@@ -16,6 +16,9 @@ ARROW_RIGHT = '➡️'
 
 ARROW_RETURN = '↩️'
 
+# time until the embed is disabled (in seconds)
+TIMEOUT = 60
+
 class GUI:
 	'The base GUI, does nothing by default but provides utilities for other GUIs'
 	client: discord.Client
@@ -153,16 +156,28 @@ class GUI:
 			if check_result: return True
 			return False
 
-		reaction, user = await self.client.wait_for('reaction_add', check=check_and_delete)
+		reaction, user = await self.client.wait_for('reaction_add', check=check_and_delete, timeout=TIMEOUT)
 	
 		return reaction.emoji
+
+	async def _timed_out(self):
+		'Edit the embed to say it timed out'
+
+		embed: discord.Embed = self.message.embeds[0]
+		embed.title = '(Timed out) ' + str(embed.title or '')
+		self.ended = True
+		await self.message.edit(embed=embed)
+		return
 
 	async def wait_for_end(self):
 		if self.ended: return
 		await self.set_reactions(self.reactions + [ARROW_RETURN])
 		reaction = None
 		while reaction != ARROW_RETURN:
-			reaction = await self.wait_for_reaction()
+			try:
+				reaction = await self.wait_for_reaction()
+			except asyncio.TimeoutError:
+				return await self._timed_out()
 
 	async def wait_for_option(self):
 		return
@@ -370,7 +385,12 @@ class PaginationGUI(GUI):
 
 	async def wait_for_option(self) -> Any:
 		while True:
-			reaction = await self.wait_for_reaction()
+			try:
+				reaction = await self.wait_for_reaction()
+			except asyncio.TimeoutError:
+				# if it times out, add (timed out) to the title and return
+				return await self._timed_out()
+
 			if reaction == ARROW_RIGHT:
 				await self.set_page(self.page_number + 1)
 			elif reaction == ARROW_LEFT:

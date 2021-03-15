@@ -1,9 +1,9 @@
-from ..betterbot import Member, Time
-from ..discordbot import mute_user
 from datetime import datetime, timedelta
+from ..betterbot import Member, Time
 from utils import seconds_to_string
-import discord
+from ..discordbot import mute_user
 from forumsweats import db
+import discord
 
 name = 'mute'
 channels = None
