@@ -213,7 +213,7 @@ async def run(message, member: Member=None):
 
 		option: PetGUIOption = await gui.wait_for_option()
 
-		if not option.pet: return
+		if not option: return
 
 		# if the user selects the already active pet, disable it
 		if pet_data.active is not None and option.pet.uuid == pet_data.active.uuid:

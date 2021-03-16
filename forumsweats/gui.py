@@ -167,6 +167,8 @@ class GUI:
 		embed.title = '(Timed out) ' + str(embed.title or '')
 		self.ended = True
 		await self.message.edit(embed=embed)
+		# clear the reactions
+		await self.set_reactions([])
 		return
 
 	async def wait_for_end(self):
