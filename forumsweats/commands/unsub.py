@@ -1,4 +1,4 @@
-from forumsweats.betterbot import Member
+from forumsweats.commandparser import Member
 from forumsweats import confirmgui
 from .sub import is_subbed
 import discord

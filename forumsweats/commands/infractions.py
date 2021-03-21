@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from utils import confirmed_emoji
 from ..discordbot import has_role
-from ..betterbot import Member
+from ..commandparser import Member
 from forumsweats import db
 import discord
 

@@ -1,4 +1,4 @@
-from ..betterbot import Member
+from ..commandparser import Member
 import forumsweats.discordbot as discordbot
 import discord
 from forumsweats import db

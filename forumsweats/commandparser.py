@@ -37,7 +37,7 @@ class NothingFound(BaseException): pass
 recent_members = {}
 
 
-class BetterBot():
+class CommandParser():
 	functions = []
 
 	def __init__(self, prefix, bot_id):

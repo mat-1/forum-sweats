@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from ..betterbot import Member, Time
+from ..commandparser import Member, Time
 from utils import seconds_to_string
 from ..discordbot import mute_user
 from forumsweats import db

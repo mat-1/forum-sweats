@@ -1,4 +1,4 @@
-from ..betterbot import Time
+from ..commandparser import Time
 from utils import seconds_to_string
 
 name = 'debugtime'

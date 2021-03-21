@@ -38,7 +38,7 @@ If the command has multiple complex uses, you should put them in different files
 The arguments that are used for running the command. The names of the arguments don't matter, but the types are listed below (can be set by doing `(message, argumentname: Member)`).
 The first argument is always the `message` object.
 
-Member and Time can be imported by doing `from ..betterbot import Member, Time`
+Member and Time can be imported by doing `from ..commandparser import Member, Time`
 
 - `Member` - Using a server member in a command. This will intelligently figure out who the user is, and even allows for putting part of the user's name or nickname, and it can include spaces. See mute.py for an example.
 - `Time` - Using an amount of time, like 5 minutes, in a command. See [mute.py](https://github.com/mat-1/forum-sweats/blob/master/bot/commands/mute.py) for an exmaple.

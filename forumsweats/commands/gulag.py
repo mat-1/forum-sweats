@@ -1,4 +1,4 @@
-from ..betterbot import Time
+from ..commandparser import Time
 from ..discordbot import mute_user
 import time
 from forumsweats import db

@@ -1,4 +1,4 @@
-from ..betterbot import Member
+from ..commandparser import Member
 
 name = 'avatar'
 

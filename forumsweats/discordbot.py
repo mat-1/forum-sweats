@@ -1,6 +1,6 @@
 from . import commands as commands_module
 from typing import Any, List, Union
-from .betterbot import BetterBot
+from .commandparser import CommandParser
 from datetime import datetime
 from . import uwuify
 from . import modbot
@@ -24,7 +24,7 @@ intents.presences = True
 
 token = os.getenv('token')
 is_dev = os.getenv('dev', 'false').lower() == 'true'
-betterbot = BetterBot(
+commandparser = CommandParser(
 	prefix=config.prefix,
 	bot_id=int(base64.b64decode(token.split('.')[0])) if token else 0
 )
@@ -380,7 +380,7 @@ async def on_message(message):
 	asyncio.ensure_future(db.add_message(message.author.id))
 	await process_counting_channel(message)
 	await process_infinite_counting_channel(message)
-	await betterbot.process_commands(message)
+	await commandparser.process_commands(message)
 	await modbot.process_messsage(message)
 
 
@@ -673,7 +673,7 @@ for module_filename in os.listdir('./forumsweats/commands'):
 	module: Any = importlib.import_module('forumsweats.commands.' + module_filename[:-3])
 	command_modules.append(module)
 	print('Registering command from file', module_filename)
-	betterbot.command(
+	commandparser.command(
 		module.name,
 		aliases=getattr(module, 'aliases', []),
 		pad_none=getattr(module, 'pad_none', True),

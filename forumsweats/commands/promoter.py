@@ -1,5 +1,5 @@
 from forumsweats.discordbot import get_role_id
-from ..betterbot import Member
+from ..commandparser import Member
 from forumsweats import db
 import discord
 import config

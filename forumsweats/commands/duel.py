@@ -3,7 +3,7 @@ from .rigduel import rigged_duel_users
 from .givepet import give_unique_pet
 from utils import seconds_to_string
 from ..discordbot import mute_user
-from ..betterbot import Member
+from ..commandparser import Member
 from forumsweats import db
 from typing import Union
 import asyncio

@@ -1,5 +1,5 @@
 from utils import seconds_to_string
-from forumsweats.betterbot import Member
+from forumsweats.commandparser import Member
 from datetime import datetime
 from .sub import tiers
 import discord

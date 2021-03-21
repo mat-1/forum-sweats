@@ -1,5 +1,5 @@
 import forumsweats.discordbot as discordbot
-from ..betterbot import Member
+from ..commandparser import Member
 import discord
 from forumsweats import db
 

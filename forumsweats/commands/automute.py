@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
 from utils import seconds_to_string
-from ..betterbot import Member
+from ..commandparser import Member
 from forumsweats import db
 from .mute import do_mute
 from typing import Union

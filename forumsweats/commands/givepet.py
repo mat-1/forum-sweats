@@ -1,5 +1,5 @@
 from .pets import PETS_META, Pet, get_member_pet_data
-from ..betterbot import Member
+from ..commandparser import Member
 from forumsweats import db
 from typing import Union
 import discord

@@ -1,6 +1,6 @@
 from typing import Dict, List, TypedDict, Union
 from ..gui import PaginationGUI
-from ..betterbot import Member
+from ..commandparser import Member
 from forumsweats import db
 from uuid import uuid4
 import discord

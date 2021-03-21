@@ -1,5 +1,5 @@
 from ..discordbot import mute_user
-from ..betterbot import Member
+from ..commandparser import Member
 import time
 from forumsweats import db
 

@@ -1,4 +1,4 @@
-from ..betterbot import Member
+from ..commandparser import Member
 from ..discordbot import unmoot_user
 import discord
 

@@ -1,4 +1,4 @@
-from ..betterbot import Member
+from ..commandparser import Member
 from ..discordbot import unmute_user
 from utils import seconds_to_string
 import discord

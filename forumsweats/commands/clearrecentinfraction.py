@@ -1,5 +1,5 @@
 from utils import confirmed_emoji
-from ..betterbot import Member
+from ..commandparser import Member
 from forumsweats import db
 
 name = 'clearrecentinfraction'
