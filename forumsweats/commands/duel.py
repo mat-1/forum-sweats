@@ -164,7 +164,7 @@ async def run(message, opponent: Member):
 	global duel_statuses
 
 	if not opponent:
-		return await message.channel.send('You must choose an opponent (example: !duel quaglet)')
+		return await message.channel.send('You must choose an opponent (example: !duel edurk)')
 	if opponent.id == message.author.id:
 		return await message.channel.send("You can't duel yourself")
 
