@@ -133,9 +133,9 @@ def create_giveaway_embed(data: dict, winners=None):
 		ends_in_string = seconds_to_string(end - int(time.time()))
 		description = f'**Ends in: {ends_in_string}**'
 		if winner_count != 1:
-			description += f'Winners: {winner_count}'
+			description += f'\nWinners: {winner_count}'
 		if bobux_requirement > 0:
-			description += f'Requirement: {bobux_requirement} bobux'
+			description += f'\nRequirement: {bobux_requirement} bobux'
 
 	description += f'\nHosted by: <@{creator_id}>'
 
