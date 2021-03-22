@@ -1,6 +1,5 @@
-from typing import List
-from discord.ext import commands
 from . import discordbot
+from typing import List, Optional
 import traceback
 import discord
 import config
@@ -8,8 +7,60 @@ import time
 import re
 
 
+class Member():
+	avatar_url: str
+	id: int
+	mention: str
+
+	async def send(self, message: str): pass
+
+	async def convert(self, ctx, arg):
+		arg = arg.strip()
+		if len(arg) == 0:
+			return None
+		if arg[0] == '@':
+			arg = arg[1:]
+
+		CHECKERS = [
+			check_user_id,  # Check user id
+			check_mention,  # Check mention
+			check_name_with_discrim,  # Name + discrim
+
+			check_name_starts_with_recent,  # Name starts with
+			check_name_starts_with,  # Name starts with
+
+			check_nickname_recent,  # Nickname
+			check_nickname,  # Nickname
+
+			check_nickname_starts_with_recent,  # Nickname starts with
+			check_nickname_starts_with,  # Nickname starts with
+
+			check_name_contains_recent,  # Name contains
+			check_name_contains,  # Name contains
+
+			check_nickname_contains_recent,  # Nickname contains
+			check_nickname_contains,  # Nickname contains
+
+			check_fakemember_id  # Deleted member id
+		]
+		for checker in CHECKERS:
+			member = checker(ctx, arg)
+			if member is not None:
+				return member
+
+		return None
+
+
 class Context(discord.Message):  # very unfinished but its fine probably
 	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content', 'add_reaction', 'delete', 'edit')
+
+	message: discord.Message
+	content: str
+	channel: discord.abc.Messageable
+	guild: discord.Guild
+	author: Member
+	prefix: Optional[str]
+	client: discord.Client
 
 	async def send(self, *args, embed=None, **kwargs):
 		'Send a message to a channel'
@@ -363,48 +414,6 @@ class FakeMember():
 	async def remove_roles(self, *args, **kwargs):
 		pass
 
-class Member():
-	avatar_url: str
-	id: int
-	mention: str
-
-	async def send(self, message: str): pass
-
-	async def convert(self, ctx, arg):
-		arg = arg.strip()
-		if len(arg) == 0:
-			return None
-		if arg[0] == '@':
-			arg = arg[1:]
-
-		CHECKERS = [
-			check_user_id,  # Check user id
-			check_mention,  # Check mention
-			check_name_with_discrim,  # Name + discrim
-
-			check_name_starts_with_recent,  # Name starts with
-			check_name_starts_with,  # Name starts with
-
-			check_nickname_recent,  # Nickname
-			check_nickname,  # Nickname
-
-			check_nickname_starts_with_recent,  # Nickname starts with
-			check_nickname_starts_with,  # Nickname starts with
-
-			check_name_contains_recent,  # Name contains
-			check_name_contains,  # Name contains
-
-			check_nickname_contains_recent,  # Nickname contains
-			check_nickname_contains,  # Nickname contains
-
-			check_fakemember_id  # Deleted member id
-		]
-		for checker in CHECKERS:
-			member = checker(ctx, arg)
-			if member is not None:
-				return member
-
-		return None
 
 
 '''
@@ -477,14 +486,14 @@ def check_time(ctx, arg):
 
 
 class Time():
-	def __init__(self, value):
+	def __init__(self, value=0):
 		self.value = value
 	def __gt__(self, other) -> bool: return float(self) > float(other)
 	def __lt__(self, other) -> bool: return float(self) < float(other)
 	def __int__(self) -> int: return int(self.value)
 	def __float__(self) -> float: return float(self.value)
 
-	async def convert(self, ctx, arg):
+	async def convert(self, ctx: Context, arg: str):
 		arg = arg.strip()
 		CHECKERS = [
 			check_time

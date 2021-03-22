@@ -19,6 +19,7 @@ member_data = db['members']
 infractions_data = db['infractions']
 servers_data = db['servers']
 starboard_data = db['starboard']
+giveaways_data = db['giveaways']
 
 async def modify_member(user_id: int, data: dict):
 	if not connection_url: return
@@ -652,3 +653,46 @@ async def set_last_dueled_member(user_id: int, last_dueled_member_id: int):
 async def fetch_last_dueled_member(user_id: int) -> Union[int, None]:
 	return await fetch_member(user_id, 'last_dueled_member')
 
+'''
+Giveaways
+'''
+
+async def create_new_giveaway(message_id: int, creator_id: int, channel_id: int, end: int, winners: int, bobux_requirement: int, prize: str):
+	await giveaways_data.update_one(
+		{ 'id': message_id },
+		{
+			'$set': {
+				'creator_id': creator_id,
+				'channel_id': channel_id,
+				'end': end,
+				'winners': winners,
+				'bobux_requirement': bobux_requirement,
+				'prize': prize,
+				'ended': False
+			}
+		},
+		upsert=True
+	)
+	return {
+		'id': message_id,
+		'creator_id': creator_id,
+		'channel_id': channel_id,
+		'end': end,
+		'winners': winners,
+		'bobux_requirement': bobux_requirement,
+		'prize': prize,
+		'ended': False
+	}
+
+
+async def get_active_giveaways():
+	giveaways = []
+	async for giveaway in giveaways_data.find({ 'ended': False }):
+		giveaways.append(giveaway)
+	return giveaways
+
+async def end_giveaway(message_id: int):
+	await giveaways_data.update_one(
+		{ 'id': message_id },
+		{ '$set': { 'ended': True } }
+	)

@@ -38,7 +38,6 @@ def seconds_to_string(actual_seconds: int, extra_parts: int=1):
 		time_string = '1 second'
 	else:
 		time_string = f'{seconds} seconds'
-	print('remaining_seconds', remaining_seconds)
 	if remaining_seconds > 1 and extra_parts != 0:
 		second_time_string = seconds_to_string(remaining_seconds, extra_parts=extra_parts - 1)
 		time_string = f'{time_string} and {second_time_string}'

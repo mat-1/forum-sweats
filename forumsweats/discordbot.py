@@ -160,14 +160,21 @@ async def on_ready():
 	await client.change_presence(
 		activity=discord.Game(name='your mom')
 	)
-	if not is_dev:
-		guild = client.get_guild(config.main_guild)
-		cached_invites = await guild.invites()
 
-		asyncio.ensure_future(check_dead_chat())
-		asyncio.ensure_future(give_active_mutes())
-		asyncio.ensure_future(give_hourly_bobux())
-		asyncio.ensure_future(give_subbed_bobux())
+	if not is_dev:
+		try:
+			guild = client.get_guild(config.main_guild)
+			cached_invites = await guild.invites()
+		except:
+			print('Failed getting guild invites, make sure the config is correct.')
+
+		asyncio.ensure_future(check_dead_chat(), loop=client.loop)
+		asyncio.ensure_future(give_active_mutes(), loop=client.loop)
+		asyncio.ensure_future(give_hourly_bobux(), loop=client.loop)
+		asyncio.ensure_future(give_subbed_bobux(), loop=client.loop)
+	
+	from forumsweats.commands.giveaway import continue_giveaways
+	asyncio.ensure_future(continue_giveaways(), loop=client.loop)
 
 
 @client.event
