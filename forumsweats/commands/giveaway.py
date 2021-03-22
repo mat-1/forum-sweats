@@ -183,7 +183,7 @@ async def prompt_input(client: discord.Client, user: Member, channel: discord.ab
 	await channel.send(prompt_message)
 
 	while user_response is None:
-		m: discord.Message = await client.wait_for('message', check=lambda m: m.author.id == user.id, timeout=60)
+		m: discord.Message = await client.wait_for('message', check=lambda m: m.author.id == user.id and channel.id == channel.id, timeout=60)
 
 		if m.content.lower() == 'cancel':
 			return await m.add_reaction('👍')
