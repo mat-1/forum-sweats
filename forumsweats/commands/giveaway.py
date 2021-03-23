@@ -1,8 +1,8 @@
-from datetime import datetime
 from forumsweats.commandparser import Context, Member, Time
+from forumsweats.discordbot import client
 from utils import seconds_to_string
 from typing import Any, Callable
-from forumsweats.discordbot import client
+from datetime import datetime
 from forumsweats import db
 import discord
 import asyncio
@@ -62,7 +62,11 @@ async def end_giveaway(data: dict):
 
 	winner_mentions = ' '.join(winner.mention for winner in winners)
 
-	await channel.send(winner_mentions)
+	# send and delete a message that mentions all the winners so they get pinged
+	mentions_message = await channel.send(winner_mentions)
+	await mentions_message.delete()
+
+
 	for winner in winners:
 		try:
 			await winner.send(f'You won **{prize}** {message.jump_url}')
@@ -176,6 +180,8 @@ async def create_new_giveaway(creator_id: int, channel: discord.abc.GuildChannel
 
 	asyncio.ensure_future(continue_giveaway(giveaway_data), loop=client.loop)
 
+	return giveaway_message
+
 
 async def prompt_input(client: discord.Client, user: Member, channel: discord.abc.Messageable, prompt_message: str, invalid_message: str, check: Callable[[str], Any]) -> Any:
 	user_response = None
@@ -183,7 +189,13 @@ async def prompt_input(client: discord.Client, user: Member, channel: discord.ab
 	await channel.send(prompt_message)
 
 	while user_response is None:
-		m: discord.Message = await client.wait_for('message', check=lambda m: m.author.id == user.id and channel.id == channel.id, timeout=60)
+		m: discord.Message = await client.wait_for(
+			'message',
+			check=lambda m:
+				m.author.id == user.id
+				and channel.id == channel.id, # type: ignore (the typings on discord.py are wrong)
+			timeout=60
+		)
 
 		if m.content.lower() == 'cancel':
 			return await m.add_reaction('👍')
@@ -231,8 +243,9 @@ async def run(message: Context):
 
 
 	async def check_winners(content: str):
-		try: return int(content)
+		try: winners = int(content)
 		except: return
+		if winners >= 1: return winners
 
 	winners: int = await prompt_input(
 		message.client,
@@ -273,4 +286,6 @@ async def run(message: Context):
 	)
 	if prize is None: return
 
-	await create_new_giveaway(message.author.id, channel, length, winners, bobux_requirement, prize)
+	giveaway_message = await create_new_giveaway(message.author.id, channel, length, winners, bobux_requirement, prize)
+
+	await message.send(f'Ok, created giveaway {giveaway_message.jump_url}')

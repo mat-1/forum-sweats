@@ -691,6 +691,10 @@ async def get_active_giveaways():
 		giveaways.append(giveaway)
 	return giveaways
 
+async def get_giveaway(message_id: int):
+	giveaway = await giveaways_data.find_one({ 'id': message_id })
+	return giveaway
+
 async def end_giveaway(message_id: int):
 	await giveaways_data.update_one(
 		{ 'id': message_id },
