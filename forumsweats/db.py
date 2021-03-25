@@ -1,3 +1,4 @@
+from discord import message
 from forumsweats.commands.pets import Pet
 from typing import Any, List, Set, Union
 from datetime import datetime, timedelta
@@ -594,7 +595,14 @@ async def set_active_pet_uuid(user_id: int, pet_uuid: Union[str, None]) -> None:
 Starboard
 '''
 
+cached_starboard = {}
+
 async def add_starboard_message(message_id: int, starboard_message_id: int, star_count: int):
+	cached_starboard[message_id] = {
+		'message_id': message_id,
+		'starboard_message_id': starboard_message_id,
+		'star_count': star_count
+	}
 	if not connection_url: return
 	await starboard_data.update_one(
 		{ 'message_id': message_id },
@@ -608,6 +616,8 @@ async def add_starboard_message(message_id: int, starboard_message_id: int, star
 	)
 
 async def fetch_starboard_message(message_id: int) -> dict:
+	if message_id in cached_starboard:
+		return cached_starboard[message_id]
 	if not connection_url: return {}
 	starboard_message_data = await starboard_data.find_one({
 		'message_id': message_id
