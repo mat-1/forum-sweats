@@ -190,7 +190,7 @@ async def run(message, opponent: Member):
 	if message.channel.id == config.channels['general']:
 		duel_invite_text = (
 			f'<@{opponent.id}>, react to this message with :gun: to duel <@{message.author.id}>. '
-			'The loser will get muted for 15 minutes'
+			'The loser will get muted for 15 minutes. Don\'t react to this if you don\'t know what this means.'
 		)
 	else:
 		duel_invite_text = f'<@{opponent.id}>, react to this message with :gun: to duel <@{message.author.id}>'

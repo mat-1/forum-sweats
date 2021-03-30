@@ -1,5 +1,5 @@
 from aiohttp import web
-from . import discordbot, commands
+from . import discordbot
 import asyncio
 import os
 
