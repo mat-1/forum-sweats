@@ -49,7 +49,7 @@ async def check_promoter(member, inviter_string: str):
 	else:
 		result_description = f'{inviter_string} invited {total_members_invited} members total and {active_members_invited} of those members are active.'
 
-	result_description += ' {inviter_string} need to invite 3 active members to get promoter role.'
+	result_description += f' {inviter_string} need to invite 3 active members to get promoter role.'
 
 
 	promoter_role = get_role_id(member.guild.id, 'promoter')
@@ -76,7 +76,7 @@ async def run(message, member: Member = None):
 	if message.guild.id != config.main_guild:
 		return
 	
-	if member.id == message.author:
+	if member.id == message.author.id:
 		inviter_string = 'You'
 	else:
 		inviter_string = member.mention
