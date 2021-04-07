@@ -11,7 +11,7 @@ args = '[member]'
 class HasntInvitedAnyone(Exception): pass
 class UnknownInvitedMembers(Exception): pass
 
-async def check_promoter(member, inviter_string: str):
+async def check_promoter(member, inviter_string: str=None):
 	invited_member_ids = await db.get_invited_members(member.id)
 
 	members_activity_bobux = {}
@@ -41,15 +41,16 @@ async def check_promoter(member, inviter_string: str):
 			active_members_invited += 1
 	
 
-	if total_members_invited == 1:
-		if active_members_invited == 1:
-			result_description = f'{inviter_string} invited 1 member total and they are active.'
+	if inviter_string:
+		if total_members_invited == 1:
+			if active_members_invited == 1:
+				result_description = f'{inviter_string} invited 1 member total and they are active.'
+			else:
+				result_description = f'{inviter_string} invited 1 member total but they\'re not active.'
 		else:
-			result_description = f'{inviter_string} invited 1 member total but they\'re not active.'
-	else:
-		result_description = f'{inviter_string} invited {total_members_invited} members total and {active_members_invited} of those members are active.'
+			result_description = f'{inviter_string} invited {total_members_invited} members total and {active_members_invited} of those members are active.'
 
-	result_description += f' {inviter_string} need to invite 3 active members to get promoter role.'
+		result_description += f' {inviter_string} need to invite 3 active members to get promoter role.'
 
 
 	promoter_role = get_role_id(member.guild.id, 'promoter')
