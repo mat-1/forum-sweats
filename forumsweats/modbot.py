@@ -188,7 +188,8 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			1,
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			replace=False
 		)
 		return
 	# antimoan
@@ -197,7 +198,8 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			15,
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			replace=False
 		)
 		return
 
@@ -206,7 +208,8 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			60 * 5,
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			replace=False
 		)
 		return
 
@@ -216,7 +219,8 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			15,
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			replace=False
 		)
 		return
 
@@ -230,7 +234,8 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			5,
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			replace=False
 		)
 		return
 	# anti n-word filter
@@ -243,7 +248,8 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			86400, # one day
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			replace=False
 		)
 		return
 	
@@ -257,7 +263,8 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			21600, # 6 hours
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			replace=False
 		)
 		return
 
@@ -270,7 +277,8 @@ async def process_messsage(message, warn=True):
 		await discordbot.mute_user(
 			message.author,
 			60 * 10, # 10 minutes
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			replace=False
 		)
 		return
 
@@ -290,7 +298,8 @@ async def process_messsage(message, warn=True):
 				await discordbot.mute_user(
 					message.author,
 					60 * 15,
-					message.guild.id if message.guild else None
+					message.guild.id if message.guild else None,
+					replace=False
 				)
 			else:
 				if identity_attack > 0.9:
@@ -299,7 +308,8 @@ async def process_messsage(message, warn=True):
 					await discordbot.mute_user(
 						message.author,
 						60 * 2,
-						message.guild.id if message.guild else None
+						message.guild.id if message.guild else None,
+						replace=False
 					)
 				# else:
 					# if warn:
@@ -311,7 +321,8 @@ async def process_messsage(message, warn=True):
 			await discordbot.mute_user(
 				message.author,
 				15,
-				message.guild.id if message.guild else None
+				message.guild.id if message.guild else None,
+				replace=False
 			)
 		last_toxic_message_times[message.author.id] = time.time()
 		return

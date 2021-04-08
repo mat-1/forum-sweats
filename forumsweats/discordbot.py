@@ -412,7 +412,14 @@ async def on_message_edit(before, after):
 	await modbot.process_messsage(after, warn=False)
 
 
-async def mute_user(member, length, guild_id=None, gulag_message=True, rock_immune=False):
+async def mute_user(member, length, guild_id=None, gulag_message=True, rock_immune=False, replace=True):
+	if not replace:
+		current_mute_length = await db.get_mute_end(member.id)
+		if length < current_mute_length:
+			return
+
+
+
 	guild_id = guild_id if guild_id else config.main_guild
 	guild = client.get_guild(guild_id)
 
