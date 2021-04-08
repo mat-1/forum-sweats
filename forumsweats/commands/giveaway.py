@@ -89,6 +89,7 @@ async def continue_giveaway(data: dict):
 		message = await channel.fetch_message(data['id'])
 	except discord.errors.NotFound:
 		await db.end_giveaway(data['id'])
+		return
 
 
 	while time_left > 0:
