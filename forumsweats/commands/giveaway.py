@@ -85,7 +85,11 @@ async def continue_giveaway(data: dict):
 	time_left_string_before: str = ''
 
 	channel = client.get_channel(data['channel_id'])
-	message = await channel.fetch_message(data['id'])
+	try:
+		message = await channel.fetch_message(data['id'])
+	except discord.errors.NotFound:
+		await db.end_giveaway(data['id'])
+
 
 	while time_left > 0:
 		# If it's gonna end in more than a minute, update every 30 seconds
