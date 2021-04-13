@@ -24,4 +24,4 @@ async def run(message, amount_str: str):
 		# add 1 to include this new message
 		amount += 1
 
-	await message.channel.purge(limit=amount, check=lambda m: m.id != message.id)
+	await message.channel.purge(limit=amount)
