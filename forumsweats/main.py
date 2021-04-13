@@ -5,7 +5,7 @@ if not os.getenv('token'):
 from . import server, discordbot
 
 
-print('starting')
+print('Starting')
 
 server.start_server(
 	discordbot.client.loop,
