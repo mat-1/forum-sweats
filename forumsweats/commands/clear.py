@@ -5,13 +5,11 @@ name = 'clear'
 aliases = ('purge',)
 args = '<amount>'
 channels = None
-roles = ('helper')
+roles = ('helper',)
 
 
 async def run(message, amount_str: str):
 	'Purge recent messages'
-
-	print('Purging', amount_str)
 
 	try:
 		amount = int(amount_str)
@@ -27,4 +25,3 @@ async def run(message, amount_str: str):
 		amount += 1
 
 	await message.channel.purge(limit=amount, check=lambda m: m.id != message.id)
-	print('ok purged')
