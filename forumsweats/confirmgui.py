@@ -5,7 +5,6 @@ disagree_reaction = '❌'
 
 
 async def make_confirmation_gui(client, message, user):
-	print('make_confirmation_gui', message)
 	await message.add_reaction(agree_reaction)
 	await message.add_reaction(disagree_reaction)
 
