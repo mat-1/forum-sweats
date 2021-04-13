@@ -8,8 +8,14 @@ channels = None
 roles = ('helper')
 
 
-async def run(message, amount: int):
+async def run(message, amount_str: str):
 	'Purge recent messages'
+
+	try:
+		amount = int(amount_str)
+	except:
+		return await message.channel.send('Invalid amount')
+
 	if amount > 100:
 		verify_message = await message.channel.send(f'Are you sure you want to purge {amount} recent messages?')
 		confirmed = await confirmgui.make_confirmation_gui(message.client, verify_message, message.author)
