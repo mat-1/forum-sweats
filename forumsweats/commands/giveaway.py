@@ -10,7 +10,7 @@ import random
 import time
 
 name = 'giveaway'
-roles = ('mod',)
+roles = ('mod', 'helper')
 channels = None
 
 
