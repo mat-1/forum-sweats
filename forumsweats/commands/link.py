@@ -28,6 +28,8 @@ async def run(message, ign: str = None):
 		)
 	if str(message.author) == discord_name:
 		pass  # good
+	elif '#' in discord_name and str(message.author.id) == discord_name.split('#')[0]:
+		pass  # good
 	else:
 		error_message = (
 			'Incorrect username. Did you link your account correctly in Hypixel? '
