@@ -24,9 +24,9 @@ async def do_moot(message, member, length, reason):
 
 	try:
 		if reason:
-			await member.send(f'You were muted for {mute_length_string} for "**{reason}**"')
+			await member.send(f'You were mooted for {mute_length_string} for "**{reason}**"')
 		else:
-			await member.send(f'You were muted for {mute_length_string}')
+			await member.send(f'You were mooted for {mute_length_string}')
 	except discord.errors.Forbidden:
 		pass
 
