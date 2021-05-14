@@ -147,11 +147,14 @@ async def give_active_mutes():
 	for muted_id in active_mutes:
 		asyncio.ensure_future(unmute_user(muted_id, True))
 
+already_ready = False
 
 @client.event
 async def on_ready():
 	global cached_invites
 	print('ready')
+	if already_ready: return
+	already_ready = True
 	await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
 	for module in command_modules:
 		if hasattr(module, 'init'):
