@@ -151,7 +151,7 @@ already_ready = False
 
 @client.event
 async def on_ready():
-	global cached_invites
+	global cached_invites, already_ready
 	print('ready')
 	if already_ready: return
 	already_ready = True
