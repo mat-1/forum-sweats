@@ -137,6 +137,7 @@ place_names = {
 
 	'docena': 12,
 	'cien': 100,
+	'ciento': 100,
 	'mil': 1000,
 	'millones': 1000,
 	'millón': 1000000,
