@@ -34,7 +34,7 @@ num_names = {
 	'ninety': 90,
 
 	'cero': 0,
-	'one': 1,
+	'uno': 1,
 	'un': 1,
 	'dos': 2,
 	'tres': 3,
