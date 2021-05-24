@@ -32,6 +32,49 @@ num_names = {
 	'seventy': 70,
 	'eighty': 80,
 	'ninety': 90,
+
+	'cero': 0,
+	'one': 1,
+	'un': 1,
+	'dos': 2,
+	'tres': 3,
+	'cuatro': 4,
+	'cinco': 5,
+	'seis': 6,
+	'siete': 7,
+	'ocho': 8,
+	'nueve': 9,
+	'diez': 9,
+	'once': 11,
+	'doce': 12,
+	'trece': 13,
+	'catorce': 14,
+	'quince': 15,
+	'dieciséis': 16,
+	'dieciseis': 16,
+	'diecisiete': 17,
+	'dieciocho': 18,
+	'diecinueve': 19,
+	'veinte': 20,
+	'veintiuno': 21,
+	'veintidós': 22,
+	'veintidos': 22,
+	'veintitrés': 23,
+	'veintitres': 23,
+	'veinticuatro': 24,
+	'veinticinco': 25,
+	'veintiséis': 26,
+	'veintiseis': 26,
+	'veintisiete': 27,
+	'veintiocho': 28,
+	'veintinueve': 29,
+	'treinta': 30,
+	'cuarenta': 40,
+	'cincuenta': 50,
+	'sesenta': 60,
+	'setenta': 70,
+	'ochenta': 80,
+	'noventa': 90,
 }
 
 emoji_numbers = {
@@ -91,6 +134,25 @@ place_names = {
 	'quintillion': 1000000000000000000,
 	'sextillion': 1000000000000000000000,
 	'septillion': 1000000000000000000000000,
+
+	'docena': 12,
+	'cien': 100,
+	'mil': 1000,
+	'millones': 1000,
+	'millón': 1000000,
+	'millon': 1000000,
+	'billón': 1000000000,
+	'billon': 1000000000,
+	'trillón': 1000000000000,
+	'trillon': 1000000000000,
+	'cuatrillón': 1000000000000000,
+	'cuatrillon': 1000000000000000,
+	'quintillón': 1000000000000000000,
+	'quintillon': 1000000000000000000,
+	'sextillón': 1000000000000000000000,
+	'sextillon': 1000000000000000000000,
+	'septillón': 1000000000000000000000000,
+	'septillon': 1000000000000000000000000,
 	**place_abbrev
 }
 
@@ -98,16 +160,21 @@ dec_names = {
 	'point': '.',
 	'decimal': '.',
 	'.': '.',
+
+	'punto': '.',
 }
 
 neg_names = {
 	'minus': '-',
 	'negative': '-',
 	'-': '-',
+
+	'negativo': '-',
+	'menos': '-',
 }
 
 ignore_chars = [ '$', ';', ',' ]
-ignore_words = [ 'a', 'and', '&', '' ]
+ignore_words = [ 'a', 'and', '&', 'y', '' ]
 
 word_to_number = { **num_names, **place_names, **dec_names, **neg_names }
 
