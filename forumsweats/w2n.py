@@ -44,7 +44,7 @@ num_names = {
 	'siete': 7,
 	'ocho': 8,
 	'nueve': 9,
-	'diez': 9,
+	'diez': 10,
 	'once': 11,
 	'doce': 12,
 	'trece': 13,
