@@ -53,7 +53,8 @@ async def check_promoter(member, inviter_string: str=None):
 		result_description += f' {inviter_string} need to invite 3 active members to get promoter role.'
 
 
-	promoter_role = get_role_id(member.guild.id, 'promoter')
+	promoter_role_id = get_role_id(member.guild.id, 'promoter')
+	promoter_role = member.guild.get_role(promoter_role_id) if promoter_role_id else None
 	if not promoter_role:
 		result_description = 'Error: Promoter role doesn\'t exist :('
 	else:
