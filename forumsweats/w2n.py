@@ -169,6 +169,14 @@ place_names = {
 	'sextillon': 1000000000000000000000,
 	'septillón': 1000000000000000000000000,
 	'septillon': 1000000000000000000000000,
+	
+	'sto': 100,
+	'tuzin': 12,
+	'mendel': 15,
+	'kopa': 60,
+	'milionów': 1000000,
+	'bilionów': 1000000000,
+	'trylionów': 1000000000000,
 	**place_abbrev
 }
 
