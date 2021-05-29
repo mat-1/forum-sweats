@@ -701,7 +701,7 @@ async def check_bobux_roles(member_id: int, bobux: Union[int, None]=None):
 	guild_id = config.main_guild
 
 	applicable_bobux_roles_names = []
-	all_bobux_roles_names = ['rich', 'veryrich', '100bobux']
+	all_bobux_roles_names = ['100bobux', 'rich', 'veryrich', 'superrich']
 
 	guild = client.get_guild(guild_id)
 	member = guild.get_member(member_id)
@@ -716,6 +716,8 @@ async def check_bobux_roles(member_id: int, bobux: Union[int, None]=None):
 		applicable_bobux_roles_names.append('rich')
 	if bobux >= 5000:
 		applicable_bobux_roles_names.append('veryrich')
+	if bobux >= 50000:
+		applicable_bobux_roles_names.append('superrich')
 		
 
 	add_roles = []
