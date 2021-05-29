@@ -16,7 +16,7 @@ class DiscordNotFound(Exception):
 async def get_user_data(ign: str):
 	'Returns the Discord username of a Hypixel IGN'
 
-	url = f'https://skyblock-api2.matdoes.dev/player/{ign}'
+	url = f'https://skyblock-api.matdoes.dev/player/{ign}'
 	async with s.get(
 		url,
 		headers={
