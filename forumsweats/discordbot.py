@@ -201,7 +201,7 @@ async def on_member_join(member):
 		bot_logs_channel = client.get_channel(718107452960145519)
 		if used_invite:
 			await bot_logs_channel.send(embed=discord.Embed(
-				description=f'<@{member.id}> joined using discord.gg/{used_invite.code} (created by <@{used_invite.inviter.id}>)'
+				description=f'<@{member.id}> joined using discord.gg/{used_invite.code} (created by <@{used_invite.inviter.id}>, {used_invite.uses} uses)'
 			))
 		else:
 			await bot_logs_channel.send(embed=discord.Embed(
