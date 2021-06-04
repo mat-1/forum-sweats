@@ -17,7 +17,7 @@ async def run(message, ign: str = None):
 	ign = ign.strip()
 	try:
 		data = await hypixel.get_user_data(ign)
-		discord_name = data.get('player', {}).get('socials', {}).get('discord')
+		discord_name = data.get('links', {}).get('DISCORD')
 		if discord_name is None:
 			raise hypixel.DiscordNotFound()
 	except hypixel.PlayerNotFound:
@@ -40,9 +40,9 @@ async def run(message, ign: str = None):
 		))
 
 	old_rank = await db.get_hypixel_rank(message.author.id)
-	new_rank = await hypixel.get_hypixel_rank(ign)
+	new_rank = data['rank'].replace('_PLUS', '+')
 
-	joined_seconds_ago = time.time() - data['player']['first_join']
+	joined_seconds_ago = time.time() - (data['first_login'] / 1000)
 	joined_years_ago = joined_seconds_ago / 31536000
 
 	veteran_role_names = []
@@ -79,14 +79,14 @@ async def run(message, ign: str = None):
 				old_rank_role = guild.get_role(old_rank_role_id)
 				await member.remove_roles(old_rank_role, reason='Old rank')
 
-		new_rank = data['player']['rank']['name']
+		new_rank = data['rank'].replace('_PLUS', '+')
 		new_rank_role_id = get_role_id(guild.id, new_rank)
 		if new_rank_role_id:
 			new_rank_role = guild.get_role(new_rank_role_id)
 			await member.add_roles(new_rank_role, reason='Update rank')
 
 	await db.set_hypixel_rank(message.author.id, new_rank)
-	await db.set_minecraft_ign(message.author.id, ign, data['player']['uuid'])
+	await db.set_minecraft_ign(message.author.id, ign, data['uuid'])
 
 	if new_rank_role_id:
 		await message.channel.send(

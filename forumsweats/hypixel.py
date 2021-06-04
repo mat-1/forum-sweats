@@ -16,13 +16,7 @@ class DiscordNotFound(Exception):
 async def get_user_data(ign: str):
 	'Returns the Discord username of a Hypixel IGN'
 
-	url = f'https://skyblock-api.matdoes.dev/player/{ign}'
-	async with s.get(
-		url,
-		headers={
-			'key': api_key
-		}
-	) as r:
+	async with s.get(f'https://api.slothpixel.me/api/players/{ign}') as r:
 		data = await r.json()
 	if not data or data.get('error'):
 		raise PlayerNotFound(f'Invalid Hypixel player: {ign}')
@@ -33,4 +27,4 @@ async def get_hypixel_rank(ign: str):
 	'Returns the Hypixel rank of an IGN'
 	
 	user_data = await get_user_data(ign)
-	return user_data['player']['rank']['name']
+	return user_data['rank']
