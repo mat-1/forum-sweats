@@ -1,6 +1,6 @@
 from . import commands as commands_module
-from typing import Any, List, Union
 from .commandparser import CommandParser
+from typing import Any, List, Union
 from datetime import datetime
 from . import uwuify
 from . import modbot
@@ -385,7 +385,7 @@ async def on_message(message: discord.Message):
 			await message.channel.send(uwuized_message)
 	if message.channel.id == config.channels.get('giveaway'):
 		# delete pin messages created by the bot in giveaways
-		if message.type == 'pins_add' and message.author.id == client.user.id:
+		if message.type == discord.MessageType.pins_add and message.author.id == client.user.id:
 			await message.delete()
 
 	asyncio.ensure_future(db.add_message(message.author.id))
