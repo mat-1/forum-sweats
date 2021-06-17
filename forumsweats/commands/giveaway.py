@@ -1,11 +1,12 @@
 from forumsweats.commandparser import Context, Member, Time
 from forumsweats.discordbot import client
 from utils import seconds_to_string
-from typing import Any, Callable
+from typing import Any, Callable, Union
 from datetime import datetime
 from forumsweats import db
 import discord
 import asyncio
+import config
 import random
 import time
 
@@ -30,12 +31,17 @@ async def update_giveaway_message(message: discord.Message, data: dict, winners=
 async def end_giveaway(data: dict):
 	await db.end_giveaway(data['id'])
 
-	channel = client.get_channel(data['channel_id'])
-	message = await channel.fetch_message(data['id'])
+	channel: Union[discord.TextChannel, None] = client.get_channel(data['channel_id'])
+	if not channel: return  # the channel the giveaway was in was deleted
+	message: discord.Message = await channel.fetch_message(data['id'])
+	if not message: return  # the message was deleted
 	total_winners = data['winners']
 	prize = data['prize']
 	creator_id = data['creator_id']
 	bobux_requirement = data['bobux_requirement']
+
+	if channel.id == config.channels['giveaway'] and message.pinned:
+		await message.unpin()
 
 	# find all the members that reacted to the giveaway
 	reacted_users = []
@@ -170,8 +176,11 @@ async def create_new_giveaway(creator_id: int, channel: discord.abc.GuildChannel
 		'ended': False
 	})
 
-	giveaway_message = await channel.send('🎉 **GIVEAWAY** 🎉', embed=embed) # type: ignore (the typings on discord.py are wrong)
+	giveaway_message: discord.Message = await channel.send('🎉 **GIVEAWAY** 🎉', embed=embed) # type: ignore (the typings on discord.py are wrong)
 	await giveaway_message.add_reaction(GIVEAWAY_EMOJI)
+
+	if channel.id == config.channels['giveaway']:
+		await giveaway_message.pin()
 
 	giveaway_data = await db.create_new_giveaway(
 		message_id=giveaway_message.id,
