@@ -367,7 +367,7 @@ async def process_suggestion(message):
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: discord.Message):
 	global last_general_message
 	global is_chat_dead
 
@@ -383,6 +383,11 @@ async def on_message(message):
 		if message.content and message.content[0] != '!' and not message.author.bot:
 			uwuized_message = uwuify.uwuify(message.content, limit=2000)
 			await message.channel.send(uwuized_message)
+	if message.channel.id == config.channels.get('giveaway'):
+		# delete pin messages created by the bot in giveaways
+		if message.type == 'pins_add' and message.author.id == client.user.id:
+			await message.delete()
+
 	asyncio.ensure_future(db.add_message(message.author.id))
 	await process_counting_channel(message)
 	await process_infinite_counting_channel(message)

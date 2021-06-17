@@ -40,7 +40,7 @@ async def end_giveaway(data: dict):
 	creator_id = data['creator_id']
 	bobux_requirement = data['bobux_requirement']
 
-	if channel.id == config.channels['giveaway'] and message.pinned:
+	if channel.id == config.channels.get('giveaway') and message.pinned:
 		await message.unpin()
 
 	# find all the members that reacted to the giveaway
@@ -179,7 +179,7 @@ async def create_new_giveaway(creator_id: int, channel: discord.abc.GuildChannel
 	giveaway_message: discord.Message = await channel.send('🎉 **GIVEAWAY** 🎉', embed=embed) # type: ignore (the typings on discord.py are wrong)
 	await giveaway_message.add_reaction(GIVEAWAY_EMOJI)
 
-	if channel.id == config.channels['giveaway']:
+	if channel.id == config.channels.get('giveaway'):
 		await giveaway_message.pin()
 
 	giveaway_data = await db.create_new_giveaway(
