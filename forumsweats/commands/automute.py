@@ -114,4 +114,4 @@ async def run(message, member: Member, reason: str = None):
 		description=mute_message
 	))
 
-	await do_mute(message, member, mute_length, reason)
+	await do_mute(message, member, mute_length, reason, muted_by=message.author.id)

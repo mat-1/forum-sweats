@@ -12,7 +12,7 @@ roles = ('helper', 'trialhelper')
 args = '<member> <length> [reason]'
 
 
-async def do_mute(message, member, length, reason):
+async def do_mute(message, member, length, reason, muted_by: int=0):
 	for infraction in await db.get_infractions(member.id):
 		if datetime.utcnow() - infraction['date'] < timedelta(minutes=1):
 			# if the infraction was made less than 3 minutes ago, it should be removed as it was likely an accident
@@ -22,7 +22,8 @@ async def do_mute(message, member, length, reason):
 		member.id,
 		'mute',
 		reason,
-		length
+		length,
+		muted_by
 	)
 	
 	mute_length_string = seconds_to_string(length)
@@ -67,4 +68,4 @@ async def run(message, member: Member, mute_length: Time = Time(0), reason: str 
 		description=mute_message
 	))
 
-	await do_mute(message, member, mute_length, reason)
+	await do_mute(message, member, mute_length, reason, muted_by=message.author.id)

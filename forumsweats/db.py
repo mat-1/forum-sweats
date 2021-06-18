@@ -135,7 +135,7 @@ async def get_active_mutes():
 	return active_mutes
 
 
-async def add_infraction(user_id: int, infraction_type, reason, mute_length=0):
+async def add_infraction(user_id: int, infraction_type, reason, mute_length=0, muted_by: int=0):
 	if not connection_url: return
 	infraction_uuid = str(uuid.uuid4())
 	await infractions_data.insert_one({
@@ -144,7 +144,8 @@ async def add_infraction(user_id: int, infraction_type, reason, mute_length=0):
 		'type': infraction_type,
 		'reason': reason,
 		'date': datetime.utcnow(),
-		'length': str(mute_length)  # must be a string otherwise mongodb gets mad on long mutes
+		'length': str(mute_length),  # must be a string otherwise mongodb gets mad on long mutes
+		'by': muted_by
 	})
 
 

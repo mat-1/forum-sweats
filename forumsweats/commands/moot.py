@@ -12,12 +12,13 @@ roles = ('helper', 'trialhelper')
 args = '<member> <length> [reason]'
 
 
-async def do_moot(message, member, length, reason):
+async def do_moot(message, member, length, reason, muted_by: int=0):
 	await db.add_infraction(
 		member.id,
 		'moot',
 		reason,
-		length
+		length,
+		muted_by=muted_by
 	)
 
 	mute_length_string = seconds_to_string(length)

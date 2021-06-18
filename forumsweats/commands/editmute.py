@@ -12,12 +12,13 @@ roles = ('helper', 'trialhelper')
 args = '<member> <length> [reason]'
 
 
-async def do_mute(message, member, length, reason):
+async def do_mute(message, member, length, reason, muted_by: int=0):
 	try:
 		await mute_user(
 			member,
 			length,
-			message.guild.id if message.guild else None
+			message.guild.id if message.guild else None,
+			muted_by=muted_by
 		)
 	except discord.errors.Forbidden:
 		await message.send("I don't have permission to do this")
@@ -57,4 +58,4 @@ async def run(message, member: Member, mute_length: Time = Time(0), reason: str 
 			description=changed_message
 		))
 
-		await do_mute(message, member, mute_length, reason)
+		await do_mute(message, member, mute_length, reason, muted_by=message.author.id)
