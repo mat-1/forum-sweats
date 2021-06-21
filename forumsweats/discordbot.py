@@ -130,13 +130,16 @@ async def queue_renew_sub(sub):
 
 
 async def give_subbed_bobux():
+	print('giving subbed bobux')
 	subs = await db.bobux_get_all_subscriptions()
 	tasks = []
 	for sub in subs:
 		if sub['owed']:
+			print('renewing sub', sub['id'], sub['sender'])
 			await renew_sub(sub)
 		else:
 			tasks.append(queue_renew_sub(sub))
+	print('ok, renewed all owed subs')
 
 	if tasks:
 		await asyncio.gather(*tasks)
