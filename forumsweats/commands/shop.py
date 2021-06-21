@@ -23,6 +23,13 @@ SHOP_ITEMS = [
 		'id': 'bigger_rock',
 		'description': 'Next time you throw a rock, it\'ll mute for 4 minutes rather than 1',
 		'persistent': True
+	},
+	{
+		'name': 'Tic-Tac-Toe',
+		'price': 500,
+		'id': 'tic_tac_toe',
+		'description': 'Unlocks !tictactoe',
+		'persistent': True
 	}
 ]
 

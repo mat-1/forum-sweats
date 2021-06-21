@@ -1,7 +1,7 @@
 from ..discordbot import mute_user
 from ..commandparser import Member
-import time
 from forumsweats import db
+import time
 
 name = 'rock'
 aliases = ['stone']

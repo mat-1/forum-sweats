@@ -1,4 +1,5 @@
-from ..commandparser import Member
+from ..commandparser import Context, Member
+from forumsweats import db
 import asyncio
 import discord
 import random
@@ -182,6 +183,9 @@ class Game:
 
 async def run(message, player2: Member = None):
 	'Play tic-tac-toe agaisnt the bot or an opponent'
+
+	if not await db.has_shop_item(message.author.id, 'tic_tac_toe'):
+		return await message.send(f'You need to buy tic-tac-toe from {config.prefix}shop.')
 
 	is_gulag = message.channel.id == config.channels['gulag']
 
