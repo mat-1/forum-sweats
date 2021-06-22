@@ -282,6 +282,20 @@ async def process_messsage(message, warn=True):
 		)
 		return
 
+	if re.search(r'\b(f\W*a\W*g{1,2})(\W*o\W*t)?\b', content, flags=re.IGNORECASE):
+		try:
+			await message.author.send('Don\'t say slurs in chat, nerd')
+		except discord.errors.Forbidden:
+			pass
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			60 * 60 * 24,
+			message.guild.id if message.guild else None,
+			replace=False
+		)
+		return
+
 	await check_spam(message)
 
 	perspectives = await get_perspectives_from_message(message)
