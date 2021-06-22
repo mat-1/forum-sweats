@@ -82,7 +82,7 @@ async def do_shop_gui(message, page_number=1, shop_message=None):
 	bought_shop_items = await db.get_bought_shop_items(message.author.id)
 	total_pages = math.ceil(len(SHOP_ITEMS) / PAGE_LENGTH)
 	start_index = (page_number-1) * PAGE_LENGTH
-	end_index = min((page_number) * PAGE_LENGTH, total_pages, len(SHOP_ITEMS))
+	end_index = min((page_number) * PAGE_LENGTH, len(SHOP_ITEMS))
 
 	disabled_items = set()
 	disabled_items.update(bought_shop_items)
