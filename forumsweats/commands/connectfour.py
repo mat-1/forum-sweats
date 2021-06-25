@@ -1,4 +1,5 @@
 from ..commandparser import Member
+from forumsweats import db
 import discord
 import aiohttp
 import random
