@@ -2,6 +2,7 @@ from ..commandparser import Member
 import discord
 import aiohttp
 import random
+import config
 
 name = 'connectfour'
 aliases = ('connect4', 'c4',)
@@ -181,6 +182,10 @@ async def wait_for_number_reaction(client, message, member, emojis):
 
 async def run(message, opponent: Member = None, opponent2: Member = None, opponent3: Member = None, opponent4: Member = None, opponent5: Member = None):
 	'Play connect 4 with up to 5 opponents'
+
+	if not await db.has_shop_item(message.author.id, 'connect_four'):
+		return await message.send(f'You need to buy Connect Four from {config.prefix}shop.')
+
 	if not opponent:
 		return await message.channel.send('You must specify an opponent')
 

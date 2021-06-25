@@ -362,8 +362,8 @@ async def set_bobux(user_id: int, amount: int):
 	)
 
 
-async def get_bobux(user_id: int):
-	if not connection_url: return
+async def get_bobux(user_id: int) -> int:
+	if not connection_url: return 0
 	bobux = await fetch_member(user_id, 'bobux')
 	return bobux or 0
 

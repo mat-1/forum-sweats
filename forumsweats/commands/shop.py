@@ -30,6 +30,13 @@ SHOP_ITEMS = [
 		'id': 'tic_tac_toe',
 		'description': 'Unlocks !tictactoe',
 		'persistent': True
+	},
+	{
+		'name': 'Connect Four',
+		'price': 2000,
+		'id': 'connect_four',
+		'description': 'Unlocks !connect4',
+		'persistent': True
 	}
 ]
 
@@ -139,7 +146,7 @@ async def do_shop_gui(message, page_number=1, shop_message=None):
 	selected_item = SHOP_ITEMS[selected_item_index]
 
 	print('pog!', selected_item)
-	bobux_count = await db.get_bobux(message.author.id)
+	bobux_count: int = await db.get_bobux(message.author.id)
 
 	selected_item_price = selected_item['price']
 	selected_item_name = selected_item['name']
