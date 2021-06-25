@@ -154,7 +154,7 @@ async def get_infractions(user_id: int) -> list:
 	infractions = []
 	async for infraction in infractions_data.find({
 		'user': user_id,
-		'date': {'$gt': datetime.utcnow() - timedelta(days=30)}
+		'date': { '$gt': datetime.utcnow() - timedelta(days=30) }
 	}):
 		infractions.append(infraction)
 	return infractions
@@ -166,6 +166,17 @@ async def get_all_infractions(user_id: int) -> list:
 		'user': user_id,
 	}):
 		infractions.append(infraction)
+	return infractions
+
+async def get_weekly_warns(user_id: int) -> List[str]:
+	if not connection_url: return []
+	infractions = []
+	async for infraction in infractions_data.find({
+		'user': user_id,
+		'date': { '$gt': datetime.utcnow() - timedelta(days=7) },
+		'type': 'warn'
+	}):
+		infractions.append(infraction['reason'] or '<no reason>')
 	return infractions
 
 
