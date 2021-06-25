@@ -1,7 +1,4 @@
-from datetime import datetime, timedelta
-from ..commandparser import Member, Time
-from utils import seconds_to_string
-from ..discordbot import mute_user
+from ..commandparser import Member
 from forumsweats import db
 import discord
 import random
