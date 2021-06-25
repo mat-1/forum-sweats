@@ -30,20 +30,15 @@ async def run(message, member: Member, reason: str):
 
 	await db.add_infraction(member.id, 'warn', reason, muted_by=message.author.id)
 
-	print('ok added infraction')
 
 	weekly_warns = await db.get_weekly_warns(member.id)
-	print('ok gotten weekly warns')
 	description = f'<@{member.id}> has been warned for "**{reason}**".'
 	if len(weekly_warns) + 1 >= 3:
-		print(weekly_warns)
 		past_warn_reasons_joined = '\n'.join(map(lambda w: '- ' + w, weekly_warns))
 		description += f'\nThey have been warned **{len(weekly_warns) + 1}** times in the past week, you should mute them for at least 45 minutes.\n\n**Past warn reasons**:\n{past_warn_reasons_joined}'
-	print(description)
 	await message.send(embed=discord.Embed(
 		description=description
 	))
-	print('ok sent message', description)
 
 	try:
 		await member.send(f'You have been warned for **{reason}** by <@{message.author.id}> ({message.author})')
