@@ -25,10 +25,10 @@ async def run(message, member: Member, reason: str):
 	if reason:
 		reason = reason.strip()
 
+	weekly_warns = await db.get_weekly_warns(member.id)
 	await db.add_infraction(member.id, 'warn', reason, muted_by=message.author.id)
 
 
-	weekly_warns = await db.get_weekly_warns(member.id)
 	description = f'<@{member.id}> has been warned for "**{reason}**".'
 	if len(weekly_warns) + 1 >= 3:
 		past_warn_reasons_joined = '\n'.join(map(lambda w: '- ' + w, weekly_warns))
