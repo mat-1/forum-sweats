@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Dict, List
 from forumsweats import discordbot
 import unidecode
 from session import s
@@ -11,7 +12,7 @@ from forumsweats import db
 
 with open('letter_pairs.json', 'r') as f:
 	letter_pair_scores = json.loads(f.read())
-previous_user_messages = {}
+previous_user_messages: Dict[int, List[discord.Message]] = {}
 last_toxic_message_times = {}
 last_very_toxic_message_times = {}
 
@@ -74,16 +75,16 @@ def add_previous_message(message):
 	previous_user_messages[message.author.id].append(message)
 
 
-def get_previous_messages(member, last_seconds=3600):
+def get_previous_messages(member: discord.User, last_seconds=3600):
 	# get last 10 messages from user
 	messages = []
 	recent_message_count = 0
 
 	now = datetime.utcnow()
 	for message in reversed(previous_user_messages.get(member.id, [])):
-		if now - message.created_at < timedelta(seconds=last_seconds):
+		if now - message.created_at.replace(tzinfo=None) < timedelta(seconds=last_seconds):
 			messages.append(message)
-		if now - message.created_at < timedelta(seconds=3600):
+		if now - message.created_at.replace(tzinfo=None) < timedelta(seconds=3600):
 			recent_message_count += 1
 	if recent_message_count == 0 and member.id in previous_user_messages:
 		del previous_user_messages[member.id]
