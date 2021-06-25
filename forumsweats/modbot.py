@@ -204,7 +204,7 @@ async def process_messsage(message, warn=True):
 		)
 		return
 
-	if re.match(r'[\w\W]*\bc\W*u\W*m\b[\w\W]*', content, flags=re.IGNORECASE):
+	if re.match(r'[\w\W]*\bc\W*u\W*m\b[\w\W]*', content, flags=re.IGNORECASE) or re.match(r'[\w\W]*\bs\W*p\W*e\W*r\W*m\b[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
