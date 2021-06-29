@@ -181,8 +181,7 @@ async def process_messsage(message, warn=True):
 		.replace('Ⱡ', 'L')\
 		.replace('Ỻ', 'lL')\
 		.replace('と', 'c')\
-		.replace('€', 'c')\
-		.replace('(', 'c')
+		.replace('€', 'c')
 	# antihoe for runic
 	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
