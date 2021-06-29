@@ -24,7 +24,7 @@ async def run(message, ign: str = None):
 		return await message.send('Invalid username.')
 	except hypixel.DiscordNotFound:
 		return await message.send(
-			'You haven\'t set your Discord username in Hypixel yet.'
+			'You haven\'t set your Discord username in Hypixel yet, if you set it now it\'ll take up to 10 minutes to update.'
 		)
 	if str(message.author) == discord_name:
 		pass  # good
@@ -33,7 +33,7 @@ async def run(message, ign: str = None):
 	else:
 		error_message = (
 			'Incorrect username. Did you link your account correctly in Hypixel? '
-			f'({ign} is linked to {discord_name})'
+			f'({ign} is linked to {discord_name}, if you change it now it\'ll take up to 10 minutes to update)'
 		)
 		return await message.send(embed=discord.Embed(
 			description=error_message
