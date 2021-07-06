@@ -298,6 +298,11 @@ async def process_counting_channel(message):
 	elif message.author.bot:
 		# if the message was sent by forum sweats, ignore it
 		return
+	# the message is too long
+	elif len(message.content) > 200:
+		await message.delete()
+		return
+
 	old_number = await db.get_counter(message.guild.id)
 	try:
 		new_number = w2n.word_to_num(message.content)
@@ -332,6 +337,11 @@ async def process_infinite_counting_channel(message):
 	elif message.author.bot:
 		# if the message was sent by forum sweats, ignore it
 		return
+	# the message is too long
+	elif len(message.content) > 200:
+		await message.delete()
+		return
+
 	old_number = await db.get_infinite_counter(message.guild.id)
 	last_person_to_count = await db.get_last_person_in_infinite_counting(message.guild.id)
 

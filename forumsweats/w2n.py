@@ -259,7 +259,8 @@ def num_generator(phrase):
 def word_to_num(phrase):
 	if type(phrase) is not str:
 		raise ValueError('Type of input is not string! Please enter a valid number word (eg. \'two million twenty three thousand and forty nine\')')
-	
+	if '\n' in phrase:
+		raise ValueError('Phrase has a newline')
 	running_total = [ 0 ]
 	postDecimalCount = 0
 	sign = 1
