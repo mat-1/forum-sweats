@@ -498,6 +498,22 @@ async def get_bobux_leaderboard(limit=10):
 		leaderboard.append(member)
 	return leaderboard
 
+async def get_activity_bobux_leaderboard(limit=10, page=1):
+	leaderboard = []
+	async for member in member_data\
+		.find({'activity_bobux': {'$gte': 1}})\
+		.sort('activity_bobux', -1)\
+		.skip((page - 1) * limit)\
+		.limit(limit):
+		leaderboard.append(member)
+	return leaderboard
+
+async def get_activity_bobux_leaderboard_position(member_id: int):
+	activity_bobux = await get_activity_bobux(member_id)
+	position = await member_data.count_documents({'activity_bobux': {'$gte': activity_bobux}})
+
+	return position
+
 '''
 Bobux subs
 '''
