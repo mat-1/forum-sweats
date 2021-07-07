@@ -2,9 +2,13 @@ import random
 import re
 
 
-faces = (
+extras = (
 	'uwu',
-	'owo'
+	'owo',
+	':3',
+	'o3o',
+	'hehe',
+	';)'
 )
 
 
@@ -16,10 +20,10 @@ def add_nyvowel(message):
 	return message
 
 
-def add_faces(message):
+def add_extras(message):
 	output = ''
 	previous_character = ''
-	face_chance = .7
+	extra_chance = .7
 	sentence_length = 0
 	sentence_uppercase_count = 0
 	sentence_lowercase_count = 0
@@ -27,8 +31,8 @@ def add_faces(message):
 
 	for character in message:
 		if previous_character in sentence_enders and character == ' ':
-			if random.random() <= face_chance and sentence_length > 10:
-				face = random.choice(faces)
+			if random.random() <= extra_chance and sentence_length > 10:
+				face = random.choice(extras)
 
 				if sentence_uppercase_count / sentence_length >= .9:
 					# if 90% of the sentence is uppercase, make the face uppercase as well
@@ -47,8 +51,8 @@ def add_faces(message):
 		output += character
 		previous_character = character
 
-	if random.random() <= face_chance and sentence_length > 10:
-		face = random.choice(faces)
+	if random.random() <= extra_chance and sentence_length > 10:
+		face = random.choice(extras)
 
 		if sentence_uppercase_count / sentence_length >= .9:
 			# if 90% of the sentence is uppercase, make the face uppercase as well
@@ -74,7 +78,7 @@ def uwuify(message, limit=2000):
 	temp_uwuized_message = add_nyvowel(uwuized_message)
 	if len(temp_uwuized_message) < limit: uwuized_message = temp_uwuized_message
 
-	temp_uwuized_message = add_faces(uwuized_message)
+	temp_uwuized_message = add_extras(uwuized_message)
 	if len(temp_uwuized_message) < limit: uwuized_message = temp_uwuized_message
 
 	return uwuized_message
