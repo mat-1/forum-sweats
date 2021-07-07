@@ -9,6 +9,9 @@ extras = (
 	'o3o',
 	'hehe',
 	';)'
+        '\*nuzzle wuzzle\*'
+        '\*wags tail\*'
+        '\wiggles\*'
 )
 
 
