@@ -16,7 +16,7 @@ Activity bobux is like bobux but cannot be used for anything, and you only get i
 	if not member:
 		member = message.author
 	bobux = await db.get_activity_bobux(member.id)
-	position = db.get_activity_bobux_leaderboard_position(member.id)
+	position = await db.get_activity_bobux_leaderboard_position(member.id)
 	if member.id == message.author.id:
 		bobux_message = f'You have **{bobux}** activity bobux (#{position})'
 	else:
