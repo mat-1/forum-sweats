@@ -4,4 +4,4 @@ channels = ['gulag']
 
 
 async def run(message):
-	await message.channel.send('You have pooed.')
+	await message.channel.send('You have pooped.')
