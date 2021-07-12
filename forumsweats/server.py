@@ -1,7 +1,8 @@
-import config
 from . import discordbot
 from aiohttp import web
 import asyncio
+import discord
+import config
 import os
 
 
@@ -42,7 +43,7 @@ async def api_bobux(request):
 			'username': user.name if user != '???' else 'Deleted user',
 			'discrim': user.discriminator if user != '???' else '0000',
 			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
-			'color': user.color
+			'color': user.color if user != '???' else discord.Colour.default()
 		})
 	return web.json_response(bobux_leaderboard)
 
@@ -62,6 +63,7 @@ async def api_activitybobux(request):
 			'username': user.name if user != '???' else 'Deleted user',
 			'discrim': user.discriminator if user != '???' else '0000',
 			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
+			'color': user.color if user != '???' else discord.Colour.default()
 		})
 	return web.json_response(bobux_leaderboard)
 
