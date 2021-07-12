@@ -1,3 +1,4 @@
+import config
 from . import discordbot
 from aiohttp import web
 import asyncio
@@ -30,7 +31,7 @@ async def api_bobux(request):
 	bobux_leaderboard_raw = await discordbot.db.get_bobux_leaderboard(100)
 	bobux_leaderboard = []
 	for member in bobux_leaderboard_raw:
-		user = discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
+		user = discordbot.client.get_guild(config.main_guild).get_member(member['discord']) or discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
 		if not user:
 			try: user = await discordbot.client.fetch_user(member['discord'])
 			except: user = '???'
@@ -38,9 +39,10 @@ async def api_bobux(request):
 		bobux_leaderboard.append({
 			'bobux': member['bobux'],
 			'id': member['discord'],
-			'username': user.name if user else 'Deleted user',
-			'discrim': user.discriminator if user else '0000',
+			'username': user.name if user != '???' else 'Deleted user',
+			'discrim': user.discriminator if user != '???' else '0000',
 			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
+			'color': user.color
 		})
 	return web.json_response(bobux_leaderboard)
 
@@ -49,7 +51,7 @@ async def api_activitybobux(request):
 	bobux_leaderboard_raw = await discordbot.db.get_activity_bobux_leaderboard(100)
 	bobux_leaderboard = []
 	for member in bobux_leaderboard_raw:
-		user = discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
+		user = discordbot.client.get_guild(config.main_guild).get_member(member['discord']) or discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
 		if not user:
 			try: user = await discordbot.client.fetch_user(member['discord'])
 			except: user = '???'
@@ -57,8 +59,8 @@ async def api_activitybobux(request):
 		bobux_leaderboard.append({
 			'bobux': member['activity_bobux'],
 			'id': member['discord'],
-			'username': user.name if user else 'Deleted user',
-			'discrim': user.discriminator if user else '0000',
+			'username': user.name if user != '???' else 'Deleted user',
+			'discrim': user.discriminator if user != '???' else '0000',
 			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
 		})
 	return web.json_response(bobux_leaderboard)
