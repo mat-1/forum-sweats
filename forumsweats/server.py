@@ -39,7 +39,7 @@ async def api_bobux(request):
 			'bobux': member['bobux'],
 			'id': member['discord'],
 			'name': str(user),
-			'avatar': user.avatar_url_as(size=256).url if user != '???' else None,
+			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
 		})
 	return web.json_response(bobux_leaderboard)
 
