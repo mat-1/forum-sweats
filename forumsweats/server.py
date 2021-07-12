@@ -42,7 +42,7 @@ async def api_bobux(request):
 			'id': member['discord'],
 			'username': user.name if user != '???' else 'Deleted user',
 			'discrim': user.discriminator if user != '???' else '0000',
-			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
+			'avatar': str(user.avatar_url_as(size=128, format='png')) if user != '???' else None,
 			'color': str(user.color) if user != '???' else '#e5f7f7'
 		})
 	return web.json_response(bobux_leaderboard)
@@ -62,7 +62,7 @@ async def api_activitybobux(request):
 			'id': member['discord'],
 			'username': user.name if user != '???' else 'Deleted user',
 			'discrim': user.discriminator if user != '???' else '0000',
-			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
+			'avatar': str(user.avatar_url_as(size=128, format='png')) if user != '???' else None,
 			'color': str(user.color) if user != '???' else '#e5f7f7'
 		})
 	return web.json_response(bobux_leaderboard)
