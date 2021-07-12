@@ -1,4 +1,3 @@
-from forumsweats import db
 from . import discordbot
 from aiohttp import web
 import asyncio
@@ -26,11 +25,11 @@ async def api_members(request):
 
 @routes.get('/api/bobux')
 async def api_bobux(request):
-	return web.json_response(await db.get_bobux_leaderboard(100))
+	return web.json_response(await discordbot.db.get_bobux_leaderboard(100))
 
 @routes.get('/api/activitybobux')
 async def api_activitybobux(request):
-	return web.json_response(await db.get_activity_bobux_leaderboard(100))
+	return web.json_response(await discordbot.db.get_activity_bobux_leaderboard(100))
 
 
 def start_server(loop, background_task, client):
