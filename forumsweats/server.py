@@ -38,8 +38,8 @@ async def api_bobux(request):
 		bobux_leaderboard.append({
 			'bobux': member['bobux'],
 			'id': member['discord'],
-			'name': str(user) if user else '???',
-			'avatar': user.avatar.with_size(size=256).url if user != '???' else None,
+			'name': str(user),
+			'avatar': user.avatar_url_as(size=256).url if user != '???' else None,
 		})
 	return web.json_response(bobux_leaderboard)
 
@@ -56,8 +56,8 @@ async def api_activitybobux(request):
 		bobux_leaderboard.append({
 			'bobux': member['bobux'],
 			'id': member['discord'],
-			'name': str(user) if user else '???',
-			'avatar': user.avatar.with_size(size=256).url if user != '???' else None,
+			'name': str(user),
+			'avatar': user.avatar_url_as(size=256).url if user != '???' else None,
 		})
 	return web.json_response(bobux_leaderboard)
 
