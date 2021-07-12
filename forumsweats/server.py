@@ -38,7 +38,8 @@ async def api_bobux(request):
 		bobux_leaderboard.append({
 			'bobux': member['bobux'],
 			'id': member['discord'],
-			'name': str(user),
+			'username': user.name if user else 'Deleted user',
+			'discrim': user.discriminator if user else '0000',
 			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
 		})
 	return web.json_response(bobux_leaderboard)
@@ -54,9 +55,10 @@ async def api_activitybobux(request):
 			except: user = '???'
 			cached_users[member['discord']] = user
 		bobux_leaderboard.append({
-			'bobux': member['bobux'],
+			'bobux': member['activity_bobux'],
 			'id': member['discord'],
-			'name': str(user),
+			'username': user.name if user else 'Deleted user',
+			'discrim': user.discriminator if user else '0000',
 			'avatar': str(user.avatar_url_as(size=256)) if user != '???' else None,
 		})
 	return web.json_response(bobux_leaderboard)
