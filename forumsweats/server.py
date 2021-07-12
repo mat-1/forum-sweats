@@ -23,13 +23,43 @@ async def kill_bot(request):
 async def api_members(request):
 	return web.json_response(discordbot.api_get_members())
 
-@routes.get('/api/bobux')
-async def api_bobux(request):
-	return web.json_response(await discordbot.db.get_bobux_leaderboard(100))
+cached_users = {}
 
-@routes.get('/api/activitybobux')
+@routes.get('/api/leaderboard/bobux')
+async def api_bobux(request):
+	bobux_leaderboard_raw = await discordbot.db.get_bobux_leaderboard(100)
+	bobux_leaderboard = []
+	for member in bobux_leaderboard_raw:
+		user = discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
+		if not user:
+			try: user = await discordbot.client.fetch_user(member['discord'])
+			except: user = '???'
+			cached_users[member['discord']] = user
+		bobux_leaderboard.append({
+			'bobux': member['bobux'],
+			'id': member['discord'],
+			'name': str(user) if user else '???',
+			'avatar': user.avatar.with_size(size=256).url if user != '???' else None,
+		})
+	return web.json_response(bobux_leaderboard)
+
+@routes.get('/api/leaderboard/activitybobux')
 async def api_activitybobux(request):
-	return web.json_response(await discordbot.db.get_activity_bobux_leaderboard(100))
+	bobux_leaderboard_raw = await discordbot.db.get_activity_bobux_leaderboard(100)
+	bobux_leaderboard = []
+	for member in bobux_leaderboard_raw:
+		user = discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
+		if not user:
+			try: user = await discordbot.client.fetch_user(member['discord'])
+			except: user = '???'
+			cached_users[member['discord']] = user
+		bobux_leaderboard.append({
+			'bobux': member['bobux'],
+			'id': member['discord'],
+			'name': str(user) if user else '???',
+			'avatar': user.avatar.with_size(size=256).url if user != '???' else None,
+		})
+	return web.json_response(bobux_leaderboard)
 
 
 def start_server(loop, background_task, client):
