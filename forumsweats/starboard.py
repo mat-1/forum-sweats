@@ -39,7 +39,10 @@ async def add_message_to_starboard(message: discord.Message):
 		message_content = ''
 
 	if len(message.embeds) > 0:
-		message_content += '\n' + message.embeds[0].description
+		try:
+			message_content += '\n' + message.embeds[0].description
+		except:
+			pass
 
 	embed = discord.Embed(
 		title=f'{STAR_EMOJI} {star_count} stars',
