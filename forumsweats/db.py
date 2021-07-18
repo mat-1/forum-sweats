@@ -168,6 +168,15 @@ async def get_all_infractions(user_id: int) -> list:
 		infractions.append(infraction)
 	return infractions
 
+async def get_all_infractions_by(user_id: int) -> list:
+	if not connection_url: return []
+	infractions = []
+	async for infraction in infractions_data.find({
+		'by': user_id,
+	}):
+		infractions.append(infraction)
+	return infractions
+
 async def get_weekly_warns(user_id: int) -> List[str]:
 	if not connection_url: return []
 	infractions = []

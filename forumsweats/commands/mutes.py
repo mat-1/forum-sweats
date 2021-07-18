@@ -5,28 +5,22 @@ from ..commandparser import Member
 from forumsweats import db
 import discord
 
-name = 'infractions'
+name = 'mutes'
 channels = None
 args = '<member>'
+# roles = ('helper', 'trialhelper')
 
 async def run(message, member: Member = None):
-	'Tells you the times you have been muted and why.'
+	'See who you (or another staff member) has muted.'
 
 	if not member:
 		member = message.author
 
-	is_checking_self = message.author.id == member.id
+	infractions = await db.get_all_infractions_by(member.id)
 
-	if (
-		not is_checking_self
-		and not has_role(message.author.id, 'helper')
-		and not has_role(message.author.id, 'trialhelper')
-	):
-		return
+	is_checking_self = member.id == message.author.id
 
-	infractions = await db.get_all_infractions(member.id)
-
-	embed_title = 'Your infractions' if is_checking_self else f'{member}\'s infractions'
+	embed_title = 'Your mutes' if is_checking_self else f'{member}\'s mutes'
 
 	embed = discord.Embed(
 		title=embed_title
@@ -46,7 +40,7 @@ async def run(message, member: Member = None):
 				total_mutes_past_month += 1
 	
 	for infraction in infractions[-30:]:
-		value = infraction.get('reason') or '<no reason>'
+		value = f'<@{infraction["user"]}> - ' + (infraction.get('reason') or '<no reason>')
 		name = infraction['type']
 		infraction_partial_id = infraction['_id'][:8]
 
@@ -68,11 +62,11 @@ async def run(message, member: Member = None):
 	
 	if total_mutes > total_mutes_past_month:
 		embed.set_footer(
-			text=f'{total_mutes} total infractions, {total_mutes_past_month} from past month'
+			text=f'{total_mutes} total muted, {total_mutes_past_month} from past month'
 		)
 	else:
 		embed.set_footer(
-			text=f'{total_mutes} total infractions'
+			text=f'{total_mutes} total muted'
 		)
 
 	if len(infractions) == 0:
