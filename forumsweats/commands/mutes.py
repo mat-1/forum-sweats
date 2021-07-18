@@ -8,7 +8,7 @@ import discord
 name = 'mutes'
 channels = None
 args = '<member>'
-# roles = ('helper', 'trialhelper')
+roles = ('helper', 'trialhelper')
 
 async def run(message, member: Member = None):
 	'See who you (or another staff member) has muted.'
