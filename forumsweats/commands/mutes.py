@@ -70,7 +70,7 @@ async def run(message, member: Member = None):
 		)
 
 	if len(infractions) == 0:
-		embed.description = 'No infractions'
+		embed.description = 'No mutes'
 
 	if is_checking_self:
 		await message.author.send(embed=embed)
