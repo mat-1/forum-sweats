@@ -9,6 +9,12 @@ name = 'infractions'
 channels = None
 args = '<member>'
 
+INFRACTION_TYPE_EMOJIS = {
+	'mute': '🔇',
+	'warn': '⚠️',
+	'moot': '<:troll:798727241001467904>',
+}
+
 async def run(message, member: Member = None):
 	'Tells you the times you have been muted and why.'
 
@@ -48,6 +54,11 @@ async def run(message, member: Member = None):
 	for infraction in infractions[-30:]:
 		value = infraction.get('reason') or '<no reason>'
 		name = infraction['type']
+
+		# add the emoji for the infraction type before the name
+		if name in INFRACTION_TYPE_EMOJIS:
+			name = f'{INFRACTION_TYPE_EMOJIS[name]}{name}'
+
 		infraction_partial_id = infraction['_id'][:8]
 
 		if 'date' in infraction:

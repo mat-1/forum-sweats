@@ -1,6 +1,6 @@
+from forumsweats.commands.infractions import INFRACTION_TYPE_EMOJIS
 from datetime import datetime, timedelta
 from utils import confirmed_emoji
-from ..discordbot import has_role
 from ..commandparser import Member
 from forumsweats import db
 import discord
@@ -42,6 +42,11 @@ async def run(message, member: Member = None):
 	for infraction in infractions[-30:]:
 		value = f'<@{infraction["user"]}> - ' + (infraction.get('reason') or '<no reason>')
 		name = infraction['type']
+
+		# add the emoji for the infraction type before the name
+		if name in INFRACTION_TYPE_EMOJIS:
+			name = f'{INFRACTION_TYPE_EMOJIS[name]}{name}'
+
 		infraction_partial_id = infraction['_id'][:8]
 
 		if 'date' in infraction:
