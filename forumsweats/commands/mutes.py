@@ -45,7 +45,7 @@ async def run(message, member: Member = None):
 
 		# add the emoji for the infraction type before the name
 		if name in INFRACTION_TYPE_EMOJIS:
-			name = f'{INFRACTION_TYPE_EMOJIS[name]}{name}'
+			name = f'{INFRACTION_TYPE_EMOJIS[name]} {name}'
 
 		infraction_partial_id = infraction['_id'][:8]
 
