@@ -39,10 +39,10 @@ async def run(message, member: Member, mute_length: Time = Time(0), reason: str 
 
 	if reason:
 		changed_message = f'<@{member.id}>\'s mute has been changed to {mute_length_string} for "**{reason}**"'
-		dm_changed_message = f'Your mute has been extended to {mute_length_string} for "**{reason}**"'
+		dm_changed_message = f'Your mute has been changed to {mute_length_string} for "**{reason}**"'
 	else:
 		changed_message = f'<@{member.id}>\'s mute has been changed to {mute_length_string}'
-		dm_changed_message = f'Your mute has been extended to {mute_length_string}'
+		dm_changed_message = f'Your mute has been changed to {mute_length_string}'
 
 	mute_remaining = int((await db.get_mute_end(member.id)) - time.time())
 
