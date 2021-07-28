@@ -11,13 +11,16 @@ args = '[member]'
 class HasntInvitedAnyone(Exception): pass
 class UnknownInvitedMembers(Exception): pass
 
-async def check_promoter(member, inviter_string: str=None):
+async def check_promoter(member, inviter_string: str=None, raise_error=True):
 	invited_member_ids = await db.get_invited_members(member.id)
 
 	members_activity_bobux = {}
 
 	if len(invited_member_ids) == 0:
-		raise HasntInvitedAnyone()
+		if raise_error:
+			raise HasntInvitedAnyone()
+		else:
+			return
 
 	for member_id in invited_member_ids:
 		member_object: discord.User = member.guild.get_member(member_id)
@@ -27,7 +30,10 @@ async def check_promoter(member, inviter_string: str=None):
 			members_activity_bobux[member_id] = member_activity_bobux
 
 	if len(members_activity_bobux) == 0:
-		raise UnknownInvitedMembers()
+		if raise_error:
+			raise UnknownInvitedMembers()
+		else:
+			return
 	
 	result_description = []
 

@@ -222,7 +222,7 @@ async def on_member_join(member):
 	if used_invite:
 		await db.add_invited_member(used_invite.inviter.id, member.id)
 		from .commands.promoter import check_promoter
-		asyncio.ensure_future(check_promoter(member))
+		asyncio.ensure_future(check_promoter(member, None, False))
 
 	moot_end = await db.get_mooted_end(member.id)
 	is_mooted = moot_end and moot_end > time.time()
@@ -646,6 +646,7 @@ def api_get_members():
 	guild_id = config.main_guild
 	guild = client.get_guild(guild_id)
 
+	if not guild: return {}
 	total_member_count = guild.member_count
 
 	owner_role_id = 717906079572295750
