@@ -1,8 +1,8 @@
-from discord import message
 from forumsweats.commands.pets import Pet
 from typing import Any, List, Set, Union
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import motor.motor_asyncio
+import discord
 import time
 import uuid
 import os
@@ -143,7 +143,7 @@ async def add_infraction(user_id: int, infraction_type, reason, mute_length=0, m
 		'user': user_id,
 		'type': infraction_type,
 		'reason': reason,
-		'date': datetime.utcnow(),
+		'date': discord.utils.utcnow(),
 		'length': str(mute_length),  # must be a string otherwise mongodb gets mad on long mutes
 		'by': muted_by
 	})
@@ -154,7 +154,7 @@ async def get_infractions(user_id: int) -> list:
 	infractions = []
 	async for infraction in infractions_data.find({
 		'user': user_id,
-		'date': { '$gt': datetime.utcnow() - timedelta(days=30) }
+		'date': { '$gt': discord.utils.utcnow() - timedelta(days=30) }
 	}):
 		infractions.append(infraction)
 	return infractions
@@ -182,15 +182,15 @@ async def get_weekly_warns(user_id: int) -> List[str]:
 	infractions = []
 	async for infraction in infractions_data.find({
 		'user': user_id,
-		'date': { '$gt': datetime.utcnow() - timedelta(days=7) },
+		'date': { '$gt': discord.utils.utcnow() - timedelta(days=7) },
 		'type': 'warn'
 	}):
 		infractions.append(infraction['reason'] or '<no reason>')
 	return infractions
 
 
-async def clear_infractions(user_id: int, date):
-	if not connection_url: return
+async def clear_infractions(user_id: int, date) -> int:
+	if not connection_url: return 0
 	r = await infractions_data.delete_many({
 		'user': user_id,
 		'date': {
@@ -356,7 +356,7 @@ async def set_last_general_duel(guild_id: int):
 	await servers_data.update_one(
 		{ 'id': guild_id },
 		{
-			'$set': { 'last_duel': datetime.utcnow() }
+			'$set': { 'last_duel': discord.utils.utcnow() }
 		},
 		upsert=True
 	)
@@ -538,15 +538,20 @@ async def bobux_get_subscriptions(user_id) -> list:
 		return []
 
 	subs = []
+	
 	for member_id in subs_raw:
 		sub_data = subs_raw[member_id]
+		# convert the next payment time to be timezone-aware
+		next_payment: datetime = sub_data['next_payment'].replace(tzinfo=timezone.utc)
+
 		subs.append({
 			'id': int(member_id),
 			'sender': int(user_id),
 			'tier': sub_data['tier'],
-			'next_payment': sub_data['next_payment'],
+
+			'next_payment': next_payment,
 			# whether the payment hasnt been given out yet (due to bot being down or something)
-			'owed': datetime.utcnow() > sub_data['next_payment']
+			'owed': discord.utils.utcnow() > next_payment
 		})
 
 	return subs
@@ -563,13 +568,17 @@ async def bobux_get_all_subscriptions(for_user=None):
 				if int(for_user) != int(member_id):
 					continue
 			sub_data = subs_raw[member_id]
+
+			# convert the next payment time to be timezone-aware
+			next_payment: datetime = sub_data['next_payment'].replace(tzinfo=timezone.utc)
+
 			subs.append({
 				'id': int(member_id),
 				'sender': int(member['discord']),
 				'tier': sub_data['tier'],
-				'next_payment': sub_data['next_payment'],
+				'next_payment': next_payment,
 				# whether the payment hasnt been given out yet (due to bot being down or something)
-				'owed': datetime.utcnow() > sub_data['next_payment']
+				'owed': discord.utils.utcnow() > next_payment
 			})
 	return subs
 
@@ -582,7 +591,7 @@ async def bobux_subscribe_to(user_id, subbing_to_id, tier):
 			'$set': {
 				f'subs.{subbing_to_id}': {
 					'tier': tier.lower().strip(),
-					'next_payment': datetime.utcnow() + timedelta(days=7)
+					'next_payment': discord.utils.utcnow() + timedelta(days=7)
 				}
 			}
 		},

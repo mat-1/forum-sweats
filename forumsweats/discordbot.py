@@ -31,7 +31,7 @@ commandparser = CommandParser(
 
 
 def get_role_id(guild_id, role_name):
-	return config.roles.get(str(guild_id), {}).get(role_name)
+	return config.roles.get(role_name)
 
 
 def has_role(member_id: int, role_name: str, guild_id=None):
@@ -124,7 +124,7 @@ async def renew_sub(sub):
 
 
 async def queue_renew_sub(sub):
-	next_payment_delta = sub['next_payment'] - datetime.utcnow()
+	next_payment_delta = sub['next_payment'] - discord.utils.utcnow()
 	await asyncio.sleep(next_payment_delta.total_seconds())
 	await renew_sub(sub)
 
@@ -163,9 +163,9 @@ async def on_ready():
 		if hasattr(module, 'init'):
 			await module.init()
 
-	await client.change_presence(
-		activity=discord.Game(name='your mom')
-	)
+	# await client.change_presence(
+	# 	activity=discord.Game(name='your mom')
+	# )
 
 	if not is_dev:
 		try:

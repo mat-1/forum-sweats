@@ -1,3 +1,4 @@
+from typing import Any, Dict
 import json
 
 
@@ -34,9 +35,11 @@ class AnyListMatcher:
 
 bot_data = read_config_file('bot')
 
-roles = read_config_file('roles')
+roles: Dict[str, int] = read_config_file('roles')
 channels_raw = read_config_file('channels')
-channels = {channel_name: AnyListMatcher(channels_raw[channel_name]) for channel_name in channels_raw}
+channels: Dict[str, Any] = {
+	channel_name: AnyListMatcher(channels_raw[channel_name]) for channel_name in channels_raw
+}
 prefix = bot_data.get('prefix', '!')
 main_guild = bot_data.get('main_guild')
 

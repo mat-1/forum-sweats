@@ -1,5 +1,5 @@
 from . import discordbot
-from typing import List, Optional
+from typing import List, Optional, Union
 import traceback
 import discord
 import config
@@ -7,8 +7,8 @@ import time
 import re
 
 
-class Member():
-	avatar_url: str
+class Member(discord.Member):
+	avatar: discord.Asset
 	id: int
 	mention: str
 
@@ -252,14 +252,14 @@ def get_channel_members(channel_id):
 	try:
 		return discordbot.client.get_channel(channel_id).members
 	except:
-		return [discordbot.client.get_channel(channel_id).recipient]
+		return [ discordbot.client.get_channel(channel_id).recipient ]
 
 
 def get_guild_members(channel_id):
 	try:
 		members = discordbot.client.get_guild(channel_id).members
 	except Exception as e:
-		members = [discordbot.client.get_channel(channel_id).recipient]
+		members = [ discordbot.client.get_channel(channel_id).recipient ]
 	return sorted(members, key=lambda m: len(m.name))
 
 
@@ -487,7 +487,7 @@ def check_time(ctx, arg):
 		return lengths[time_type] * time_part
 
 
-class Time():
+class Time(int):
 	def __init__(self, value=0):
 		self.value = value
 	def __gt__(self, other) -> bool: return float(self) > float(other)

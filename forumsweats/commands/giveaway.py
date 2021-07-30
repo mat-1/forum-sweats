@@ -91,6 +91,12 @@ async def continue_giveaway(data: dict):
 	time_left_string_before: str = ''
 
 	channel = client.get_channel(data['channel_id'])
+
+	# if it can't find the channel, just print a warning and return
+	if not channel:
+		print(f'Could not find channel for giveaway {data["id"]}')
+		return
+
 	try:
 		message = await channel.fetch_message(data['id'])
 	except discord.errors.NotFound:

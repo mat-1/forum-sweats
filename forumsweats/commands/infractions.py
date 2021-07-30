@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
-from utils import confirmed_emoji
-from ..discordbot import has_role
 from ..commandparser import Member
+from ..discordbot import has_role
+from utils import confirmed_emoji
+from datetime import timedelta
 from forumsweats import db
 import discord
 
@@ -46,7 +46,7 @@ async def run(message, member: Member = None):
 		if name == 'mute':
 			total_mutes += 1
 		if 'date' in infraction:
-			if datetime.utcnow() - timedelta(days=30) > infraction['date']:
+			if discord.utils.utcnow() - timedelta(days=30) > infraction['date']:
 				continue
 			if name == 'mute':
 				total_mutes_past_month += 1
@@ -62,7 +62,7 @@ async def run(message, member: Member = None):
 		infraction_partial_id = infraction['_id'][:8]
 
 		if 'date' in infraction:
-			if datetime.utcnow() - infraction['date'] > timedelta(days=30):
+			if discord.utils.utcnow() - infraction['date'] > timedelta(days=30):
 				continue
 
 			date_pretty = infraction['date'].strftime('%m/%d/%Y')

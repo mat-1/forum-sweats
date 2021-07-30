@@ -14,7 +14,7 @@ args = '<member> <length> [reason]'
 
 async def do_mute(message, member, length, reason, muted_by: int=0):
 	for infraction in await db.get_infractions(member.id):
-		if datetime.utcnow() - infraction['date'] < timedelta(minutes=1):
+		if discord.utils.utcnow() - infraction['date'] < timedelta(minutes=1):
 			# if the infraction was made less than 3 minutes ago, it should be removed as it was likely an accident
 			await db.clear_infraction(infraction['_id'])
 

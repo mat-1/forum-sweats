@@ -1,9 +1,8 @@
-from utils import seconds_to_string
 from forumsweats.commandparser import Member
-from datetime import datetime
+from utils import seconds_to_string
+from forumsweats import db
 from .sub import tiers
 import discord
-from forumsweats import db
 
 name = 'listsubs'
 args = '[member]'
@@ -28,7 +27,7 @@ async def run(message, member: Member = None):
 		receiver = sub['id']
 		tier = sub['tier']
 		tier_upper = tier.upper()
-		next_payment_delta = sub['next_payment'] - datetime.utcnow()
+		next_payment_delta = sub['next_payment'] - discord.utils.utcnow()
 		next_payment_seconds = next_payment_delta.total_seconds()
 		next_payment_display = seconds_to_string(next_payment_seconds)
 		display_message.append(

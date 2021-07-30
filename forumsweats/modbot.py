@@ -80,11 +80,11 @@ def get_previous_messages(member: discord.User, last_seconds=3600):
 	messages = []
 	recent_message_count = 0
 
-	now = datetime.utcnow()
+	now = discord.utils.utcnow()
 	for message in reversed(previous_user_messages.get(member.id, [])):
-		if now - message.created_at.replace(tzinfo=None) < timedelta(seconds=last_seconds):
+		if now - message.created_at < timedelta(seconds=last_seconds):
 			messages.append(message)
-		if now - message.created_at.replace(tzinfo=None) < timedelta(seconds=3600):
+		if now - message.created_at < timedelta(seconds=3600):
 			recent_message_count += 1
 	if recent_message_count == 0 and member.id in previous_user_messages:
 		del previous_user_messages[member.id]

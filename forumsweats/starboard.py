@@ -24,7 +24,7 @@ async def get_star_count(message: discord.Message):
 	return star_count
 
 async def add_message_to_starboard(message: discord.Message):
-	starboard_channel: Union[discord.abc.Messageable, None] = client.get_channel(config.channels['starboard'])
+	starboard_channel = client.get_channel(config.channels['starboard'])
 	if not starboard_channel: return
 
 	star_count = await get_star_count(message)
@@ -50,7 +50,7 @@ async def add_message_to_starboard(message: discord.Message):
 	)
 	embed.set_author(
 		name=str(message.author),
-		icon_url=message.author.avatar_url,
+		icon_url=message.author.avatar.url,
 		url=message.jump_url
 	)
 	if len(message.attachments) > 0:

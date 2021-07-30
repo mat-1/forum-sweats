@@ -1,6 +1,7 @@
 from ..commandparser import Member
 from datetime import datetime
 from forumsweats import db
+import discord
 
 name = 'clearinfractions'
 channels = None
@@ -14,7 +15,7 @@ async def run(message, member: Member, date_string: str = None):
 		return await message.send('Please use `!clearinfractions @member date`')
 	# month, day, year = date.split('/')
 	if date_string == 'today':
-		date = datetime.utcnow()
+		date = discord.utils.utcnow()
 	else:
 		try:
 			date = datetime.strptime(date_string.strip(), '%m/%d/%Y')
