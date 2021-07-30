@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Union
 import config
 
@@ -70,3 +71,6 @@ def trim_string(string, width=150, height=20):
 
 
 confirmed_emoji = '👍'
+
+def convert_datetime_to_tz_aware(datetime_object: datetime):
+	return datetime_object.replace(tzinfo=timezone.utc)

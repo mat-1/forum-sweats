@@ -18,6 +18,7 @@ INFRACTION_TYPE_EMOJIS = {
 async def run(message, member: Member = None):
 	'Tells you the times you have been muted and why.'
 
+
 	if not member:
 		member = message.author
 

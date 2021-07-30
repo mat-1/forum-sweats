@@ -213,7 +213,8 @@ class CommandParser():
 				try:
 					print('doing function', func.__code__.co_filename)
 					return await func(ctx, *return_args)
-				except TypeError:
+				except TypeError as e:
+					traceback.print_exc()
 					if pad_none:
 						return_args.append(None)
 					else:

@@ -1,3 +1,4 @@
+from utils import convert_datetime_to_tz_aware
 from forumsweats.commands.pets import Pet
 from typing import Any, List, Set, Union
 from datetime import datetime, timedelta, timezone
@@ -156,6 +157,8 @@ async def get_infractions(user_id: int) -> list:
 		'user': user_id,
 		'date': { '$gt': discord.utils.utcnow() - timedelta(days=30) }
 	}):
+		# replace the infraction date with the timezone aware one
+		infraction['date'] = convert_datetime_to_tz_aware(infraction['date'])
 		infractions.append(infraction)
 	return infractions
 
@@ -165,6 +168,7 @@ async def get_all_infractions(user_id: int) -> list:
 	async for infraction in infractions_data.find({
 		'user': user_id,
 	}):
+		infraction['date'] = convert_datetime_to_tz_aware(infraction['date'])
 		infractions.append(infraction)
 	return infractions
 
@@ -174,6 +178,7 @@ async def get_all_infractions_by(user_id: int) -> list:
 	async for infraction in infractions_data.find({
 		'by': user_id,
 	}):
+		infraction['date'] = convert_datetime_to_tz_aware(infraction['date'])
 		infractions.append(infraction)
 	return infractions
 
@@ -185,6 +190,7 @@ async def get_weekly_warns(user_id: int) -> List[str]:
 		'date': { '$gt': discord.utils.utcnow() - timedelta(days=7) },
 		'type': 'warn'
 	}):
+		infraction['date'] = convert_datetime_to_tz_aware(infraction['date'])
 		infractions.append(infraction['reason'] or '<no reason>')
 	return infractions
 
@@ -542,7 +548,7 @@ async def bobux_get_subscriptions(user_id) -> list:
 	for member_id in subs_raw:
 		sub_data = subs_raw[member_id]
 		# convert the next payment time to be timezone-aware
-		next_payment: datetime = sub_data['next_payment'].replace(tzinfo=timezone.utc)
+		next_payment: datetime = convert_datetime_to_tz_aware(sub_data['next_payment'])
 
 		subs.append({
 			'id': int(member_id),
@@ -570,7 +576,7 @@ async def bobux_get_all_subscriptions(for_user=None):
 			sub_data = subs_raw[member_id]
 
 			# convert the next payment time to be timezone-aware
-			next_payment: datetime = sub_data['next_payment'].replace(tzinfo=timezone.utc)
+			next_payment: datetime = convert_datetime_to_tz_aware(sub_data['next_payment'])
 
 			subs.append({
 				'id': int(member_id),
