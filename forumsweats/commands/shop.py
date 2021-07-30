@@ -37,7 +37,14 @@ SHOP_ITEMS = [
 		'id': 'connect_four',
 		'description': 'Unlocks !connect4',
 		'persistent': True
-	}
+	},
+	{
+		'name': 'Tetris',
+		'price': 3000,
+		'id': 'tetris',
+		'description': 'Unlocks !tetris',
+		'persistent': True
+	},
 ]
 
 

@@ -1,5 +1,5 @@
 from . import discordbot
-from typing import List, Optional, Union
+from typing import Any, Coroutine, List, Optional, Union
 import traceback
 import discord
 import config
@@ -65,6 +65,10 @@ class Context(discord.Message):  # very unfinished but its fine probably
 	async def send(self, *args, embed=None, **kwargs):
 		'Send a message to a channel'
 		message = await self.message.channel.send(*args, **kwargs, embed=embed)
+		return message
+
+	async def reply(self, content: Union[str, None] = None, **kwargs):
+		message = await self.message.reply(content, **kwargs)
 		return message
 
 	def __init__(self, message, prefix=None):
