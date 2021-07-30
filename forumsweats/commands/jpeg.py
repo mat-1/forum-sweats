@@ -1,4 +1,4 @@
-from ..commandparser import Member
+from ..commandparser import Context, Member
 import discord
 import io
 import aiohttp
@@ -24,13 +24,15 @@ async def upload(im_bytes, content_type):
 	return new_url
 
 
-async def run(message, member: Member):
+async def run(message: Context, member: Member):
 	'Compresses a user\'s avatar. A lot.'
 	async with message.channel.typing():
 		img_size = 128
 		user = message.client.get_user(member.id)
+		if not user:
+			return await message.reply('User not found.')
 		with io.BytesIO() as output:
-			asset = user.avatar_url_as(static_format='png', size=img_size)
+			asset = user.avatar.with_static_format('png').with_size(img_size)
 			await asset.save(output)
 			if '.gif' in asset._url:
 				content_type = 'image/gif'
@@ -45,4 +47,4 @@ async def run(message, member: Member):
 
 	embed.set_image(url=url)
 
-	await message.channel.send(embed=embed)
+	await message.reply(embed=embed)

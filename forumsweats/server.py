@@ -1,3 +1,4 @@
+from typing import Union
 from . import discordbot
 from aiohttp import web
 import asyncio
@@ -31,19 +32,27 @@ cached_users = {}
 async def api_bobux(request):
 	bobux_leaderboard_raw = await discordbot.db.get_bobux_leaderboard(100)
 	bobux_leaderboard = []
+
+	main_guild = discordbot.client.get_guild(config.main_guild)
+	if not main_guild:
+		return web.json_response({ 'error': 'main guild not found' })
+
 	for member in bobux_leaderboard_raw:
-		user = discordbot.client.get_guild(config.main_guild).get_member(member['discord']) or discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
-		if not user:
+		_user = main_guild.get_member(member['discord']) or discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
+		if not _user:
 			try: user = await discordbot.client.fetch_user(member['discord'])
 			except: user = '???'
 			cached_users[member['discord']] = user
+		else:
+			user = _user
+		user: Union[discord.User, discord.Member, str]
 		bobux_leaderboard.append({
 			'bobux': member['bobux'],
 			'id': member['discord'],
-			'username': user.name if user != '???' else 'Deleted user',
-			'discrim': user.discriminator if user != '???' else '0000',
-			'avatar': str(user.avatar_url_as(size=128, format='png')) if user != '???' else None,
-			'color': str(user.color) if user != '???' else '#e5f7f7'
+			'username': user.name if not isinstance(user, str) else 'Deleted user',
+			'discrim': user.discriminator if not isinstance(user, str) else '0000',
+			'avatar': str(user.avatar.with_format('png').with_size(128).url) if not isinstance(user, str) else None,
+			'color': str(user.color) if not isinstance(user, str) else '#e5f7f7'
 		})
 	return web.json_response(bobux_leaderboard)
 
@@ -51,8 +60,12 @@ async def api_bobux(request):
 async def api_activitybobux(request):
 	bobux_leaderboard_raw = await discordbot.db.get_activity_bobux_leaderboard(100)
 	bobux_leaderboard = []
+	main_guild = discordbot.client.get_guild(config.main_guild)
+	if not main_guild:
+		return web.json_response({ 'error': 'main guild not found' })
+
 	for member in bobux_leaderboard_raw:
-		user = discordbot.client.get_guild(config.main_guild).get_member(member['discord']) or discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
+		user = main_guild.get_member(member['discord']) or discordbot.client.get_user(member['discord']) or cached_users.get(member['discord'])
 		if not user:
 			try: user = await discordbot.client.fetch_user(member['discord'])
 			except: user = '???'
@@ -60,10 +73,10 @@ async def api_activitybobux(request):
 		bobux_leaderboard.append({
 			'bobux': member['activity_bobux'],
 			'id': member['discord'],
-			'username': user.name if user != '???' else 'Deleted user',
-			'discrim': user.discriminator if user != '???' else '0000',
-			'avatar': str(user.avatar_url_as(size=128, format='png')) if user != '???' else None,
-			'color': str(user.color) if user != '???' else '#e5f7f7'
+			'username': user.name if not isinstance(user, str) else 'Deleted user',
+			'discrim': user.discriminator if not isinstance(user, str) else '0000',
+			'avatar': str(user.avatar.with_format('png').with_size(128).url) if not isinstance(user, str) else None,
+			'color': str(user.color) if not isinstance(user, str) else '#e5f7f7'
 		})
 	return web.json_response(bobux_leaderboard)
 
