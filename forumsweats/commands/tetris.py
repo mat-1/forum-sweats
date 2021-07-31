@@ -14,6 +14,7 @@ pieces = [
 	{
 		# I piece
 		'color': '🟦',
+		'ghost_color': '🔵',
 		'shape': [
 			[1, 1, 1, 1]
 		]
@@ -21,6 +22,7 @@ pieces = [
 	{
 		# J piece
 		'color': '🟫',
+		'ghost_color': '🟤',
 		'shape': [
 			[1, 0, 0],
 			[1, 1, 1]
@@ -29,6 +31,7 @@ pieces = [
 	{
 		# L piece
 		'color': '🟧',
+		'ghost_color': '🟠',
 		'shape': [
 			[0, 0, 1],
 			[1, 1, 1]
@@ -37,6 +40,7 @@ pieces = [
 	{
 		# O piece
 		'color': '🟨',
+		'ghost_color': '🟡',
 		'shape': [
 			[1, 1],
 			[1, 1]
@@ -45,6 +49,7 @@ pieces = [
 	{
 		# S piece
 		'color': '🟩',
+		'ghost_color': '🟢',
 		'shape': [
 			[0, 1, 1],
 			[1, 1, 0]
@@ -53,6 +58,7 @@ pieces = [
 	{
 		# T piece
 		'color': '🟪',
+		'ghost_color': '🟣',
 		'shape': [
 			[0, 1, 0],
 			[1, 1, 1]
@@ -61,6 +67,7 @@ pieces = [
 	{
 		# Z piece
 		'color': '🟥',
+		'ghost_color': '🔴',
 		'shape': [
 			[1, 1, 0],
 			[0, 1, 1]
@@ -101,7 +108,7 @@ def render_board_embed(original_game_board, score: int, held_piece=None, piece=N
 		# overlay the piece onto the game board
 		game_board = overlay_piece_onto_board(game_board, piece, piece_x, piece_y)
 		# overlay the ghost, which is always at the place where the piece would be if it drops
-		ghost_piece = { 'color': '⚫', 'shape': piece['shape'] }
+		ghost_piece = { 'color': piece['ghost_color'], 'shape': piece['shape'] }
 		ghost_piece_y = piece_y
 		while is_position_possible(original_game_board, ghost_piece['shape'], piece_x, ghost_piece_y + 1):
 			ghost_piece_y += 1
@@ -235,6 +242,11 @@ async def run(message: Context):
 
 	score = 0
 
+	has_held_this_round = False
+
+	# whether nothing will move down this round
+	frozen_turn = False
+
 	def choose_piece():
 		'Choose a random piece to play'
 		nonlocal bag
@@ -318,12 +330,18 @@ async def run(message: Context):
 		nonlocal piece_y
 		nonlocal piece
 		nonlocal held_piece
+		nonlocal has_held_this_round
+		if has_held_this_round:
+			return
+		has_held_this_round = True
 		if held_piece is None:
 			held_piece = piece
 			choose_new_piece()
 		else:
 			piece, held_piece = held_piece, piece
 			choose_new_piece(piece)
+		frozen_turn = True
+	
 
 	def clear_lines():
 		'Clear any full lines and award points'
@@ -378,18 +396,23 @@ async def run(message: Context):
 				embed = render_board_embed(game_board, score, held_piece)
 			)
 			choose_new_piece()
+			frozen_turn = True
 			if piece and not is_position_possible(game_board, piece['shape'], piece_x, piece_y):
 				playing = False
 
 		await asyncio.sleep(time.time() - last_edit + 1)
 		
 		if piece and is_position_possible(game_board, piece['shape'], piece_x, piece_y + 1):
-			piece_y += 1
+			if frozen_turn:
+				frozen_turn = False
+			else:
+				piece_y += 1
 		else:
 			# the piece can't be moved down anymore, choose a new piece
 			game_board = overlay_piece_onto_board(game_board, piece, piece_x, piece_y)
 			piece = None
 			clear_lines()
+			has_held_this_round = False
 
 	embed = render_board_embed(game_board, score, held_piece)
 	embed.title = f'Game over (score: {score:,})'
