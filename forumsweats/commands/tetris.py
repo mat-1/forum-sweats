@@ -85,6 +85,8 @@ default_board = [
 	[ background_color ] * board_height
 ] * board_width
 
+active_channels = []
+
 def is_position_possible(game_board, shape: List[List[Literal[0, 1]]], x: int, y: int):
 	'Check if the piece can be at a given position'
 
@@ -158,6 +160,10 @@ async def run(message: Context):
 
 	if not await db.has_shop_item(message.author.id, 'tetris'):
 		return await message.send(f'You need to buy tetris from {config.prefix}shop.')
+	
+	if message.channel.id in active_channels:
+		return await message.reply('There\'s already a game of Tetris going on in this channel, please wait for it to end.'
+	active_channels.append(message.channel.id)
 
 	# the game board, this doesn't include the current piece that is moving
 	game_board = [ row[:] for row in default_board ]
@@ -383,38 +389,43 @@ async def run(message: Context):
 	ui_button_hold.callback = button_click_hold
 
 	choose_new_piece()
+	
 
 	while playing:
-		# do the game loop
-		last_edit = time.time()
-		if piece:
-			await game_message.edit(
-				embed = render_board_embed(game_board, score, held_piece, piece, piece_x, piece_y)
-			)
-		else:
-			await game_message.edit(
-				embed = render_board_embed(game_board, score, held_piece)
-			)
-			choose_new_piece()
-			frozen_turn = True
-			if piece and not is_position_possible(game_board, piece['shape'], piece_x, piece_y):
-				playing = False
-
-		await asyncio.sleep(time.time() - last_edit + 1)
-		
-		if piece and is_position_possible(game_board, piece['shape'], piece_x, piece_y + 1):
-			if frozen_turn:
-				frozen_turn = False
+		try:
+			# do the game loop
+			last_edit = time.time()
+			if piece:
+				await game_message.edit(
+					embed = render_board_embed(game_board, score, held_piece, piece, piece_x, piece_y)
+				)
 			else:
-				piece_y += 1
-		else:
-			# the piece can't be moved down anymore, choose a new piece
-			game_board = overlay_piece_onto_board(game_board, piece, piece_x, piece_y)
-			piece = None
-			clear_lines()
-			has_held_this_round = False
+				await game_message.edit(
+					embed = render_board_embed(game_board, score, held_piece)
+				)
+				choose_new_piece()
+				frozen_turn = True
+				if piece and not is_position_possible(game_board, piece['shape'], piece_x, piece_y):
+					playing = False
+
+			await asyncio.sleep(time.time() - last_edit + 1)
+			
+			if piece and is_position_possible(game_board, piece['shape'], piece_x, piece_y + 1):
+				if frozen_turn:
+					frozen_turn = False
+				else:
+					piece_y += 1
+			else:
+				# the piece can't be moved down anymore, choose a new piece
+				game_board = overlay_piece_onto_board(game_board, piece, piece_x, piece_y)
+				piece = None
+				clear_lines()
+				has_held_this_round = False
+		except:
+			await asyncio.sleep(1)
 
 	embed = render_board_embed(game_board, score, held_piece)
 	embed.title = f'Game over (score: {score:,})'
 	await game_message.edit(embed = embed)
 	view.stop()
+	active_channels.remove(message.channel.id)
