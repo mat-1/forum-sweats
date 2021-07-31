@@ -162,7 +162,7 @@ async def run(message: Context):
 		return await message.send(f'You need to buy tetris from {config.prefix}shop.')
 	
 	if message.channel.id in active_channels:
-		return await message.reply('There\'s already a game of Tetris going on in this channel, please wait for it to end.'
+		return await message.reply('There\'s already a game of Tetris going on in this channel, please wait for it to end.')
 	active_channels.append(message.channel.id)
 
 	# the game board, this doesn't include the current piece that is moving
