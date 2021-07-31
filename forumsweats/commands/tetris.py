@@ -149,10 +149,14 @@ def overlay_piece_onto_board(game_board, piece, piece_x, piece_y):
 
 def rotate_shape_clockwise(shape):
 	'Rotate the shape clockwise'
+	# copy the shape so we don't modify the original
+	shape = [ list(row) for row in shape ]
 	return [ [ shape[y][x] for y in range(len(shape)-1, -1, -1) ] for x in range(len(shape[0])) ]
 
 def rotate_shape_counterclockwise(shape):
 	'Rotate the shape counterclockwise'
+	# copy the shape so we don't modify the original
+	shape = [ list(row) for row in shape ]
 	return [ [ shape[y][x] for y in range(len(shape)) ] for x in range(len(shape[0])-1, -1, -1) ]
 
 async def run(message: Context):
