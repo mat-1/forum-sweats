@@ -14,13 +14,10 @@ async def run(message, amount_str: str):
 	try:
 		amount = int(amount_str)
 	except:
-		return await message.reply('Invalid amount')
+		return await message.channel.send('Invalid amount')
 
-	if amount >= 1000:
-		return await message.reply('You can\'t clear this many messages.')
-
-	if amount >= 50:
-		verify_message = await message.reply(f'Are you sure you want to purge {amount} recent messages?')
+	if amount > 100:
+		verify_message = await message.channel.send(f'Are you sure you want to purge {amount} recent messages?')
 		confirmed = await confirmgui.make_confirmation_gui(message.client, verify_message, message.author)
 		if not confirmed:
 			return
