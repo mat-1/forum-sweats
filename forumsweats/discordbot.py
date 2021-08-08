@@ -373,6 +373,8 @@ is_chat_dead = False
 
 
 async def process_suggestion(message):
+	if message.type == discord.MessageType.thread_created:
+		return await message.delete()
 	agree_emoji = client.get_emoji(719235230958878822)
 	disagree_emoji = client.get_emoji(719235358029512814)
 	await message.add_reaction(agree_emoji)
