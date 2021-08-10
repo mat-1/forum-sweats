@@ -20,7 +20,7 @@ def execute(_code, loc):  # Executes code asynchronously
 
 
 async def run(message, code: str):
-	if message.author.id != 224588823898619905: return
+	if message.author.id != 856340031999311872: return
 	f = io.StringIO()
 	with redirect_stdout(f):
 		command = message.content.split(None, 1)[1].strip()

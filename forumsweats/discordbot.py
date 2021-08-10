@@ -615,7 +615,7 @@ async def unmoot_user(user_id, wait=False, gulag_message=True, reason=None):
 
 async def custom_reaction_messages(payload):
 	# ignore reactions from mat
-	# if payload.user_id == 224588823898619905:
+	# if payload.user_id == 856340031999311872:
 	# 	return
 	if payload.message_id == 732551899374551171:
 		if str(payload.emoji.name).lower() != 'disagree':
