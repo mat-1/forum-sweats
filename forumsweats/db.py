@@ -769,15 +769,14 @@ async def end_giveaway(message_id: int):
 
 
 
-async def get_social_credit(user_id: int) -> int:
+async def get_base_social_credit(user_id: int) -> int:
 	if not connection_url: return 0
-	bobux = await fetch_member(user_id, 'socialcredit')
-	return bobux or 1000
+	return await fetch_member(user_id, 'socialcredit') or 0
 
 
 async def change_social_credit(user_id: int, amount: int):
-	if not connection_url: return
+	if not connection_url: return 0
 	data_inc = { 'socialcredit': amount }
 	await modify_member(user_id, { '$inc': data_inc })
-	return await get_social_credit(user_id)
+	return await get_base_social_credit(user_id)
 

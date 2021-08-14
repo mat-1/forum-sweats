@@ -10,7 +10,7 @@ args = '[member]'
 async def run(message, member: Member = None):
 	if not member:
 		member = message.author
-	social_credit = await db.get_social_credit(member.id)
+	social_credit = await db.get_base_social_credit(member.id) + 1000
 	if social_credit >= 1050:
 		grade = 'AAA'
 	elif social_credit >= 1030:
