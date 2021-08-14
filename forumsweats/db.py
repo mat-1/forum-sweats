@@ -762,3 +762,22 @@ async def end_giveaway(message_id: int):
 		{ 'id': message_id },
 		{ '$set': { 'ended': True } }
 	)
+
+
+
+
+
+
+
+async def get_social_credit(user_id: int) -> int:
+	if not connection_url: return 0
+	bobux = await fetch_member(user_id, 'socialcredit')
+	return bobux or 1000
+
+
+async def change_social_credit(user_id: int, amount: int):
+	if not connection_url: return
+	data_inc = { 'socialcredit': amount }
+	await modify_member(user_id, { '$inc': data_inc })
+	return get_social_credit(user_id)
+
