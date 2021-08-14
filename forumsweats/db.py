@@ -779,5 +779,5 @@ async def change_social_credit(user_id: int, amount: int):
 	if not connection_url: return
 	data_inc = { 'socialcredit': amount }
 	await modify_member(user_id, { '$inc': data_inc })
-	return get_social_credit(user_id)
+	return await get_social_credit(user_id)
 
