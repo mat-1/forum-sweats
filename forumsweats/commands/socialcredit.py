@@ -31,7 +31,7 @@ async def run(message, member: Member = None):
 	if member.id == message.author.id:
 		social_credit_message = f'You have **{social_credit}** social credit. That means you have a grade of **{grade}**.'
 	else:
-		social_credit_message = f'<@{member.id}> has **{social_credit}** bobux. That means they have a grade of **{grade}**.'
+		social_credit_message = f'<@{member.id}> has **{social_credit}** social credit. That means they have a grade of **{grade}**.'
 	embed = discord.Embed(
 		description=social_credit_message
 	)
