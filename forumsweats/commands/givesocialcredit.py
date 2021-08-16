@@ -5,6 +5,7 @@ name = 'givesocialcredit'
 aliases = ('addsocialcredit', 'givesocialcredits', 'addsocialcredits')
 roles = ('mod', 'admin')
 args = '[member]'
+channels = None
 
 
 async def run(message, member: Member = None, amount: int = None):
