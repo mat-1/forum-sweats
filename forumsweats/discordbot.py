@@ -159,6 +159,7 @@ async def on_ready():
 	try:
 		await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
 	except: pass
+
 	for module in command_modules:
 		if hasattr(module, 'init'):
 			await module.init()
@@ -166,6 +167,29 @@ async def on_ready():
 	# await client.change_presence(
 	# 	activity=discord.Game(name='your mom')
 	# )
+
+	# send a message in #counting saying the current number if people messed up counting while it was down
+	try:
+		current_number = await db.get_counter(config.main_guild)
+		counting_channel = client.get_channel(config.channels['counting'])
+		most_recent_counting_message = await counting_channel.history(limit=1).flatten()[0]
+		try:
+			most_recent_number = w2n.word_to_num(most_recent_counting_message.content)
+		except:
+			most_recent_number = -1
+		did_bot_confirm_most_recent = False
+		for reaction in most_recent_counting_message.reactions:
+			if str(reaction.emoji) == str(COUNTING_CONFIRMATION_EMOJI):
+				async for user in reaction.users():
+					if user.id == client.user.id:
+						did_bot_confirm_most_recent = True
+						break
+				if did_bot_confirm_most_recent:
+					break
+		if most_recent_number != current_number or not did_bot_confirm_most_recent:
+			await counting_channel.send(f'{current_number}')
+	except:
+		pass
 
 	if not is_dev:
 		try:
@@ -289,6 +313,10 @@ async def on_member_update(before, after):
 most_recent_counting_message_id = None
 most_recent_infinite_counting_message_id = None
 
+# a dict of ids to the last time a member sent a message in #counting
+counting_cooldowns = {}
+
+COUNTING_CONFIRMATION_EMOJI = '✅'
 
 async def process_counting_channel(message):
 	global most_recent_counting_message_id
@@ -303,6 +331,14 @@ async def process_counting_channel(message):
 		await message.delete()
 		return
 
+	if (
+		message.author.id in counting_cooldowns
+		and counting_cooldowns[message.author.id] + message.channel.slowmode_delay > time.time()
+	):
+		# delete messages if the author hasn't waited the full cooldown
+		return await message.delete()
+
+
 	old_number = await db.get_counter(message.guild.id)
 	try:
 		new_number = w2n.word_to_num(message.content)
@@ -313,7 +349,7 @@ async def process_counting_channel(message):
 		await message.channel.send(f'<@{message.author.id}>, please start at 1', delete_after=10)
 	elif new_number == old_number + 1:
 		try:
-			await message.add_reaction('✅')
+			await message.add_reaction(COUNTING_CONFIRMATION_EMOJI)
 		except:
 			# if there was an error adding the reaction, just delete the message
 			return await message.delete()
@@ -323,11 +359,15 @@ async def process_counting_channel(message):
 		await db.change_bobux(message.author.id, 1)
 		# we do a try except in case the user blocked the bot
 	else:
+		if has_role(message.author.id, 'helper'):
+			# if the user has the helper role and they mess up counting, delete their message
+			return await message.delete()
 		await db.set_counter(message.guild.id, 0)
 		await message.channel.send(
 			f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})"
 		)
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
+	counting_cooldowns[message.author.id] = time.time()
 
 async def process_infinite_counting_channel(message):
 	global most_recent_infinite_counting_message_id
@@ -358,7 +398,7 @@ async def process_infinite_counting_channel(message):
 		await message.channel.send(f'<@{message.author.id}>, please start at 1', delete_after=10)
 	elif new_number == old_number + 1:
 		try:
-			await message.add_reaction('✅')
+			await message.add_reaction(COUNTING_CONFIRMATION_EMOJI)
 		except:
 			# if there was an error adding the reaction, just delete the message
 			return await message.delete()
