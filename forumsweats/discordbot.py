@@ -172,24 +172,26 @@ async def on_ready():
 	try:
 		current_number = await db.get_counter(config.main_guild)
 		counting_channel = client.get_channel(config.channels['counting'])
-		most_recent_counting_message = await counting_channel.history(limit=1).flatten()[0]
+		most_recent_counting_message = (await counting_channel.history(limit=1).flatten())[0]
 		try:
 			most_recent_number = w2n.word_to_num(most_recent_counting_message.content)
 		except:
 			most_recent_number = -1
 		did_bot_confirm_most_recent = False
+		if most_recent_counting_message.author.id == client.user.id:
+			did_bot_confirm_most_recent = True
 		for reaction in most_recent_counting_message.reactions:
 			if str(reaction.emoji) == str(COUNTING_CONFIRMATION_EMOJI):
 				async for user in reaction.users():
 					if user.id == client.user.id:
 						did_bot_confirm_most_recent = True
 						break
-				if did_bot_confirm_most_recent:
-					break
+			if did_bot_confirm_most_recent:
+				break
 		if most_recent_number != current_number or not did_bot_confirm_most_recent:
 			await counting_channel.send(f'{current_number}')
-	except:
-		pass
+	except Exception as e:
+		print(type(e), e)
 
 	if not is_dev:
 		try:
