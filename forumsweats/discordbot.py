@@ -13,6 +13,7 @@ import forums
 import base64
 import config
 import time
+import math
 import os
 
 commands: Any = commands_module
@@ -357,8 +358,11 @@ async def process_counting_channel(message):
 			return await message.delete()
 		await db.set_counter(message.guild.id, int(new_number))
 		most_recent_counting_message_id = message.id
-		# give 1 bobux every time you count
-		await db.change_bobux(message.author.id, 1)
+
+		# how much bobux should be given for counting
+		counting_bobux = math.ceil(new_number / 10)
+		# give bobux every time you count
+		await db.change_bobux(message.author.id, counting_bobux)
 		# we do a try except in case the user blocked the bot
 	else:
 		if has_role(message.author.id, 'helper'):
