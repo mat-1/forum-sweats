@@ -16,4 +16,4 @@ async def run(message, member: Member = None, amount: int = None, reason: str=No
 	if amount > 0:
 		await message.channel.send(f'<@{member.id}>, you have earned **{amount}** social credit. You now have a total of {social_credit} social credit.')
 	else:
-		await message.channel.send(f'<@{member.id}>, you have lost **{amount}** social credit. You now have a total of {social_credit} social credit.')
+		await message.channel.send(f'<@{member.id}>, you have lost **{-amount}** social credit. You now have a total of {social_credit} social credit.')
