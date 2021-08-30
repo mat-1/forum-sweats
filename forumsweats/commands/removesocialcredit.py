@@ -8,7 +8,7 @@ args = '[member]'
 channels = None
 
 
-async def run(message, member: Member = None, amount: int = None):
+async def run(message, member: Member = None, amount: int = None, reason: str=None):
 	if not member or not amount:
 		return await message.reply(f'Invalid member or amount')
 	amount = -amount
