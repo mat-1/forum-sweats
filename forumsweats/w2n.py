@@ -96,7 +96,7 @@ num_names = {
 	'dix-huit': 18,
 	'dix-neuf': 19,
 	'vingt': 20,
-	'vingt et un': 21,
+	'vingt-et-un': 21,
 	'vingt-deux': 22,
 	'vingt-trois': 23,
 	'vingt-quatre': 24,
@@ -220,7 +220,7 @@ neg_names = {
 }
 
 ignore_chars = [ '$', ';', ',' ]
-ignore_words = [ 'a', 'and', '&', 'y', '' ]
+ignore_words = [ 'a', 'and', '&', 'y', '', 'et' ]
 
 word_to_number = { **num_names, **place_names, **dec_names, **neg_names }
 
