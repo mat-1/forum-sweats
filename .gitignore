@@ -14,3 +14,8 @@ pytest_cache
 .vscode/settings.json
 aiohttp/
 motor/
+config
+config/
+config/channels.json
+config/bot.json
+.gitignore

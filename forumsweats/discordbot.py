@@ -1,3 +1,4 @@
+from discord.message import Message
 from . import commands as commands_module
 from .commandparser import CommandParser
 from typing import Any, List, Union
@@ -418,13 +419,26 @@ last_general_message = time.time()
 is_chat_dead = False
 
 
-async def process_suggestion(message):
+async def process_suggestion(message: Message):
+	if message.author.bot: return
 	if message.type == discord.MessageType.thread_created:
 		return await message.delete()
+
+	embed = discord.Embed(
+		title="{0}'s suggestion".format(message.author.name),
+		description=message.content
+	)
+
 	agree_emoji = client.get_emoji(719235230958878822)
 	disagree_emoji = client.get_emoji(719235358029512814)
-	await message.add_reaction(agree_emoji)
-	await message.add_reaction(disagree_emoji)
+
+	embed_message = await message.channel.send(
+		embed=embed
+	)
+	
+	await message.delete()
+	await embed_message.add_reaction(agree_emoji)
+	await embed_message.add_reaction(disagree_emoji)
 
 
 @client.event
