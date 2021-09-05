@@ -73,7 +73,7 @@ def uwuify(message, limit=2000):
 		.replace('l', 'w')\
 		.replace('R', 'W')\
 		.replace('L', 'W')\
-		.replace('<!642466378254647296>', '<@642466378254647296>')
+		.replace('@everyone', '@everyone')
 
 	temp_uwuized_message = add_nyvowel(uwuized_message)
 	if len(temp_uwuized_message) < limit: uwuized_message = temp_uwuized_message
