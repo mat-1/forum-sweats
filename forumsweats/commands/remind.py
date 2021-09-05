@@ -16,7 +16,6 @@ channels = ('bot-commands',)
 
 async def run(message, length: Time, reason: str):
 	'Allows you to remind yourself about something after a specified amount of time'
-	print('remind', length, reason)
 	if not length:
 		await message.reply(message.channel, f'Invalid time. Usage: {message.prefix}remind <time> <reason>')
 		return

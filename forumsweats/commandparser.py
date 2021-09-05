@@ -476,20 +476,33 @@ lengths = {
 }
 
 
-def check_time(ctx, arg):
-	if arg.strip() == 'forever':
-		return lengths['eons'] * 1000
-	time_part = ''
-	for char in arg:
-		if char in '0123456789':
-			time_part += char
+def check_time(ctx, arg: str):
+	total_time = 0
+	while arg:
+		if arg.strip() == 'forever':
+			return lengths['eons'] * 1000
+		time_part = ''
+		for char in arg:
+			if char in '0123456789':
+				time_part += char
+			else:
+				break
+		split_time_type_and_arg = arg[len(time_part):].strip().split(' ', 1)
+		if len(split_time_type_and_arg) > 1:
+			time_type, arg = split_time_type_and_arg
 		else:
-			break
-	time_type = arg[len(time_part):]
-	time_type = time_type.strip()
-	time_part = int(time_part)
-	if time_type in lengths:
-		return lengths[time_type] * time_part
+			time_type = split_time_type_and_arg[0]
+			arg = ''
+
+		try:
+			time_part = int(time_part)
+		except:
+			return
+		if time_type in lengths:
+			total_time += lengths[time_type] * time_part
+		else:
+			return
+	return total_time
 
 
 class Time(int):
