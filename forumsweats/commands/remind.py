@@ -11,6 +11,7 @@ import random
 import time
 
 name = 'remind'
+aliases = ('remindme', 'reminder')
 channels = ('bot-commands',)
 
 async def run(message, length: Time, reason: str):
