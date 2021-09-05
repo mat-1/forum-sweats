@@ -38,6 +38,7 @@ async def run(message, length: Time, reason: str):
 		int(time.time() + float(length)),
 		reason
 	)
+	await continue_reminder(reminder_created_message.id, reminder_created_message.jump_url, message.author.id, int(time.time() + float(length)), reason)
 
 async def continue_reminder(message_id: int, message_url: str, creator_id: int, end: int, reason: str):
 	'Continues a reminder'
