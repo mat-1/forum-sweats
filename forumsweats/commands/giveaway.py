@@ -118,7 +118,10 @@ async def continue_giveaway(data: dict):
 		time_left = data['end'] - int(time.time())
 		time_left_string = seconds_to_string(time_left)
 		if time_left_string != time_left_string_before:
-			await update_giveaway_message(message, data)
+			try:
+				await update_giveaway_message(message, data)
+			except discord.errors.Forbidden:
+				pass
 			time_left_string_before = time_left_string
 
 	await update_giveaway_message(message, data)

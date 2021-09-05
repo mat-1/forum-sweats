@@ -22,6 +22,7 @@ infractions_data = db['infractions']
 servers_data = db['servers']
 starboard_data = db['starboard']
 giveaways_data = db['giveaways']
+reminders_data = db['reminders']
 
 async def modify_member(user_id: int, data: dict):
 	if not connection_url: return
@@ -780,3 +781,49 @@ async def change_social_credit(user_id: int, amount: int):
 	await modify_member(user_id, { '$inc': data_inc })
 	return await get_base_social_credit(user_id)
 
+
+
+
+
+
+'''
+Reminders
+'''
+
+async def create_new_reminder(message_id: int, message_url: str, creator_id: int, end: int, reason: str):
+	await reminders_data.update_one(
+		{ 'id': message_id },
+		{
+			'$set': {
+				'message_url': message_url,
+				'creator_id': creator_id,
+				'end': end,
+				'reason': reason,
+				'ended': False
+			}
+		},
+		upsert=True
+	)
+	return {
+		'id': message_id,
+		'message_url': message_url,
+		'creator_id': creator_id,
+		'end': end,
+		'reason': reason,
+		'ended': False
+	}
+
+
+async def get_active_reminders():
+	reminders = []
+	async for reminder in reminders_data.find({
+		'ended': False
+	}):
+		reminders.append(reminder)
+	return reminders
+
+async def end_reminder(reminder_id: int):
+	await reminders_data.update_one(
+		{ 'id': reminder_id },
+		{ '$set': { 'ended': True } }
+	)
