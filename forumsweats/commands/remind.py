@@ -50,4 +50,4 @@ async def continue_reminder(message_id: int, message_url: str, creator_id: int, 
 
 async def init():
 	for reminder in await db.get_active_reminders():
-		await continue_reminder(reminder['id'], reminder['message_url'], reminder['creator_id'], reminder['end'], reminder['reason'])
+		asyncio.ensure_future(continue_reminder(reminder['id'], reminder['message_url'], reminder['creator_id'], reminder['end'], reminder['reason']))
