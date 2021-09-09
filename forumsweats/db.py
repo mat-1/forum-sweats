@@ -1,3 +1,4 @@
+from discord.user import User
 from utils import convert_datetime_to_tz_aware
 from forumsweats.commands.pets import Pet
 from typing import Any, List, Set, Union
@@ -22,6 +23,7 @@ infractions_data = db['infractions']
 servers_data = db['servers']
 starboard_data = db['starboard']
 giveaways_data = db['giveaways']
+auctions_data = db['auctions']
 reminders_data = db['reminders']
 
 async def modify_member(user_id: int, data: dict):
@@ -746,6 +748,66 @@ async def create_new_giveaway(message_id: int, creator_id: int, channel_id: int,
 		'prize': prize,
 		'ended': False
 	}
+
+async def create_new_auction(message_id: int, creator_id: int, channel_id: int, end: int, item: str, highest_bid: int = 0, highest_bidder: User = None):
+	bidder_id = None
+	if highest_bidder:
+		bidder_id = highest_bidder.id
+
+	await auctions_data.update_one(
+		{ 'id': message_id },
+		{
+			'$set': {
+				'creator_id': creator_id,
+				'channel_id': channel_id,
+				'end': end,
+				'item': item,
+				'highest_bid': highest_bid,
+				'highest_bidder': bidder_id,
+				'ended': False
+			}
+		},
+		upsert=True
+	)
+	return {
+		'id': message_id,
+		'creator_id': creator_id,
+		'channel_id': channel_id,
+		'end': end,
+		'item': item,
+		'highest_bid': highest_bid,
+		'highest_bidder': bidder_id,
+		'ended': False
+	}	
+
+async def end_auction(message_id: int):
+	await auctions_data.update_one(
+		{ 'id': message_id },
+		{ '$set': { 'ended': True } }
+	)	
+
+async def extend_auction(message_id: int, amount: int):
+	auction = await get_auction(message_id)
+	await auctions_data.update_one(
+		{ 'id': message_id },
+		{ '$set': { 'end': auction['end'] + amount } }
+	)	
+
+
+async def set_highest_bidder(message_id: int, highest_bid: int, highest_bidder: User):
+	await auctions_data.update_one(
+		{ 'id': message_id },
+		{ 
+			'$set': { 
+				'highest_bid': highest_bid,
+				'highest_bidder': highest_bidder
+			} 
+		}
+	)	
+
+async def get_auction(message_id: int):
+	auction = await auctions_data.find_one({ 'id': message_id })
+	return auction		
 
 
 async def get_active_giveaways():
