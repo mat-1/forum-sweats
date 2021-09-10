@@ -13,6 +13,9 @@ async def run(message, member: Member = None, amount: int = 0):
 	if not amount or amount <= 0:
 		return await message.channel.send('Invalid amount')
 	sender_bobux = await db.get_bobux(message.author.id)
+	bobux_in_auctions = await db.get_bobux_in_auctions_for_user(message.author.id)
+	if sender_bobux - amount < bobux_in_auctions:
+		return await message.channel.send(f'You can\'t send { amount } bobux, because you have { bobux_in_auctions } in auctions')
 	if sender_bobux < amount:
 		return await message.channel.send('You don\'t have enough bobux')
 	await db.change_bobux(message.author.id, -amount)

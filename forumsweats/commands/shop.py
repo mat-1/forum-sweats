@@ -159,6 +159,10 @@ async def do_shop_gui(message, page_number=1, shop_message=None):
 	selected_item_name = selected_item['name']
 	selected_item_id = selected_item['id']
 
+	bobux_in_auctions = await db.get_bobux_in_auctions_for_user(message.author.id)
+	if bobux_count - selected_item_price < bobux_in_auctions:
+		return await message.channel.send(f'You can\'t buy this item, because you have { bobux_in_auctions } in auctions')
+
 	if bobux_count < selected_item_price:
 		await edit_footer_text(shop_message, 'You don\'t have enough bobux to buy this')
 		await shop_message.clear_reactions()
