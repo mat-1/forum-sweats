@@ -813,7 +813,7 @@ async def extend_auction(message_id: int, amount: int):
 	)	
 
 
-async def set_highest_bidder(message_id: int, highest_bid: int, highest_bidder: User):
+async def set_highest_bidder(message_id: int, highest_bid: int, highest_bidder: int):
 	await auctions_data.update_one(
 		{ 'id': message_id },
 		{ 

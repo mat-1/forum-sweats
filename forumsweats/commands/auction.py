@@ -4,7 +4,7 @@ from discord.reaction import Reaction
 from forumsweats.commandparser import Context, Member, Time
 from forumsweats.discordbot import client
 from utils import seconds_to_string
-from typing import Any, Callable, Tuple, Union
+from typing import Any, Callable, Optional, Tuple, Union
 from datetime import datetime
 from forumsweats import db
 import discord
@@ -19,6 +19,44 @@ channels = None
 
 
 AUCTION_EMOJI = '💸'
+
+
+def create_auction_embed(data: dict, bidder=None):
+	item = data['item']
+	creator_id = data['creator_id']
+	end = data['end']
+	highest_bidder = bidder or data.get('highest_bidder')
+	current_bid = data.get('highest_bid', 0)
+
+	ended = time.time() > end
+
+	if isinstance(highest_bidder, (str, list, tuple)):
+		highest_bidder = highest_bidder[0]	
+
+	description = f'Highest bid is {current_bid}. Minimal next bid {current_bid + 100} bobux'
+	if highest_bidder:
+		description = f'Highest bid is {current_bid} by <@{highest_bidder}>. Minimal next bid {current_bid + 100} bobux'
+
+	description += f'\nReact with {AUCTION_EMOJI} to bid\n'
+
+	if ended:
+		if highest_bidder is None:
+			description = f'**No highest bidder**'
+		else:
+			description = f'**The highest bid was: {current_bid} by <@{highest_bidder}>**'
+	else:
+		ends_in_string = seconds_to_string(end - int(time.time()))
+		description += f'**Ends in: {ends_in_string}**'
+	description += f'\nHosted by: <@{creator_id}>'
+	
+
+	embed = discord.Embed(
+		title=item,
+		description=description,
+		timestamp=datetime.fromtimestamp(end)
+	)
+
+	return embed
 
 
 async def update_auction_message(message: discord.Message, data: dict = None):
@@ -38,13 +76,13 @@ async def end_auction(data: dict):
 	await db.end_auction(data['id'])
 	
 
-	channel: Union[discord.TextChannel, None] = client.get_channel(data['channel_id'])
+	channel = client.get_channel(data['channel_id'])
 	if not channel: return  # the channel the auction was in was deleted
 	message: discord.Message = await channel.fetch_message(data['id'])
 	if not message: return  # the message was deleted
 
 	highest_bidder = data.get('highest_bidder')
-	highest_bid = -data.get('highest_bid') or 0
+	highest_bid = -data.get('highest_bid', 0)
 	if not highest_bidder: return
 
 	#winner = await channel.guild.fetch_member(highest_bidder)
@@ -57,14 +95,14 @@ async def continue_auction(message_id: int):
 	data = await db.get_auction(message_id)
 	time_left: int = data['end'] - int(time.time())
 
-	time_left_string: str = seconds_to_string(time_left)
-	time_left_string_before: str = ''
+	time_left_string = seconds_to_string(time_left)
+	time_left_string_before = ''
 
 	channel = client.get_channel(data['channel_id'])
 
 	# if it can't find the channel, just print a warning and return
 	if not channel:
-		print(f'Could not find channel for auction {data['id']})
+		print(f'Could not find channel for auction {data["id"]}')
 		return
 
 	try:
@@ -99,45 +137,6 @@ async def continue_auction(message_id: int):
 	await end_auction(data)
 
 
-def create_auction_embed(data: dict, bidder=None):
-	item = data['item']
-	creator_id = data['creator_id']
-	end = data['end']
-	highest_bidder = bidder or data.get('highest_bidder')
-	current_bid = data.get('highest_bid') or 0,
-
-	ended = time.time() > end
-
-	if not current_bid is int:
-		current_bid = current_bid[0]
-	if isinstance(highest_bidder, (str, list, tuple)):
-		highest_bidder = highest_bidder[0]	
-
-	description = f'Highest bid is {current_bid}. Minimal next bid ${current_bid + 100}'
-	if highest_bidder:
-		description = f'Highest bid is {current_bid} by <@{highest_bidder}>. Minimal next bid ${current_bid + 100}'
-
-	description += f'\nReact with {AUCTION_EMOJI} to bid\n'
-
-	if ended:
-		if highest_bidder is None:
-			description = f'**No highest bidder**'
-		else:
-			description = f'**The highest bid was: {current_bid} by <@{highest_bidder}>**'
-	else:
-		ends_in_string = seconds_to_string(end - int(time.time()))
-		description += f'**Ends in: {ends_in_string}**'
-	description += f'\nHosted by: <@{creator_id}>'
-	
-
-	embed = discord.Embed(
-		title=item,
-		description=description,
-		timestamp=datetime.fromtimestamp(end)
-	)
-
-	return embed
-
 
 def handle_bids(message: Message, data):
 	@client.event
@@ -149,7 +148,7 @@ def handle_bids(message: Message, data):
 		highest_bid = auction_info['highest_bid'] or 0
 
 		# Check if auction ended
-		if auction_info['ended'] == True: return
+		if auction_info['ended']: return
 
 		# Check if the person has enough bobux
 		if not await db.get_bobux(user.id) > highest_bid + 100:

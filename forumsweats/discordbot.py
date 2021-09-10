@@ -163,7 +163,7 @@ async def on_ready():
 
 	for module in command_modules:
 		if hasattr(module, 'init'):
-			await module.init()
+			asyncio.ensure_future(module.init(), loop=client.loop)
 
 	# await client.change_presence(
 	# 	activity=discord.Game(name='your mom')
