@@ -836,10 +836,12 @@ async def get_active_auctions():
 
 
 async def get_bobux_in_auctions_for_user(user_id: int) -> int:
-	auctions = get_active_auctions()
+	auctions = await get_active_auctions()
 	bobux_in_auctions = 0
-	async for auction_with_bid in auctions.find({ 'highest_bidder': user_id }):
-		bobux_in_auctions += auction_with_bid['highest_bid']
+	for auction in auctions:
+		if auction and auction.get('highest_bidder'):
+			if auction.get('highest_bidder') == user_id and not auction['ended']:
+				bobux_in_auctions += auction['highest_bid']
 	return bobux_in_auctions
 
 
