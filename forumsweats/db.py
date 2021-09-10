@@ -749,6 +749,25 @@ async def create_new_giveaway(message_id: int, creator_id: int, channel_id: int,
 		'ended': False
 	}
 
+async def get_active_giveaways():
+	giveaways = []
+	async for giveaway in giveaways_data.find({ 'ended': False }):
+		giveaways.append(giveaway)
+	return giveaways
+
+async def get_giveaway(message_id: int):
+	giveaway = await giveaways_data.find_one({ 'id': message_id })
+	return giveaway
+
+async def end_giveaway(message_id: int):
+	await giveaways_data.update_one(
+		{ 'id': message_id },
+		{ '$set': { 'ended': True } }
+	)
+
+'''Auctions'''
+
+
 async def create_new_auction(message_id: int, creator_id: int, channel_id: int, end: int, item: str, highest_bid: int = 0, highest_bidder: User = None):
 	bidder_id = None
 	if highest_bidder:
@@ -807,29 +826,21 @@ async def set_highest_bidder(message_id: int, highest_bid: int, highest_bidder: 
 
 async def get_auction(message_id: int):
 	auction = await auctions_data.find_one({ 'id': message_id })
-	return auction		
+	return auction
+
+async def get_active_auctions():
+	auctions = []
+	async for auction in auctions_data.find({ 'ended': False }):
+		auctions.append(auction)
+	return auctions
 
 
-async def get_active_giveaways():
-	giveaways = []
-	async for giveaway in giveaways_data.find({ 'ended': False }):
-		giveaways.append(giveaway)
-	return giveaways
-
-async def get_giveaway(message_id: int):
-	giveaway = await giveaways_data.find_one({ 'id': message_id })
-	return giveaway
-
-async def end_giveaway(message_id: int):
-	await giveaways_data.update_one(
-		{ 'id': message_id },
-		{ '$set': { 'ended': True } }
-	)
-
-
-
-
-
+async def get_bobux_in_auctions_for_user(user_id: int) -> int:
+	auctions = get_active_auctions()
+	bobux_in_auctions = 0
+	async for auction_with_bid in auctions.find({ 'highest_bidder': user_id }):
+		bobux_in_auctions += auction_with_bid['highest_bid']
+	return bobux_in_auctions
 
 
 async def get_base_social_credit(user_id: int) -> int:

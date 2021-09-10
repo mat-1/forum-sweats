@@ -26,9 +26,12 @@ async def update_auction_message(message: discord.Message, data: dict = None):
 		data = await db.get_auction(message.id);
 	embed = create_auction_embed(data)
 
+	if not message: return
 
-	# if there's a winner, make the content be "giveaway ended"
-	await message.edit(embed=embed)
+	try:
+		await message.edit(embed=embed)
+	except: # Message dosen't exist
+		return	
 
 
 async def end_auction(data: dict):
@@ -40,18 +43,18 @@ async def end_auction(data: dict):
 	message: discord.Message = await channel.fetch_message(data['id'])
 	if not message: return  # the message was deleted
 
-	data = await db.get_auction(message.id)
 	highest_bidder = data.get('highest_bidder')
-	highest_bid = -data.get('highest_bid')
+	highest_bid = -data.get('highest_bid') or 0
 	if not highest_bidder: return
 
 	#winner = await channel.guild.fetch_member(highest_bidder)
 
-	await db.change_bobux(highest_bidder, -data.get('highest_bid') or 0)
+	await db.change_bobux(highest_bidder, highest_bid)
 	
 
 
-async def continue_auction(data: dict):
+async def continue_auction(message_id: int):
+	data = await db.get_auction(message_id)
 	time_left: int = data['end'] - int(time.time())
 
 	time_left_string: str = seconds_to_string(time_left)
@@ -72,6 +75,7 @@ async def continue_auction(data: dict):
 
 
 	while time_left > 0:
+		data = await db.get_auction(message_id)
 		# If it's gonna end in more than a minute, update every 30 seconds
 		if time_left > 60:
 			await asyncio.sleep(30)
@@ -93,12 +97,6 @@ async def continue_auction(data: dict):
 
 	await update_auction_message(message)
 	await end_auction(data)
-
-
-async def continue_giveaways():
-	active_giveaways = await db.get_active_giveaways()
-	for giveaway_data in active_giveaways:
-		asyncio.ensure_future(continue_auction(giveaway_data), loop=client.loop)
 
 
 def create_auction_embed(data: dict, bidder=None):
@@ -146,15 +144,24 @@ def handle_bids(message: Message, data):
 	async def on_reaction_add(reaction: Reaction, user: User):
 		if user.bot or reaction.message.id != message.id: return
 		await reaction.remove(user)
+
 		auction_info = await db.get_auction(message.id)
-		if auction_info["ended"] == True: return
 		highest_bid = auction_info["highest_bid"] or 0
+
+		# Check if auction ended
+		if auction_info["ended"] == True: return
+
+		# Check if the person has enough bobux
 		if not await db.get_bobux(user.id) > highest_bid + 100:
 			await user.send("You do not have enough bobux to bid")
 			return
+
 		await db.set_highest_bidder(message.id, highest_bid + 100, user.id)
 		data["highest_bid"] += 100
-		await db.extend_auction(message.id, 100)
+
+		if data.get('end') - int(time.time()) < 30:
+			await db.extend_auction(message.id, 100)
+
 		embed = create_auction_embed(data, bidder=user.id)
 		await message.edit(embed=embed)
 
@@ -183,7 +190,7 @@ async def create_new_auction(creator_id: int, channel: discord.abc.GuildChannel,
 
 	handle_bids(auction_message, auction_data)
 
-	asyncio.ensure_future(continue_auction(auction_data), loop=client.loop)
+	asyncio.ensure_future(continue_auction(auction_message.id), loop=client.loop)
 
 	return auction_message
 
