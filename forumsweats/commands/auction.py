@@ -39,7 +39,7 @@ async def end_auction(data: dict):
 	
 
 	channel: Union[discord.TextChannel, None] = client.get_channel(data['channel_id'])
-	if not channel: return  # the channel the giveaway was in was deleted
+	if not channel: return  # the channel the auction was in was deleted
 	message: discord.Message = await channel.fetch_message(data['id'])
 	if not message: return  # the message was deleted
 
@@ -64,7 +64,7 @@ async def continue_auction(message_id: int):
 
 	# if it can't find the channel, just print a warning and return
 	if not channel:
-		print(f'Could not find channel for auction {data["id"]}')
+		print(f'Could not find channel for auction {data['id']})
 		return
 
 	try:
@@ -103,7 +103,7 @@ def create_auction_embed(data: dict, bidder=None):
 	item = data['item']
 	creator_id = data['creator_id']
 	end = data['end']
-	highest_bidder = bidder or data.get("highest_bidder")
+	highest_bidder = bidder or data.get('highest_bidder')
 	current_bid = data.get('highest_bid') or 0,
 
 	ended = time.time() > end
@@ -146,18 +146,18 @@ def handle_bids(message: Message, data):
 		await reaction.remove(user)
 
 		auction_info = await db.get_auction(message.id)
-		highest_bid = auction_info["highest_bid"] or 0
+		highest_bid = auction_info['highest_bid'] or 0
 
 		# Check if auction ended
-		if auction_info["ended"] == True: return
+		if auction_info['ended'] == True: return
 
 		# Check if the person has enough bobux
 		if not await db.get_bobux(user.id) > highest_bid + 100:
-			await user.send("You do not have enough bobux to bid")
+			await user.send('You do not have enough bobux to bid')
 			return
 
 		await db.set_highest_bidder(message.id, highest_bid + 100, user.id)
-		data["highest_bid"] += 100
+		data['highest_bid'] += 100
 
 		if data.get('end') - int(time.time()) < 30:
 			await db.extend_auction(message.id, 100)
@@ -215,7 +215,7 @@ async def prompt_input(client: discord.Client, user: Member, channel: discord.ab
 		user_response = await check(m.content)
 
 		if user_response is None:
-			await channel.send(invalid_message + ' (Type "cancel" to cancel the giveaway creation)')
+			await channel.send(invalid_message + ' (Type "cancel" to cancel the auction creation)')
 	return user_response
 
 
