@@ -270,3 +270,9 @@ async def run(message: Context):
 	auction_message = await create_new_auction(message.author.id, channel, length, item)
 
 	await message.send(f'Ok, created auction {auction_message.jump_url}')
+
+
+async def continue_auctions():
+	active_auctions = await db.get_active_auctions()
+	for auction_data in active_auctions:
+		asyncio.ensure_future(continue_auction(auction_data), loop=client.loop)
