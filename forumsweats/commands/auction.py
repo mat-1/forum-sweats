@@ -111,7 +111,7 @@ async def continue_auction(message_id: int):
 		await db.end_auction(data['id'])
 		return
 	
-	handle_bids(auction_message, auction_data)
+	handle_bids(message, data)
 
 
 	while time_left > 0:
