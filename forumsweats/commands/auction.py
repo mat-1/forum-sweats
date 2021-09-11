@@ -275,4 +275,4 @@ async def run(message: Context):
 async def continue_auctions():
 	active_auctions = await db.get_active_auctions()
 	for auction_data in active_auctions:
-		asyncio.ensure_future(continue_auction(auction_data), loop=client.loop)
+		asyncio.ensure_future(continue_auction(auction_data['id']), loop=client.loop)
