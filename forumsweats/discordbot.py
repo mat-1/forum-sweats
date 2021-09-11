@@ -209,7 +209,7 @@ async def on_ready():
 	from forumsweats.commands.giveaway import continue_giveaways
 	asyncio.ensure_future(continue_giveaways(), loop=client.loop)
 
-	from forumsweats.commands.auctions import continue_auctions
+	from forumsweats.commands.auction import continue_auctions
 	asyncio.ensure_future(continue_auctions(), loop=client.loop)
 
 
