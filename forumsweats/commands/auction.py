@@ -110,6 +110,8 @@ async def continue_auction(message_id: int):
 	except discord.errors.NotFound:
 		await db.end_auction(data['id'])
 		return
+	
+	handle_bids(auction_message, auction_data)
 
 
 	while time_left > 0:
@@ -186,8 +188,6 @@ async def create_new_auction(creator_id: int, channel: discord.abc.GuildChannel,
 		end=end,
 		item=item,
 	)
-
-	handle_bids(auction_message, auction_data)
 
 	asyncio.ensure_future(continue_auction(auction_message.id), loop=client.loop)
 
