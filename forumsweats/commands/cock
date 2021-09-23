@@ -1,0 +1,7 @@
+name = 'cock'
+aliases = ['cock']
+channels = ['general']
+
+
+async def run(message):
+	await message.channel.send('cock')
