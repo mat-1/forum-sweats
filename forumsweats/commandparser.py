@@ -52,7 +52,7 @@ class Member(discord.Member):
 
 
 class Context(discord.Message):  # very unfinished but its fine probably
-	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content', 'add_reaction', 'delete', 'edit')
+	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content', 'add_reaction', 'delete', 'edit', 'command_name')
 
 	message: discord.Message
 	content: str
