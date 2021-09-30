@@ -1,3 +1,4 @@
+from discord.message import Attachment
 from . import discordbot
 from typing import Any, Coroutine, List, Optional, Union
 import traceback
@@ -52,7 +53,20 @@ class Member(discord.Member):
 
 
 class Context(discord.Message):  # very unfinished but its fine probably
-	__slots__ = ('message', 'channel', 'guild', 'author', 'prefix', 'client', 'content', 'add_reaction', 'delete', 'edit', 'command_name')
+	__slots__ = (
+		'message',
+		'channel',
+		'guild',
+		'author',
+		'prefix',
+		'client',
+		'content',
+		'add_reaction',
+		'delete',
+		'edit',
+		'attachments',
+		'command_name',
+	)
 
 	message: discord.Message
 	content: str
@@ -61,7 +75,9 @@ class Context(discord.Message):  # very unfinished but its fine probably
 	author: Member
 	prefix: Optional[str]
 	client: discord.Client
+	attachments: List[Attachment]
 	command_name: Optional[str]
+	
 
 	async def send(self, *args, embed=None, **kwargs):
 		'Send a message to a channel'
@@ -79,6 +95,7 @@ class Context(discord.Message):  # very unfinished but its fine probably
 		self.channel = message.channel
 		self.guild = message.guild
 		self.author = message.author
+		self.attachments = message.attachments
 
 		self.add_reaction = message.add_reaction
 		self.delete = message.delete
