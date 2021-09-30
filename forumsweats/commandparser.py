@@ -61,6 +61,7 @@ class Context(discord.Message):  # very unfinished but its fine probably
 	author: Member
 	prefix: Optional[str]
 	client: discord.Client
+	command_name: Optional[str]
 
 	async def send(self, *args, embed=None, **kwargs):
 		'Send a message to a channel'
@@ -71,7 +72,7 @@ class Context(discord.Message):  # very unfinished but its fine probably
 		message = await self.message.reply(content, **kwargs)
 		return message
 
-	def __init__(self, message, prefix=None):
+	def __init__(self, message, prefix=None, command_name=None):
 		'Initialize all the things'
 		self.message = message
 		self.content = message.content
@@ -83,6 +84,7 @@ class Context(discord.Message):  # very unfinished but its fine probably
 		self.delete = message.delete
 
 		self.prefix = prefix
+		self.command_name = command_name
 		self.client = discordbot.client
 
 
@@ -201,7 +203,7 @@ class CommandParser():
 			if channels is not None and not any(config.channels[channel] == message.channel.id for channel in channels):
 				return
 
-			ctx = Context(message, prefix=prefix)
+			ctx = Context(message, prefix=prefix, command_name=command_name)
 			if parsing_remaining:
 				try:
 					return_args = await self.parse_args(parsing_remaining, func, ctx, ignore_extra=pad_none)
