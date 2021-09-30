@@ -759,7 +759,8 @@ for module_filename in os.listdir('./forumsweats/commands'):
 		aliases=getattr(module, 'aliases', []),
 		pad_none=getattr(module, 'pad_none', True),
 		channels=getattr(module, 'channels', ['bot-commands']),
-		roles=getattr(module, 'roles', [])
+		roles=getattr(module, 'roles', []),
+		on_no_perms=getattr(module, 'on_no_perms', None),
 	)(module.run)
 
 

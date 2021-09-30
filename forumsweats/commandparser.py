@@ -1,6 +1,6 @@
 from discord.message import Attachment
 from . import discordbot
-from typing import Any, Coroutine, List, Optional, Union
+from typing import Any, Awaitable, Callable, Coroutine, List, Optional, Union
 import traceback
 import discord
 import config
@@ -207,10 +207,14 @@ class CommandParser():
 		parsing_remaining = parsing_remaining[len(command_name):].strip()
 		for function in self.functions:
 			if function[0] != command_name: continue
-			func, channels, pad_none, roles = function[1]
+			func, channels, pad_none, roles, on_no_perms = function[1]
+
+			ctx = Context(message, prefix=prefix, command_name=command_name)
 
 			# if roles exists and the user doesnt have any of the roles, return
 			if roles and not any(discordbot.has_role(message.author.id, role) for role in roles):
+				if on_no_perms:
+					await on_no_perms(ctx)
 				return
 
 			# if it's in a dm and dm isn't one of the allowed channels, return
@@ -220,7 +224,6 @@ class CommandParser():
 			if channels is not None and not any(config.channels[channel] == message.channel.id for channel in channels):
 				return
 
-			ctx = Context(message, prefix=prefix, command_name=command_name)
 			if parsing_remaining:
 				try:
 					return_args = await self.parse_args(parsing_remaining, func, ctx, ignore_extra=pad_none)
@@ -247,11 +250,19 @@ class CommandParser():
 					traceback.print_exc()
 					return
 
-	def command(self, name: str, aliases: List[str]=[], channels: List[str]=['bot-commands'], pad_none: bool=True, roles: List[str]=[]):
+	def command(
+		self,
+		name: str,
+		aliases: List[str]=[],
+		channels: List[str]=['bot-commands'],
+		pad_none: bool=True,
+		roles: List[str]=[],
+		on_no_perms: Callable[[Context], Awaitable]=None
+	):
 		def decorator(func):
 			command_names = [name] + list(aliases)
 			for command_name in command_names:
-				self.functions.append((command_name.lower(), (func, channels, pad_none, roles)))
+				self.functions.append((command_name.lower(), (func, channels, pad_none, roles, on_no_perms)))
 			return func
 		return decorator
 
