@@ -22,7 +22,10 @@ async def run(message, member: Member = None, amount: int = 0):
 	if sender_bobux - amount < bobux_in_auctions:
 		return await message.channel.send(f'You can\'t send {amount} {currency_name}, because you have {bobux_in_auctions} in auctions')
 	if sender_bobux < amount:
-		return await message.channel.send('You don\'t have enough {currency_name}')
+		return await message.channel.send(f'You don\'t have enough {currency_name}')
+	
+	if message.author.id == member.id:
+		return await message.channel.send(f'You sent **{amount}** {currency_name} to yourself. Nothing happened.')
 
 	await db.change_bobux(message.author.id, -amount)
 	await db.change_bobux(member.id, amount)
