@@ -78,6 +78,13 @@ async def add_message_to_starboard(message: discord.Message):
 		existing_starboard_message = await starboard_channel.send(embed=embed)
 		existing_starboard_message_id = existing_starboard_message.id
 
+		# check again just in case
+		existing_starboard_message_2 = await db.fetch_starboard_message(message.id)
+		existing_starboard_message_id_2 = existing_starboard_message_2.get('starboard_message_id')
+		if existing_starboard_message_id_2:
+			return await existing_starboard_message.delete()
+
+
 	await db.add_starboard_message(message.id, existing_starboard_message_id, star_count)
 
 
