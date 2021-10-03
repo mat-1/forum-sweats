@@ -8,5 +8,5 @@ args = '[number]'
 
 async def run(message, number: str):
 	await message.channel.send(embed=discord.Embed(
-        description=str(w2n.word_to_num(number))
+        description=str(w2n.solve_expression(number))
     ))

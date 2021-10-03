@@ -175,7 +175,7 @@ async def on_ready():
 		counting_channel = client.get_channel(config.channels['counting'])
 		most_recent_counting_message = (await counting_channel.history(limit=1).flatten())[0]
 		try:
-			most_recent_number = w2n.word_to_num(most_recent_counting_message.content)
+			most_recent_number = w2n.solve_expression(most_recent_counting_message.content)
 		except:
 			most_recent_number = -1
 		did_bot_confirm_most_recent = False
@@ -346,7 +346,7 @@ async def process_counting_channel(message):
 
 	old_number = await db.get_counter(message.guild.id)
 	try:
-		new_number = w2n.word_to_num(message.content)
+		new_number = w2n.solve_expression(message.content)
 	except ValueError:
 		new_number = 0
 	if old_number == 0 and new_number != 1:
@@ -398,7 +398,7 @@ async def process_infinite_counting_channel(message):
 		return await message.delete()
 
 	try:
-		new_number = w2n.word_to_num(message.content)
+		new_number = w2n.solve_expression(message.content)
 	except:
 		new_number = 0
 	if old_number == 0 and new_number != 1:
