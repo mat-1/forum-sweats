@@ -1,5 +1,8 @@
 # https://github.com/akshaynagpal/w2n/pull/51
 
+from typing import Generator, List, Union
+
+
 num_names = {
 	'zero': 0,
 	'naught': 0,
@@ -227,7 +230,7 @@ ignore_words = [ 'a', 'and', '&', 'y', '', 'et' ]
 word_to_number = { **num_names, **place_names, **dec_names, **neg_names }
 
 
-def num_generator(phrase):
+def num_generator(phrase) -> Generator[Union[int, float], None, None]:
 	# remove dirty characters - commonly put in numbers but not "part of" the number
 	cleanphrase = ''.join(char for char in phrase if char not in ignore_chars)
 
@@ -252,9 +255,10 @@ def num_generator(phrase):
 			if i == 0:
 				words.append('-')
 				words.append(word[1:])
-			else:
-				words.append(word[:i])
-				words.append(word[i+1:])
+			# mat: i decided to not treat - as a separator, since it messes with subtraction
+			# else:
+			# 	words.append(word[:i])
+			# 	words.append(word[i+1:])
 		else:
 			words.append(word)
 	
@@ -279,7 +283,6 @@ def num_generator(phrase):
 		# Hundred is a special case, since "one hundred thousand one hundred" is a valid number
 		if place != 'hundred' and 1 < words.count(place):
 			raise ValueError('Duplicate number word provided: {}'.format(place))
-			return 0
 	
 	# Iterate over the words, yielding them consecutively as numbers
 	for word in words:
@@ -293,14 +296,13 @@ def num_generator(phrase):
 					yield float(word)
 				except:
 					raise ValueError('Non-number words provided: {}'.format(word))
-					return 0
 	
 def word_to_num(phrase):
 	if type(phrase) is not str:
 		raise ValueError('Type of input is not string! Please enter a valid number word (eg. \'two million twenty three thousand and forty nine\')')
 	if '\n' in phrase:
 		raise ValueError('Phrase has a newline')
-	running_total = [ 0 ]
+	running_total: List[Union[int, float]] = [ 0 ]
 	postDecimalCount = 0
 	sign = 1
 	
