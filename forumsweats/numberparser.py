@@ -38,7 +38,7 @@ TOKENS = {
 		'category': 'operator'
 	},
 	'DIV': {
-		'match': re.compile(r'\/|divided by'),
+		'match': re.compile(r'\/|divided by|÷'),
 		'category': 'operator'
 	},
 	'LEFTPAREN': {

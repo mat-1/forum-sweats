@@ -2,7 +2,7 @@ from forumsweats import db
 
 name = 'infinite-counting'
 aliases = (
-	'inf-count', 'inf-counting', 'inf-counter', 'infinite-count', 'infinite-counter'
+	'inf-count', 'inf-counting', 'inf-counter', 'infinite-count', 'infinite-counter',
 	'infinitecounting', 'infcount', 'infcounting', 'infcounter', 'infinitecount', 'infinitecounter')
 
 
