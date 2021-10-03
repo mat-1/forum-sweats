@@ -1,7 +1,7 @@
 from typing import Callable, Pattern, Union
+from . import w2n
 import math
 import json
-import w2n
 import re
 
 def match_number(string: str):
