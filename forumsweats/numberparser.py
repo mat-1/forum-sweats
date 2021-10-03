@@ -34,7 +34,7 @@ TOKENS = {
 		'category': 'operator'
 	},
 	'MUL': {
-		'match': re.compile(r'\*|times'),
+		'match': re.compile(r'\*|times|×'),
 		'category': 'operator'
 	},
 	'DIV': {
