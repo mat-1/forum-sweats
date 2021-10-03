@@ -213,7 +213,13 @@ def solve_postfix(tokens):
 			left_operator = output_queue.pop()['value']
 
 			solver = SOLVERS[token['name']]
-			result = solver(parse_number(left_operator), parse_number(right_operator))
+
+			try:
+				result = solver(parse_number(left_operator), parse_number(right_operator))
+			except ZeroDivisionError:
+				# if the solver fails, return 0
+				result = float('inf')
+
 			result_token = {
 				'name': 'NUMBER',
 				'value': result,
@@ -256,4 +262,6 @@ assert solve_expression('(1+2)*3') == 9
 assert solve_expression('one + one') == 2
 
 assert solve_expression('seven hundred and twenty seven times two million and one') == 1454000727
+
+assert solve_expression('4 / 0') == float('inf')
 

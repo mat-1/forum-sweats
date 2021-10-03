@@ -1,5 +1,5 @@
 import forumsweats.discordbot as discordbot
-from forumsweats import numberparser, w2n
+from forumsweats import numberparser
 import discord
 
 name = 'debugnumber'
