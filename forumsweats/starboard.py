@@ -45,7 +45,7 @@ async def add_message_to_starboard(message: discord.Message):
 			pass
 
 	embed = discord.Embed(
-		title=f'{STAR_EMOJI} {star_count} stars',
+		title=f'{STAR_EMOJI} {star_count:,} stars',
 		description=message_content,
 	)
 	embed.set_author(

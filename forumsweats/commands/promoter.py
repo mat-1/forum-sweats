@@ -54,7 +54,7 @@ async def check_promoter(member, inviter_string: str=None, raise_error=True):
 			else:
 				result_description = f'{inviter_string} invited 1 member total but they\'re not active.'
 		else:
-			result_description = f'{inviter_string} invited {total_members_invited} members total and {active_members_invited} of those members are active.'
+			result_description = f'{inviter_string} invited {total_members_invited:,} members total and {active_members_invited} of those members are active.'
 
 		result_description += f' {inviter_string} need to invite 3 active members to get promoter role.'
 

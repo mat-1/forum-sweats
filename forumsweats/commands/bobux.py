@@ -17,9 +17,9 @@ async def run(message, member: Member = None):
 	currency_name = 'kromer' if message.command_name == 'kromer' else 'bobux'
 
 	if member.id == message.author.id:
-		bobux_message = f'You have **{bobux}** {currency_name}'
+		bobux_message = f'You have **{bobux:,}** {currency_name}'
 	else:
-		bobux_message = f'<@{member.id}> has **{bobux}** {currency_name}'
+		bobux_message = f'<@{member.id}> has **{bobux:,}** {currency_name}'
 	embed = discord.Embed(
 		description=bobux_message
 	)

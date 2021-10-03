@@ -81,7 +81,7 @@ def create_shop_embed(
 		title=title,
 		description='\n'.join(description)
 	)
-	embed.set_footer(text=f'page {page_number}/{total_pages}')
+	embed.set_footer(text=f'page {page_number:,}/{total_pages:,}')
 
 	return embed
 
@@ -161,7 +161,7 @@ async def do_shop_gui(message, page_number=1, shop_message=None):
 
 	bobux_in_auctions = await db.get_bobux_in_auctions_for_user(message.author.id)
 	if bobux_count - selected_item_price < bobux_in_auctions:
-		return await message.channel.send(f'You can\'t buy this item, because you have { bobux_in_auctions } in auctions')
+		return await message.channel.send(f'You can\'t buy this item, because you have {bobux_in_auctions:,} in auctions')
 
 	if bobux_count < selected_item_price:
 		await edit_footer_text(shop_message, 'You don\'t have enough bobux to buy this')
@@ -171,7 +171,7 @@ async def do_shop_gui(message, page_number=1, shop_message=None):
 
 	await db.change_bobux(message.author.id, -selected_item_price)
 
-	await shop_message.edit(content=f'Bought **{selected_item_name}** for **{selected_item_price}** bobux', embed=None)
+	await shop_message.edit(content=f'Bought **{selected_item_name}** for **{selected_item_price:,}** bobux', embed=None)
 	await shop_message.clear_reactions()
 	if selected_item['persistent']:
 		await db.get_shop_item(message.author.id, selected_item_id)

@@ -71,7 +71,7 @@ async def run(message, member: Member = None, tier: str = None):
 	tier_cost = tiers[tier]
 
 	verify_message = await message.channel.send(embed=discord.Embed(
-		description=f'Are you sure you want to **{tier}** sub to {member.mention} by sending **{tier_cost}** bobux per week?'
+		description=f'Are you sure you want to **{tier}** sub to {member.mention} by sending **{tier_cost:,}** bobux per week?'
 	))
 	confirmed = await confirmgui.make_confirmation_gui(message.client, verify_message, message.author)
 

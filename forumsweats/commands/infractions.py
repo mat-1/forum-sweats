@@ -80,11 +80,11 @@ async def run(message, member: Member = None):
 	
 	if total_mutes > total_mutes_past_month:
 		embed.set_footer(
-			text=f'{total_mutes} total infractions, {total_mutes_past_month} from past month'
+			text=f'{total_mutes:,} total infractions, {total_mutes_past_month:,} from past month'
 		)
 	else:
 		embed.set_footer(
-			text=f'{total_mutes} total infractions'
+			text=f'{total_mutes:,} total infractions'
 		)
 
 	if len(infractions) == 0:

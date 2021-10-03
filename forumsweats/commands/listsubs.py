@@ -40,7 +40,7 @@ async def run(message, member: Member = None):
 	else:
 		title = f'{member}\'s subs'
 
-	title += f' ({total_spending} bobux spent per week)'
+	title += f' ({total_spending:,} bobux spent per week)'
 
 	await message.channel.send(embed=discord.Embed(
 		title=title,

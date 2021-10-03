@@ -33,9 +33,9 @@ async def run(message, infraction_ids_string: str):
 	elif cleared_count == 1:
 		cleared_message = f'Cleared an infraction from <@{cleared_users[0]}>'
 	elif cleared_count > 1 and len(cleared_users) == 1:
-		cleared_message = f'Cleared {cleared_count} infractions from <@{cleared_users[0]}>'
+		cleared_message = f'Cleared {cleared_count:,} infractions from <@{cleared_users[0]}>'
 	elif cleared_count > 1 and len(cleared_users) > 1:
-		cleared_message = f'Cleared {cleared_count} infractions from {len(cleared_users[0])} users'
+		cleared_message = f'Cleared {cleared_count:,} infractions from {len(cleared_users[0])} users'
 	else:
 		cleared_message = 'Cleared infractions'
 	return await message.send(

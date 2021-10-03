@@ -20,7 +20,7 @@ async def run(message, member: Member = None, amount: int = 0):
 	currency_name = 'kromer' if 'kromer' in message.command_name else 'bobux'
 
 	if sender_bobux - amount < bobux_in_auctions:
-		return await message.channel.send(f'You can\'t send {amount} {currency_name}, because you have {bobux_in_auctions} in auctions')
+		return await message.channel.send(f'You can\'t send {amount} {currency_name}, because you have {bobux_in_auctions:,} in auctions')
 	if sender_bobux < amount:
 		return await message.channel.send(f'You don\'t have enough {currency_name}')
 	
@@ -33,7 +33,7 @@ async def run(message, member: Member = None, amount: int = 0):
 
 	await message.channel.send(
 		embed=discord.Embed(
-			description=f'Ok, <@{member.id}> now has **{reciever_bobux}** {currency_name}. You now have **{sender_bobux-amount}** {currency_name}.'
+			description=f'Ok, <@{member.id}> now has **{reciever_bobux:,}** {currency_name}. You now have **{sender_bobux-amount:,}** {currency_name}.'
 		)
 	)
 	await discordbot.check_bobux_roles(member.id, reciever_bobux)

@@ -15,7 +15,7 @@ async def run(message, page: int=1):
 		position = position_0 + 1
 		member_id = member['discord']
 		bobux = member['activity_bobux']
-		leaderboard_strings.append(f'{position}) <@{member_id}> (**{bobux}** activity bobux)')
+		leaderboard_strings.append(f'{position}) <@{member_id}> (**{bobux:,}** activity bobux)')
 	embed = discord.Embed(
 		title='Activity Leaderboard',
 		description='\n'.join(leaderboard_strings)

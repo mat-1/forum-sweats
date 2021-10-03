@@ -18,9 +18,9 @@ Activity bobux is like bobux but cannot be used for anything, and you only get i
 	bobux = await db.get_activity_bobux(member.id)
 	position = await db.get_activity_bobux_leaderboard_position(member.id)
 	if member.id == message.author.id:
-		bobux_message = f'You have **{bobux}** activity bobux (#{position})'
+		bobux_message = f'You have **{bobux:,}** activity bobux (#{position})'
 	else:
-		bobux_message = f'<@{member.id}> has **{bobux}** activity bobux (#{position})'
+		bobux_message = f'<@{member.id}> has **{bobux:,}** activity bobux (#{position})'
 	embed = discord.Embed(
 		description=bobux_message
 	)
