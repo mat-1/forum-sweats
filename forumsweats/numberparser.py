@@ -38,7 +38,7 @@ TOKENS = {
 		'category': 'operator'
 	},
 	'DIV': {
-		'match': re.compile(r'\/|divided by|÷'),
+		'match': re.compile(r'\/|divided by|÷|:'),
 		'category': 'operator'
 	},
 	'LEFTPAREN': {
@@ -177,8 +177,7 @@ def shunting_yard_algorithm(tokens):
 					)
 				)
 			):
-				while len(operator_stack) > 0:
-					output_queue.append(operator_stack.pop())
+				output_queue.append(operator_stack.pop())
 
 			operator_stack.append(token)
 		elif token['name'] == 'LEFTPAREN':
@@ -265,3 +264,4 @@ assert solve_expression('seven hundred and twenty seven times two million and on
 
 assert solve_expression('4 / 0') == float('inf')
 
+assert solve_expression('( 1 * 1 * 0)') == 0
