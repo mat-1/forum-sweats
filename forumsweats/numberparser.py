@@ -8,7 +8,7 @@ def match_number(string: str):
 	string_split = re.split(r'([^\w])', string)
 	for characters_remaining in range(len(string_split), 0, -1):
 		try:
-			word = ''.join(string_split[:characters_remaining])
+			word = ''.join(string_split[:characters_remaining]).strip()
 			parse_number(word)
 			return word
 		except ValueError:
@@ -26,27 +26,27 @@ TOKENS = {
 		'category': 'whitespace'
 	},
 	'ADD': {
-		'match': re.compile(r'\+|plus'),
+		'match': re.compile(r'\+|\bplus\b'),
 		'category': 'operator'
 	},
 	'SUB': {
-		'match': re.compile(r'-|minus'),
+		'match': re.compile(r'-|\bminus\b'),
 		'category': 'operator'
 	},
 	'MUL': {
-		'match': re.compile(r'\*|times|×'),
+		'match': re.compile(r'\*|\btimes\b|×'),
 		'category': 'operator'
 	},
 	'DIV': {
-		'match': re.compile(r'\/|divided by|÷|:'),
+		'match': re.compile(r'\/|\bdivided by\b|÷|:'),
 		'category': 'operator'
 	},
 	'LEFTPAREN': {
-		'match': re.compile(r'\(|left parenthesis'),
+		'match': re.compile(r'\(|\bleft parenthesis\b'),
 		'category': 'parenthesis'
 	},
 	'RIGHTPAREN': {
-		'match': re.compile(r'\)|right parenthesis'),
+		'match': re.compile(r'\)|\bright parenthesis\b'),
 		'category': 'parenthesis'
 	},
 	'POW': {
@@ -54,15 +54,15 @@ TOKENS = {
 		'category': 'operator'
 	},
 	'SIN': {
-		'match': re.compile(r'sin'),
+		'match': re.compile(r'\bsin\b'),
 		'category': 'function'
 	},
 	'COS': {
-		'match': re.compile(r'cos'),
+		'match': re.compile(r'\bcos\b'),
 		'category': 'function'
 	},
 	'TAN': {
-		'match': re.compile(r'tan'),
+		'match': re.compile(r'\btan\b'),
 		'category': 'function'
 	},
 
@@ -213,6 +213,8 @@ def solve_postfix(tokens):
 
 			solver = SOLVERS[token['name']]
 
+			print('solving', parse_number(left_operator), parse_number(right_operator), token)
+
 			try:
 				result = solver(parse_number(left_operator), parse_number(right_operator))
 			except ZeroDivisionError:
@@ -248,6 +250,7 @@ def solve_postfix(tokens):
 def solve_expression(string):
 	# solves a mathematical expression (ex. '1+1' or '5*(1+2)-3')
 	tokens = tokenize(string)
+	print(json.dumps(tokens, indent=2))
 	if (tokens == None): return
 	postfix_tokens = shunting_yard_algorithm(tokens)
 	result = solve_postfix(postfix_tokens)
@@ -265,3 +268,9 @@ assert solve_expression('seven hundred and twenty seven times two million and on
 assert solve_expression('4 / 0') == float('inf')
 
 assert solve_expression('( 1 * 1 * 0)') == 0
+
+assert solve_expression('0.01') == 0.01
+
+assert solve_expression('0.001597444089456869 * 3130') == 5
+
+assert solve_expression('1 / 2 minus 1 / 2') == 0

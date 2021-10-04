@@ -290,7 +290,9 @@ def num_generator(phrase) -> Generator[Union[int, float], None, None]:
 			yield word_to_number[word]
 		else:
 			try:
-				yield int(word)
+				int(word)
+				for c in str(word):
+					yield int(c)
 			except ValueError:
 				try:
 					yield float(word)
@@ -303,15 +305,15 @@ def word_to_num(phrase):
 	if '\n' in phrase:
 		raise ValueError('Phrase has a newline')
 	running_total: List[Union[int, float]] = [ 0 ]
-	postDecimalCount = 0
+	post_decimal_count = 0
 	sign = 1
 	
 	for num in num_generator(phrase):
 		if num == '.':
-			postDecimalCount = -1
+			post_decimal_count = -1
 			
 		elif num == '-':
-			if running_total[0] != 0:
+			if running_total != [ 0 ]:
 				raise ValueError('Negating word must be first word')
 			sign = -1
 			
@@ -336,16 +338,16 @@ def word_to_num(phrase):
 			# Append a new item after this - we've just handled a place name, and need to separate
 			# the remaining content in case we have another place name coming
 			running_total.append(0)
-			postDecimalCount = 0
-			
-		elif len(str(num)) != len(str(running_total[-1])) or postDecimalCount:
+			post_decimal_count = 0
+					
+		elif len(str(num)) != len(str(running_total[-1])) or post_decimal_count:
 			# Special case to pre-adjust the decimal value, in case someone puts something like 
 			# 'point nineteen'
-			if postDecimalCount:
-				postDecimalCount -= len(str(num)) - 1
-			running_total[-1] += num * 10**postDecimalCount
-			if postDecimalCount:
-				postDecimalCount -= 1
+			if post_decimal_count:
+				post_decimal_count -= len(str(num)) - 1
+			running_total[-1] += num * 10**post_decimal_count
+			if post_decimal_count:
+				post_decimal_count -= 1
 				
 		else:
 			running_total.append(0)
