@@ -408,7 +408,10 @@ async def process_infinite_counting_channel(message):
 
 	# the same person can't count twice in a row in #infinite-counting
 	if last_person_to_count == message.author.id:
-		await message.author.send(f'You can\'t count twice in a row in infinite-counting')
+		try:
+			await message.author.send(f'You can\'t count twice in a row in infinite-counting')
+		except:
+			pass
 		return await message.delete()
 
 	try:
