@@ -1,19 +1,20 @@
 from typing import Callable, Pattern, Union
 from . import w2n
 import math
-import json
 import re
 
+compiled_re_split = re.compile(r'([^\w.])')
+
 def match_number(string: str):
-	string_split = re.split(r'([^\w])', string)
-	for characters_remaining in range(len(string_split), 0, -1):
+	string = string.strip()
+	string_split = compiled_re_split.split(string)
+	for characters_remaining in range(min(len(string_split), 20), 0, -1):
 		if string_split[characters_remaining - 1] == '' or string_split[characters_remaining - 1] == ' ':
 			continue
-		try:
-			word = ''.join(string_split[:characters_remaining]).strip()
-			parse_number(word)
+		word = ''.join(string_split[:characters_remaining]).strip()
+		if w2n.try_word(word):
 			return word
-		except ValueError:
+		else:
 			pass
 
 def parse_number(string: Union[str, int]):
@@ -249,18 +250,10 @@ def solve_postfix(tokens):
 
 def solve_expression(string):
 	# solves a mathematical expression (ex. '1+1' or '5*(1+2)-3')
-	# import time
-	# initial_time = time.time()
 	tokens = tokenize(string)
-	# token_time = time.time()
 	if (tokens == None): return
 	postfix_tokens = shunting_yard_algorithm(tokens)
-	# postfix_time = time.time()
 	result = solve_postfix(postfix_tokens)
-	# solve_time = time.time()
-	# print('tokenize:', token_time - initial_time)
-	# print('shunting_yard_algorithm:', postfix_time - token_time)
-	# print('solve_postfix:', solve_time - postfix_time)
 	return result
 
 assert solve_expression('1+1') == 2
@@ -282,4 +275,6 @@ assert solve_expression('0.001597444089456869 * 3130') == 5
 
 assert solve_expression('1 / 2 minus 1 / 2') == 0
 
-# print(solve_expression('(((((((((((((((((((((((((0.001597444089456869 * (311 * 20 / 2 * 3 * 2 * 2 / 4 / 6 * 2 + uno + uno + uno + 17) divided by 100 minus 4 divided by 8) times 2) minus 8) plus 3174) minus 3160.1 plus 5) divided by 11) * 11) divided by 16) * 0.625) * 256) divided by 100) minus .0000000000000002) plus 3180) divided by 953) divided by 953) * 908209) divided by 4️⃣ 4️⃣ 4️⃣) divided by 2) * 8888) divided by 31838.65765765766) plus 3184) divided by uno uno uno uno) + uno 8954) divided by 0.0000527374) * ( uno uno uno uno uno )) minus 3993934984787.5312'))
+
+
+exit()

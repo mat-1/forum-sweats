@@ -298,7 +298,18 @@ def num_generator(phrase) -> Generator[Union[int, float], None, None]:
 					yield float(word)
 				except:
 					raise ValueError('Non-number words provided: {}'.format(word))
+
+def try_word(phrase: str) -> bool:
+	try:
+		for i, num in enumerate(num_generator(phrase)):
+			if num == '-':
+				if i != 0:
+					return False
+	except:
+		return False
 	
+	return True
+
 def word_to_num(phrase):
 	if type(phrase) is not str:
 		raise ValueError('Type of input is not string! Please enter a valid number word (eg. \'two million twenty three thousand and forty nine\')')
