@@ -343,6 +343,9 @@ def calculate_approximate_message_height(message):
 			height += 1
 	return height
 
+def round_insignificant_decimals(num):
+	return round(num * (10 ** 5)) / (10 ** 5)
+
 async def process_counting_channel(message):
 	global most_recent_counting_message_id
 	if message.channel.id != config.channels.get('counting'):
@@ -368,8 +371,8 @@ async def process_counting_channel(message):
 
 	old_number = await db.get_counter(message.guild.id)
 	try:
-		new_number = numberparser.solve_expression(message.content)
-	except ValueError:
+		new_number = round_insignificant_decimals(numberparser.solve_expression(message.content))
+	except:
 		new_number = 0
 	if old_number == 0 and new_number != 1:
 		await message.delete()
@@ -438,7 +441,7 @@ async def process_infinite_counting_channel(message):
 		return await message.delete()
 
 	try:
-		new_number = numberparser.solve_expression(message.content)
+		new_number = round_insignificant_decimals(numberparser.solve_expression(message.content))
 	except:
 		new_number = 0
 	if old_number == 0 and new_number != 1:
