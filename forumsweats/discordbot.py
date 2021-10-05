@@ -324,6 +324,25 @@ counting_cooldowns = {}
 
 COUNTING_CONFIRMATION_EMOJI = '✅'
 
+def calculate_approximate_message_height(message):
+	height = 0
+	current_line_length = 0
+	max_line_length = 180
+
+	for c in message:
+		# if it's a newline, we go back to the start of the line
+		if c == '\n':
+			current_line_length = 0
+			height += 1
+		# we always assume characters are 1 unit long, this is fine since we don't need exact measurements
+		else:
+			current_line_length += 1
+
+		if current_line_length > max_line_length:
+			current_line_length = 0
+			height += 1
+	return height
+
 async def process_counting_channel(message):
 	global most_recent_counting_message_id
 	if message.channel.id != config.channels.get('counting'):
@@ -333,8 +352,10 @@ async def process_counting_channel(message):
 		# if the message was sent by forum sweats, ignore it
 		return
 	# the message is too long
-	elif len(message.content) > 200:
+	elif calculate_approximate_message_height(message.content) > 10:
 		await message.delete()
+		try: await message.author.send('The message you tried to send in counting is too long.')
+		except: pass
 		return
 
 	if (
@@ -399,8 +420,10 @@ async def process_infinite_counting_channel(message):
 		# if the message was sent by forum sweats, ignore it
 		return
 	# the message is too long
-	elif len(message.content) > 200:
+	elif calculate_approximate_message_height(message.content) > 10:
 		await message.delete()
+		try: await message.author.send('The message you tried to send in infinite-counting is too long.')
+		except: pass
 		return
 
 	old_number = await db.get_infinite_counter(message.guild.id)
