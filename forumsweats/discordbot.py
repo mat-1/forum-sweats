@@ -376,11 +376,23 @@ async def process_counting_channel(message):
 			f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})"
 		)
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
+
+
+		if new_number == 0 or new_number is None:
+			await message.author.send(f'You put "{message.content}" in counting which isn\'t a valid number.')
+		else:
+			await message.author.send(f'You put "{message.content}" ({new_number}) in counting which isn\'t the right number, you should\'ve put {old_number + 1}')
+
+
+
 	counting_cooldowns[message.author.id] = time.time()
 
 async def process_infinite_counting_channel(message):
 	global most_recent_infinite_counting_message_id
-	if message.channel.id != config.channels.get('infinite-counting'):
+
+	infinite_counting_channel_id = config.channels.get('infinite-counting')
+
+	if message.channel.id != infinite_counting_channel_id:
 		# if the message wasn't in the counting channel, you can ignore all of this
 		return
 	elif message.author.bot:
@@ -396,6 +408,7 @@ async def process_infinite_counting_channel(message):
 
 	# the same person can't count twice in a row in #infinite-counting
 	if last_person_to_count == message.author.id:
+		await message.author.send(f'You can\'t count twice in a row in infinite-counting')
 		return await message.delete()
 
 	try:
@@ -405,17 +418,23 @@ async def process_infinite_counting_channel(message):
 	if old_number == 0 and new_number != 1:
 		await message.delete()
 		await message.channel.send(f'<@{message.author.id}>, please start at 1', delete_after=10)
+
 	elif new_number == old_number + 1:
 		try:
 			await message.add_reaction(COUNTING_CONFIRMATION_EMOJI)
 		except:
 			# if there was an error adding the reaction, just delete the message
 			return await message.delete()
+
 		most_recent_infinite_counting_message_id = message.id
 		await db.set_infinite_counter(message.guild.id, int(new_number))
 		await db.set_last_person_in_infinite_counting(message.guild.id, message.author.id)
 	else:
 		await message.delete()
+		if new_number == 0 or new_number is None:
+			await message.author.send(f'You put "{message.content}" in infinite-counting which isn\'t a valid number.')
+		else:
+			await message.author.send(f'You put "{message.content}" ({new_number}) in infinite-counting which isn\'t the right number, you should\'ve put {old_number + 1}')
 
 last_general_message = time.time()
 is_chat_dead = False

@@ -338,6 +338,8 @@ async def get_infinite_counter(guild_id: int):
 	})
 	if data:
 		return data.get('infinite_counter', 0)
+	else:
+		return 0
 
 
 async def get_last_person_in_infinite_counting(guild_id: int):
@@ -347,6 +349,8 @@ async def get_last_person_in_infinite_counting(guild_id: int):
 	})
 	if data:
 		return data.get('last_infinite_counter', 0)
+	else:
+		return 0
 
 
 async def set_last_person_in_infinite_counting(guild_id: int, member_id: int):
