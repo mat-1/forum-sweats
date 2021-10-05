@@ -213,8 +213,6 @@ def solve_postfix(tokens):
 
 			solver = SOLVERS[token['name']]
 
-			print('solving', parse_number(left_operator), parse_number(right_operator), token)
-
 			try:
 				result = solver(parse_number(left_operator), parse_number(right_operator))
 			except ZeroDivisionError:
@@ -250,7 +248,6 @@ def solve_postfix(tokens):
 def solve_expression(string):
 	# solves a mathematical expression (ex. '1+1' or '5*(1+2)-3')
 	tokens = tokenize(string)
-	print(json.dumps(tokens, indent=2))
 	if (tokens == None): return
 	postfix_tokens = shunting_yard_algorithm(tokens)
 	result = solve_postfix(postfix_tokens)
