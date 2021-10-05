@@ -283,4 +283,3 @@ assert solve_expression('0.001597444089456869 * 3130') == 5
 assert solve_expression('1 / 2 minus 1 / 2') == 0
 
 # print(solve_expression('(((((((((((((((((((((((((0.001597444089456869 * (311 * 20 / 2 * 3 * 2 * 2 / 4 / 6 * 2 + uno + uno + uno + 17) divided by 100 minus 4 divided by 8) times 2) minus 8) plus 3174) minus 3160.1 plus 5) divided by 11) * 11) divided by 16) * 0.625) * 256) divided by 100) minus .0000000000000002) plus 3180) divided by 953) divided by 953) * 908209) divided by 4️⃣ 4️⃣ 4️⃣) divided by 2) * 8888) divided by 31838.65765765766) plus 3184) divided by uno uno uno uno) + uno 8954) divided by 0.0000527374) * ( uno uno uno uno uno )) minus 3993934984787.5312'))
-exit()
