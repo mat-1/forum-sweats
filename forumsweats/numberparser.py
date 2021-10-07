@@ -297,7 +297,6 @@ def solve_postfix(tokens):
 def solve_expression(string):
 	# solves a mathematical expression (ex. '1+1' or '5*(1+2)-3')
 	tokens = tokenize(string)
-	print(tokens)
 	if (tokens == None): return
 	postfix_tokens = shunting_yard_algorithm(tokens)
 	result = solve_postfix(postfix_tokens)
