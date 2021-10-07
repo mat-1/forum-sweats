@@ -323,5 +323,3 @@ assert solve_expression('0.001597444089456869 * 3130') == 5
 assert solve_expression('1 / 2 minus 1 / 2') == 0
 
 assert solve_expression('round(sin(3.141592 / 2))') == 1
-
-exit()
