@@ -82,6 +82,30 @@ TOKENS = {
 		'match': re.compile(r'\btan\b'),
 		'category': 'function'
 	},
+	'FLOOR': {
+		'match': re.compile(r'\bfloor\b'),
+		'category': 'function'
+	},
+	'CEIL': {
+		'match': re.compile(r'\bceil\b'),
+		'category': 'function'
+	},
+	'ABS': {
+		'match': re.compile(r'\babs\b'),
+		'category': 'function'
+	},
+	'SQRT': {
+		'match': re.compile(r'\bsqrt\b'),
+		'category': 'function'
+	},
+	'LOG': {
+		'match': re.compile(r'\blog\b'),
+		'category': 'function'
+	},
+	'ROUND': {
+		'match': re.compile(r'\bround\b'),
+		'category': 'function'
+	},
 
 	'NUMBER': {
 		# numbers and decimals
@@ -107,6 +131,12 @@ SOLVERS = {
 	'COS': lambda n: math.cos(n),
 	'TAN': lambda n: math.tan(n),
 	'POW': lambda a, b: (a ** b) if b <= 100 else 0, # we don't allow powers higher than 100 because they're too expensive
+	'FLOOR': lambda n: math.floor(n),
+	'CEIL': lambda n: math.ceil(n),
+	'ABS': lambda n: abs(n),
+	'SQRT': lambda n: math.sqrt(n),
+	'LOG': lambda n: math.log(n),
+	'ROUND': lambda n: round(n),
 }
 
 def is_greater_precedence(operator, other_operator):
@@ -246,7 +276,9 @@ def solve_postfix(tokens):
 			# there has to be at least 1 token for functions, otherwise the expression is invalid
 			if len(output_queue) < 1:
 				return
-			parameter = output_queue.pop()['value']
+
+			parameter = parse_number(output_queue.pop()['value'])
+
 			solver = SOLVERS[token['name']]
 			result = solver(parameter)
 			result_token = {
@@ -265,6 +297,7 @@ def solve_postfix(tokens):
 def solve_expression(string):
 	# solves a mathematical expression (ex. '1+1' or '5*(1+2)-3')
 	tokens = tokenize(string)
+	print(tokens)
 	if (tokens == None): return
 	postfix_tokens = shunting_yard_algorithm(tokens)
 	result = solve_postfix(postfix_tokens)
@@ -289,4 +322,6 @@ assert solve_expression('0.001597444089456869 * 3130') == 5
 
 assert solve_expression('1 / 2 minus 1 / 2') == 0
 
+assert solve_expression('round(sin(3.141592 / 2))') == 1
 
+exit()
