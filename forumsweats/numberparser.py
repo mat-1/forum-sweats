@@ -8,10 +8,24 @@ compiled_re_split = re.compile(r'([^\w.])')
 def match_number(string: str):
 	string = string.strip()
 	string_split = compiled_re_split.split(string)
-	for characters_remaining in range(min(len(string_split), 20), 0, -1):
-		if string_split[characters_remaining - 1] == '' or string_split[characters_remaining - 1] == ' ':
+
+	cut_string = []
+	for i, s in enumerate(string_split):
+		if i > 20:
+			# if the string is too long, it's probably not a number
+			break
+		elif s == ')':
+			# if there's a closing paren, it's probably not a number
+			break
+		elif s in '+-*/^':
+			# if there's an operator, it's probably not a number
+			break
+		cut_string.append(s)
+
+	for characters_remaining in range(len(cut_string), 0, -1):
+		if cut_string[characters_remaining - 1] == '' or cut_string[characters_remaining - 1] == ' ':
 			continue
-		word = ''.join(string_split[:characters_remaining]).strip()
+		word = ''.join(cut_string[:characters_remaining]).strip()
 		if w2n.try_word(word):
 			return word
 		else:
