@@ -11,7 +11,9 @@ def match_number(string: str):
 
 	cut_string = []
 	for i, s in enumerate(string_split):
-		if i > 20:
+		if s == '':
+			pass
+		elif i > 20:
 			# if the string is too long, it's probably not a number
 			break
 		elif s == ')':
@@ -306,19 +308,12 @@ assert solve_expression('1+1') == 2
 assert solve_expression('1+2*3') == 7
 assert solve_expression('1+2*3-4') == 3
 assert solve_expression('(1+2)*3') == 9
-
 assert solve_expression('one + one') == 2
-
 assert solve_expression('seven hundred and twenty seven times two million and one') == 1454000727
-
 assert solve_expression('4 / 0') == float('inf')
-
 assert solve_expression('( 1 * 1 * 0)') == 0
-
 assert solve_expression('0.01') == 0.01
-
 assert solve_expression('0.001597444089456869 * 3130') == 5
-
 assert solve_expression('1 / 2 minus 1 / 2') == 0
-
 assert solve_expression('round(sin(3.141592 / 2))') == 1
+assert solve_expression('<:uno:876124296190259240>') == 1
