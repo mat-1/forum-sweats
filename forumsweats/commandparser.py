@@ -122,7 +122,8 @@ class CommandParser():
 		self.prefixes = [
 			prefix,
 			f'<@{bot_id}>',
-			f'<@!{bot_id}>'
+			f'<@!{bot_id}>',
+			'hey siri '
 		]
 
 	async def try_converter(self, ctx, string: str, converter):
