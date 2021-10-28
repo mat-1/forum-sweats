@@ -247,7 +247,7 @@ async def on_member_join(member):
 
 	cached_invites = await guild.invites()
 
-	if 'ban speedrun' in member.name.lower() or 'forum sweats nsfw' in member.name.lower():
+	if 'ban speedrun' in member.name.lower() or 'forum sweats nsfw' in member.name.lower() or 'XYaaHH2wg' in member.name.lower():
 		return await member.ban(reason='has blacklisted phrase in name')
 
 	if used_invite:
