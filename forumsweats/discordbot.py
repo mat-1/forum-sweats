@@ -500,11 +500,14 @@ async def on_message(message: discord.Message):
 		if message.type == discord.MessageType.pins_add and message.author.id == client.user.id:
 			await message.delete()
 
+	# if the message was deleted, we don't want to do anything else
+	if await modbot.process_messsage(message):
+		return
+
 	asyncio.ensure_future(db.add_message(message.author.id))
 	await process_counting_channel(message)
 	await process_infinite_counting_channel(message)
 	await commandparser.process_commands(message)
-	await modbot.process_messsage(message)
 
 
 @client.event
@@ -605,7 +608,7 @@ async def mute_user(member, length, guild_id=None, gulag_message=True, rock_immu
 
 			await gulag.send(f'<@{member.id}>, your mute is now {mute_str}')
 
-	await unmute_user(member.id, wait=True)
+	asyncio.ensure_future(unmute_user(member.id, wait=True))
 
 
 async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):

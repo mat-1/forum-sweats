@@ -122,8 +122,8 @@ async def check_repeat_spam(message):
 	return False
 
 
-async def check_spam(message):
-	if message.author.bot: return
+async def check_spam(message) -> bool:
+	if message.author.bot: return False
 	previous_messages = get_previous_messages(message.author, last_seconds=60)
 	previous_messages.insert(0, message)
 	same_message = True
@@ -132,6 +132,8 @@ async def check_spam(message):
 			same_message = False
 	if same_message and len(previous_messages) > 3:
 		await message.delete()
+		return True
+	return False
 
 
 async def get_perspectives_from_message(message):
@@ -153,18 +155,23 @@ async def get_perspectives_from_message(message):
 invite_regex = re.compile(r'(discord\.gg|discordapp\.com\/invite|discord\.com\/invite|discord\.gg\/invite)\/(.{1,10})')
 
 
-async def process_messsage(message, warn=True):
+async def process_messsage(message, warn=True) -> bool:
+	'''
+	Process the message, returns True if the message was deleted
+	'''
 	# await process_for_invites(message)
 	if message.channel.id == 719570596005937152:
 		# Ignore spam channel
-		return
+		return False
 	if message.channel.id == 735470150681100350:
 		# Ignore skyblock threads
-		return
+		return False
+
 	# Ignore your messages if you're already muted
 	mute_remaining = int((await db.get_mute_end(message.author.id)) - time.time())
 	if mute_remaining > 0:
-		return
+		return False
+
 	content = message.content
 	for letter, regional_indicator in zip(
 		'abcdefghijklmnopqrstuvwxyz',
@@ -191,7 +198,7 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
 
 	if re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
 		await message.delete()
@@ -201,7 +208,7 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
 
 	if re.match(r'[\w\W]*\bc\W*u\W*m\b[\w\W]*', content, flags=re.IGNORECASE) or re.match(r'[\w\W]*\bs\W*p\W*e\W*r\W*m\b[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
@@ -211,7 +218,7 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
 
 	# antichilynn for someblanket
 	if message.author.id in {750815961942065252} and re.match(r'[\w\W]*c+[^a-z]*h+[^a-z]*[i1y][\w\W]*', content, flags=re.IGNORECASE):
@@ -222,7 +229,7 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
 
 	if re.search(r'\b((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d))\b', content):
 		# 69.420.69.420
@@ -237,7 +244,8 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
+
 	# anti n-word filter
 	if re.search(r'(n+ *i+ *g+ *)g+ *(a+|e+ *r+)', content, flags=re.IGNORECASE):
 		try:
@@ -251,7 +259,7 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
 	
 	# anti r-word filter
 	if re.search(r'retard', content, flags=re.IGNORECASE):
@@ -266,7 +274,7 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
 
 	if re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
 		try:
@@ -280,7 +288,7 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
 
 	if re.search(r'\b(f\W*a\W*g{1,2})(\W*o\W*t)?\b', content, flags=re.IGNORECASE):
 		try:
@@ -294,80 +302,10 @@ async def process_messsage(message, warn=True):
 			message.guild.id if message.guild else None,
 			replace=False
 		)
-		return
+		return True
 
-	await check_spam(message)
-
-	perspectives = await get_perspectives_from_message(message)
-	if not perspectives: return
-	severe_toxicity = perspectives['SEVERE_TOXICITY']
-	toxicity = perspectives['TOXICITY']
-	identity_attack = perspectives['IDENTITY_ATTACK']
-
-	if identity_attack > 0.85 and toxicity > 0.8 and severe_toxicity > 0.8:
-		if time.time() - last_toxic_message_times.get(message.author.id, 0) < 3600:
-			if time.time() - last_very_toxic_message_times.get(message.author.id, 0) < 3600 and identity_attack > 0.9:
-				# if warn:
-				# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :rage:')
-				await discordbot.mute_user(
-					message.author,
-					60 * 15,
-					message.guild.id if message.guild else None,
-					replace=False
-				)
-			else:
-				if identity_attack > 0.9:
-					# if warn:
-					# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :rage:')
-					await discordbot.mute_user(
-						message.author,
-						60 * 2,
-						message.guild.id if message.guild else None,
-						replace=False
-					)
-				# else:
-					# if warn:
-					# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :angry:')
-				last_very_toxic_message_times[message.author.id] = time.time()
-		else:
-			# if warn:
-			# 	await message.channel.send(f'<@{message.author.id}>, please be nice.')
-			await discordbot.mute_user(
-				message.author,
-				15,
-				message.guild.id if message.guild else None,
-				replace=False
-			)
-		last_toxic_message_times[message.author.id] = time.time()
-		return
-
-	# if severe_toxicity and severe_toxicity > 0.8 and toxicity > 0.7:
-	# 	if time.time() - last_toxic_message_times.get(message.author.id, 0) < 3600:
-	# 		if time.time() - last_very_toxic_message_times.get(message.author.id, 0) < 3600 and severe_toxicity > 0.9:
-	# 			# if warn:
-	# 			# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :rage:')
-	# 			await discordbot.mute_user(
-	# 				message.author,
-	# 				60 * 3,
-	# 				message.guild.id if message.guild else None
-	# 			)
-	# 		else:
-	# 			if severe_toxicity > 0.9:
-	# 				# if warn:
-	# 				# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :rage:')
-	# 				await discordbot.mute_user(
-	# 					message.author,
-	# 					15,
-	# 					message.guild.id if message.guild else None
-	# 				)
-	# 			# else:
-	# 				# if warn:
-	# 				# 	await message.channel.send(f'<@{message.author.id}>, please be nice. :angry:')
-	# 			last_very_toxic_message_times[message.author.id] = time.time()
-	# 	# else:
-	# 		# if warn:
-	# 		# 	await message.channel.send(f'<@{message.author.id}>, please be nice.')
-	# 	last_toxic_message_times[message.author.id] = time.time()
-	# 	return
+	is_spam = await check_spam(message)
 
 	add_previous_message(message)
+
+	return is_spam
