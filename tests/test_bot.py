@@ -237,17 +237,14 @@ async def test_counting(client, test: discordpytest.Tester, guild, counting_chan
 	other_member = test.make_member(guild, test.make_user(999999999999999999, 'duck', '0001'))
 
 	# make sure new members can count correct numbers
-	test.clear_queues()
 	m = await test.message('2', counting_channel, new_member)
 	await test.verify_reaction_added(lambda r: r['emoji'] == bot.COUNTING_CONFIRMATION_EMOJI and str(r['message_id']) == str(m['id']))
 
 	# make sure normal members can still count
-	test.clear_queues()
 	m = await test.message('3', counting_channel, member)
 	await test.verify_reaction_added(lambda r: r['emoji'] == bot.COUNTING_CONFIRMATION_EMOJI and str(r['message_id']) == str(m['id']))
 
 	# make sure new members can't count the wrong number
-	test.clear_queues()
 	m = await test.message('troll', counting_channel, other_new_member)
 	await test.verify_message_deleted(int(m['id']))
 
@@ -255,4 +252,4 @@ async def test_counting(client, test: discordpytest.Tester, guild, counting_chan
 	# make sure old members can still count the wrong number
 	test.clear_queues()
 	m = await test.message('troll', counting_channel, other_member)
-	await test.verify_message(lambda m: print(m) or m['content'].startswith(f'<@{other_member.id}> put an invalid number and ruined it for everyone'))
+	await test.verify_message(lambda m: m['content'].startswith(f'<@{other_member.id}> put an invalid number and ruined it for everyone'))
