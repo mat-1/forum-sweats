@@ -9,9 +9,12 @@ async def make_confirmation_gui(client, message, user):
 	await message.add_reaction(disagree_reaction)
 
 	def check(reaction, check_user):
-		if user.id != check_user.id: return False
-		if reaction.emoji != agree_reaction and reaction.emoji != disagree_reaction: return False
-		if reaction.message.id != message.id: return False
+		if user.id != check_user.id:
+			return False
+		if reaction.emoji != agree_reaction and reaction.emoji != disagree_reaction:
+			return False
+		if reaction.message.id != message.id:
+			return False
 		return True
 
 	reaction, user = await client.wait_for('reaction_add', check=check)
