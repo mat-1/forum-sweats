@@ -172,7 +172,9 @@ async def process_messsage(message, warn=True) -> bool:
 		.replace('Ⱡ', 'L')\
 		.replace('Ỻ', 'lL')\
 		.replace('と', 'c')\
-		.replace('€', 'c')
+		.replace('€', 'c')\
+		.replace('!', 'i')
+
 	# antihoe for runic
 	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
@@ -286,6 +288,14 @@ async def process_messsage(message, warn=True) -> bool:
 			message.guild.id if message.guild else None,
 			replace=False
 		)
+		return True
+
+	if re.search(r'thiswordisblacklistedyouliterallycannotsayit', content, flags=re.IGNORECASE):
+		try:
+			await message.author.send('troll')
+		except discord.errors.Forbidden:
+			pass
+		await message.delete()
 		return True
 
 	is_spam = await check_spam(message)

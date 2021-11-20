@@ -253,3 +253,8 @@ async def test_counting(client, test: discordpytest.Tester, guild, counting_chan
 	test.clear_queues()
 	m = await test.message('troll', counting_channel, other_member)
 	await test.verify_message(lambda m: m['content'].startswith(f'<@{other_member.id}> put an invalid number and ruined it for everyone'))
+
+@pytest.mark.asyncio
+async def test_filter(client, test: discordpytest.Tester, channel):
+	m = await test.message('th¡swordisblacklistedyouliterallycannotsayit', channel)
+	await test.verify_message_deleted(int(m['id']))
