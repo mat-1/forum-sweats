@@ -256,5 +256,5 @@ async def test_counting(client, test: discordpytest.Tester, guild, counting_chan
 
 @pytest.mark.asyncio
 async def test_filter(client, test: discordpytest.Tester, channel):
-	m = await test.message('th¡swordisblacklistedyouliterallycannotsayit', channel)
+	m = await test.message('th¡swordisblacklistʒdyouliterallycannotsayit', channel)
 	await test.verify_message_deleted(int(m['id']))

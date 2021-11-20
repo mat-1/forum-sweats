@@ -167,13 +167,15 @@ async def process_messsage(message, warn=True) -> bool:
 		.replace('🅰', 'a')\
 		.replace('⭕', 'o')\
 		.replace('🅾', 'o')\
-		.replace('👁‍🗨', 'o')
+		.replace('👁‍🗨', 'o')\
+		.replace('ʒ', '3')
 	content = unidecode.unidecode(content)\
 		.replace('Ⱡ', 'L')\
 		.replace('Ỻ', 'lL')\
 		.replace('と', 'c')\
 		.replace('€', 'c')\
-		.replace('!', 'i')
+		.replace('!', 'i')\
+		.replace('3', 'e')
 
 	# antihoe for runic
 	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
