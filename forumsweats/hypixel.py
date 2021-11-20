@@ -1,4 +1,4 @@
-from session import s
+from .session import s
 import random
 import os
 

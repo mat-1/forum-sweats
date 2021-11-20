@@ -395,9 +395,18 @@ async def process_counting_channel(message):
 		await db.change_bobux(message.author.id, counting_bobux)
 		# we do a try except in case the user blocked the bot
 	else:
+		# if the user has the helper role and they mess up counting, delete their message
 		if has_role(message.author.id, 'helper'):
-			# if the user has the helper role and they mess up counting, delete their message
 			return await message.delete()
+
+		# if the user has less than 50 activity bobux, delete their message and dm
+		if (await db.get_activity_bobux(message.author.id)) < 50:
+			await message.delete()
+			try: await message.author.send('Because you are a new member, you are immune to putting the wrong number in counting.')
+			except: pass
+			return
+
+
 		await db.set_counter(message.guild.id, 0)
 		await message.channel.send(
 			f"<@{message.author.id}> put an invalid number and ruined it for everyone. (Ended at {old_number})"

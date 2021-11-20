@@ -1,14 +1,14 @@
-from datetime import datetime, timedelta
-from typing import Dict, List
 from forumsweats import discordbot
+from datetime import timedelta
+from typing import Dict, List
+from forumsweats import db
+from .session import s
 import unidecode
-from session import s
 import discord
 import time
 import json
 import os
 import re
-from forumsweats import db
 
 with open('letter_pairs.json', 'r') as f:
 	letter_pair_scores = json.loads(f.read())
@@ -135,22 +135,6 @@ async def check_spam(message) -> bool:
 		return True
 	return False
 
-
-async def get_perspectives_from_message(message):
-	if message.content.strip() == '':
-		return {}
-	content = message.content
-	for letter, regional_indicator in zip(
-		'abcdefghijklmnopqrstuvwxyz',
-		'🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿'
-	):
-		content = content.replace(regional_indicator, letter)
-	content = unidecode.unidecode(content)
-	scores = await get_perspective_score(content)
-	if message.content.startswith('!toxicity '):
-		scores['SEVERE_TOXICITY'] = 0
-
-	return scores
 
 invite_regex = re.compile(r'(discord\.gg|discordapp\.com\/invite|discord\.com\/invite|discord\.gg\/invite)\/(.{1,10})')
 

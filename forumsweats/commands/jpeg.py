@@ -1,18 +1,14 @@
 from ..commandparser import Context, Member
 from typing import Optional
+from ..session import s
 import discord
 import aiohttp
-import io
 
 name = 'jpeg'
 args = '[member]'
 aliases = ('jpg',)
 
 s: Optional[aiohttp.ClientSession] = None
-
-async def init():
-	global s
-	s = aiohttp.ClientSession()
 
 async def upload(im_bytes, content_type):
 	data = aiohttp.FormData()
@@ -56,7 +52,7 @@ async def run(message: Context, item: str=None):
 			user = message.client.get_user(member.id)
 			if not user:
 				return await message.reply('User not found.')
-			asset = user.avatar.with_static_format('png').with_size(img_size)
+			asset = user.display_avatar.with_static_format('png').with_size(img_size)
 			image_url = str(asset)
 		elif item is not None and (item.startswith('https://') or item.startswith('http://')):
 			image_url = str(item)

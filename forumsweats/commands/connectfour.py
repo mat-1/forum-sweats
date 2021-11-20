@@ -1,15 +1,13 @@
 from ..commandparser import Member
 from forumsweats import db
+from ..session import s
 import discord
-import aiohttp
 import random
 import config
 
 name = 'connectfour'
 aliases = ('connect4', 'c4',)
 args = '<opponent> [opponent2] [opponent3] [opponent4] [opponent5]'
-
-s = aiohttp.ClientSession()
 
 class Game:
 	def __init__(self, player_count=2, width=7, height=6):

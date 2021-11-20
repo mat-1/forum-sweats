@@ -1,130 +1,17 @@
-from typing import Union
+from discordpytest.client import FakeClient, make_user_data
+from discord.types.snowflake import Snowflake, SnowflakeList
+from discord.types.user import User as UserPayload
+from discord.types.member import MemberWithUser
+from discord.types.channel import TextChannel
+from discord.types.message import Message as MessagePayload
+from typing import Callable, Dict, Union
 from discord.member import Member
-from discord.user import User
 from discord.role import Role
-import discord
+from discord.user import User
 import asyncio
 import random
 import time
 
-
-class FakeClient(discord.Client):
-	def __init__(self, client):
-		self.ws = None
-		self.loop = asyncio.get_event_loop()
-		asyncio.set_event_loop(self.loop)
-		self._listeners = client._listeners
-
-		self.http = FakeHTTPClient(self)
-
-		self._handlers = client._handlers
-
-		self._hooks = client._hooks
-
-		self._connection = self._get_state()
-		self._closed = False
-		self._ready = asyncio.Event()
-		self._connection._get_websocket = self._get_websocket
-		self._connection._get_client = lambda: self
-
-		for attr in dir(client):
-			if attr.startswith('on_'):
-				setattr(self, attr, getattr(client, attr))
-
-	async def connect(self, *, reconnect=True, id: int):
-		self._connection.guild_ready_timeout = 0
-		self._connection.parse_ready({
-			'user': Tester.make_user_data(id),
-			'guilds': []
-		})
-
-	def login(self, token, *, bot=True):
-		self.loop.run_until_complete(self.http.static_login(token.strip()))
-
-	def start(self, *args, id: int, **kwargs):
-		bot = kwargs.pop('bot', True)
-		reconnect = kwargs.pop('reconnect', True)
-
-		self.login(*args, bot=bot)
-		self.loop.run_until_complete(self.connect(reconnect=reconnect, id=id))
-
-
-class FakeHTTPClient():
-	def __init__(self, client):
-		self.messages_queue = []
-		self.client = client
-
-	def recreate(self):
-		pass
-
-	async def ws_connect(self, url, *, compress=0):
-		pass
-
-	async def static_login(self, token):
-		self.token = token
-
-	async def get_gateway(self, *, encoding='json', v=6, zlib=True):
-		return 'https://discord.com'
-
-	async def send_message(
-			self,
-			channel_id,
-			content,
-			*,
-			tts=False,
-			embed=None,
-			embeds=None,
-			nonce=None,
-			allowed_mentions=None,
-			message_reference=None,
-			stickers=None,
-			components=None,
-	):
-		self.messages_queue.append({
-			'channel_id': channel_id,
-			'content': content,
-			'tts': tts,
-			'embeds': [embed] if embed else embeds,
-			'nonce': nonce,
-			'allowed_mentions': allowed_mentions,
-			'message_reference': message_reference,
-			'components': components,
-			'sticker_ids': stickers
-		})
-		user_json = self.client._connection.user._to_minimal_user_json()
-		return {
-			'id': random.randint(100000, 99999999999999),
-			'channel_id': channel_id,
-			'guild_id': self.client.get_channel(channel_id).guild.id,
-			'author': user_json,
-			'member': {
-				'user': user_json,
-				'nick': None,
-				'roles': [],
-				'joined_at': '1970-01-01T00:00:01+00:00'
-			},
-			'content': content,
-			'timestamp': '1970-01-01T00:00:01+00:00',
-			'edited_timestamp': None,
-			'tts': tts,
-			'mention_everyone': False,
-			'mentions': [],
-			'mention_roles': [],
-			'mention_channels': [],
-			'attachments': [],
-			'embeds': [],
-			'pinned': False,
-			'type': 0,
-		}
-
-	async def send_typing(self, channel_id):
-		pass
-
-	async def add_reaction(self, channel_id, message_id, emoji):
-		print('add reaction!')
-
-	async def add_role(self, guild_id, user_id, role_id, *, reason=None):
-		print('add role!')
 
 
 class Tester:
@@ -134,6 +21,9 @@ class Tester:
 		self.client.start('-.-.-', id=719348452491919401)
 
 		self.client._connection.user = self.make_user(719348452491919401)
+
+	def clear_queues(self):
+		self.client.http.queues = {}
 
 	def make_guild(self, **kwargs):
 		data = {
@@ -170,13 +60,17 @@ class Tester:
 		data.update(kwargs)
 		self.client._connection.parse_guild_create(data)
 		guild = self.client.get_guild(int(data['id']))
+
+		# sanity check, and so the typings work
+		assert guild
+
 		default_role = Role(guild=guild, state=self.client._connection, data={
 			'id': str(guild.id),
 			'name': '@everyone',
-			'color': '000000',
+			'color': 0,
 			'hoist': True,
 			'position': 0,
-			'permissions': 0,
+			'permissions': '0',
 			'managed': False,
 			'mentionable': False
 		})
@@ -185,34 +79,26 @@ class Tester:
 		self.make_member(guild, self.client._connection.user)
 		return guild
 
-	def make_channel(self, guild, **kwargs):
-		data = {
-			'id': id,
+	def make_channel(self, guild, id: Union[str, int]):
+		data: TextChannel = {
+			'id': str(id),
 			'guild_id': guild.id,
 			'type': 0,
 			'name': 'general',
 			'position': 0,
+			'permission_overwrites': [],
+			'parent_id': None,
+			'nsfw': False,
 		}
-		data.update(kwargs)
 
 		self.client._connection.parse_channel_create(data)
 		return self.client._connection.get_channel(int(data['id']))
 
-	@staticmethod
-	def make_user_data(user_id: Union[int, str] = 1, username: str = 'user', discriminator: str = '0001', avatar: str = '') -> User:
-		return {
-			'id': str(user_id),
-			'username': username,
-			'discriminator': str(discriminator),
-			'avatar': avatar,
-			'bot': False,
-		}
-
-	def make_user(self, user_id=1, username='user', discriminator='0001', avatar=''):
-		data = Tester.make_user_data(user_id, username, discriminator, avatar)
-		return self.client._connection.store_user({
+	def make_user(self, user_id: Snowflake=1, username: str='user', discriminator: str='0001', avatar: str='') -> User:
+		data = make_user_data(user_id, username, discriminator, avatar)
+		user = self.client._connection.store_user({
 			'avatar': data['avatar'],
-			'bot': data['bot'],
+			'bot': data.get('bot', False),
 			'discriminator': data['discriminator'],
 			'email': None,
 			'flags': 0,
@@ -225,32 +111,44 @@ class Tester:
 			'username': data['username'],
 			'verified': False,
 		})
+		return user
 
-	def make_member(self, guild, user):
-		data = {
+	def make_member(self, guild, user) -> Member:
+		data: MemberWithUser = {
 			'user': user._to_minimal_user_json(),
-			'nick': None,
+			'nick': '',
 			'roles': [],
-			'joined_at': '1970-01-01T00:00:01+00:00'
+			'joined_at': '1970-01-01T00:00:01+00:00',
+			# not sure how deaf and mute are supposed to be  but it's fine
+			'deaf': '0',
+			'mute': '0',
 		}
 		member = Member(data=data, state=self.client._connection, guild=guild)
 		guild._add_member(member)
 		guild._member_count = len(guild._members)
 		return member
 
-	async def message(self, content, channel, author=None, **kwargs):
+	async def message(self, content, channel, author: Member=None, **kwargs) -> MessagePayload:
 		if not author:
 			author = self.make_member(channel.guild, self.make_user(0))
-		author_data = {
-			'user': author._user._to_minimal_user_json(),
-			'nick': author.nick,
-			'roles': author._roles,
-			'joined_at': author.joined_at.isoformat(),
+
+		user: UserPayload = author._user._to_minimal_user_json()
+		roles: SnowflakeList = author._roles.tolist()
+
+		author_data: MemberWithUser = {
+			'user': user,
+			'nick': author.nick or '',
+			'roles': roles,
+			'joined_at': author.joined_at.isoformat() if author.joined_at else '',
+			'deaf': '0',
+			'mute': '0',
 		}
+
 		member = Member(state=self.client._connection,
 						data=author_data, guild=channel.guild)
+
 		data = {
-			'id': '0',
+			'id': random.randint(100000, 99999999999999),
 			'channel_id': channel.id,
 			'guild_id': channel.guild.id,
 			'reactions': [],
@@ -268,26 +166,63 @@ class Tester:
 			'content': content,
 			'nonce': None,
 			'author': author._user._to_minimal_user_json(),
-			'member': author_data
+			'member': author_data,
 		}
 		data.update(kwargs)
 		self.client._connection.parse_message_create(data)
 
-	async def verify_message(self, checker, timeout=1):
+		return data
+
+	async def verify_message(self, checker: Union[str, Callable[[MessagePayload], bool]], timeout=1):
 		if isinstance(checker, str):
 			check_content = checker
 
-			def checker(s):
-				return s['content'] == check_content
+			checker = lambda m: m['content'] == check_content
 
 		started_time = time.time()
 
-		while len(self.client.http.messages_queue) == 0:
+		while len(self.client.http.get_queue('send_message')) == 0:
 			await asyncio.sleep(0)
 			elapsed_time = time.time() - started_time
 			if elapsed_time > timeout:
 				raise TimeoutError()
 
-		message = self.client.http.messages_queue.pop(0)
-		print(message)
+		message = self.client.http.pop_queue('send_message')
 		assert checker(message)
+	
+	async def verify_message_deleted(self, message_id: int, timeout=1):
+		started_time = time.time()
+
+		# wait until a message with that id is deleted, or timeout
+		while any(m['message_id'] == message_id for m in self.client.http.get_queue('delete_message')) == 0:
+			await asyncio.sleep(0)
+			elapsed_time = time.time() - started_time
+			if elapsed_time > timeout:
+				raise TimeoutError()
+
+		# remove the message from the queue
+		self.client.http.set_queue(
+			'delete_message',
+			[m for m in self.client.http.get_queue('delete_message') if m['message_id'] != message_id]
+		)
+	
+	async def verify_reaction_added(self, checker: Union[str, Callable[[Dict], bool]], timeout=1):
+		if isinstance(checker, str) or isinstance(checker, int):
+			check_message_id = int(checker)
+
+			checker = lambda m: m['message_id'] == check_message_id
+
+		started_time = time.time()
+
+		# wait until the checker returns true, or timeout
+		while any(checker(m) for m in self.client.http.get_queue('add_reaction')) == 0:
+			await asyncio.sleep(0)
+			elapsed_time = time.time() - started_time
+			if elapsed_time > timeout:
+				raise TimeoutError()
+
+		# remove the message from the queue
+		self.client.http.set_queue(
+			'add_reaction',
+			[m for m in self.client.http.get_queue('add_reaction') if not checker(m)]
+		)

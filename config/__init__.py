@@ -31,6 +31,14 @@ class AnyListMatcher:
 
 	def __hash__(self):
 		return hash(self.data)
+	
+	def __getitem__(self, index):
+		if isinstance(self.data, list):
+			return self.data[index]
+		elif index == 0:
+			return self.data
+		else:
+			raise IndexError(f'{self.data} is not a list')
 
 
 bot_data = read_config_file('bot')

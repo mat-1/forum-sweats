@@ -1,5 +1,5 @@
-from asyncio.queues import Queue
 import forumsweats.discordbot as bot
+from asyncio.queues import Queue
 from forumsweats import db
 import discordpytest
 import asyncio
@@ -7,9 +7,9 @@ import pytest
 import config
 import time
 
-print('imported things', bot)
-
 bobux_queue = []
+
+db.connection_url = None
 
 
 async def fake_change_bobux(user_id: int, amount: int):
@@ -26,14 +26,35 @@ async def get_mute_end(user_id: int):
 db.get_mute_end = get_mute_end
 
 
+counter = 1
+@pytest.fixture(autouse=True)
+def reset_counter():
+	global counter
+	counter = 1
+
 async def get_counter(guild_id: int):
-	return 1
+	return counter
 db.get_counter = get_counter
 
+async def set_counter(guild_id: int, value: int):
+	global counter
+	counter = value
+db.set_counter = set_counter
 
 async def get_active_reminders():
 	return []
 db.get_active_reminders = get_active_reminders
+
+async def get_activity_bobux(user_id: int):
+	# these user ids are considered new members
+	if user_id == 533502154191798273 or user_id == 533502154191798274:
+		return 0
+	return 200
+db.get_activity_bobux = get_activity_bobux
+
+
+
+
 
 
 async def verify_bobux(checker, timeout=1):
@@ -67,98 +88,97 @@ def client(test):
 def guild(test):
 	return test.make_guild(id=config.main_guild)
 
+def get_channel_from_config(channel_name: str) -> int:
+	channel = config.channels.get(channel_name, [])
+	return channel[0]
 
 @pytest.fixture
-def channel(test, guild):
-	return test.make_channel(guild, id=config.channels['bot-commands'])
+def channel(test: discordpytest.Tester, guild):
+	return test.make_channel(guild, id=get_channel_from_config('bot-commands'))
 
+@pytest.fixture
+def counting_channel(test: discordpytest.Tester, guild):
+	return test.make_channel(guild, id=get_channel_from_config('counting'))
 
 @pytest.mark.asyncio
-async def test_avatar(test, channel, guild):
+async def test_avatar(test: discordpytest.Tester, channel, guild):
 	user_1 = test.make_member(
-		guild, test.make_user(1, 'mat', 1234, avatar='asdf'))
+		guild, test.make_user(1, 'mat', '1234', avatar='asdf'))
 	await test.message('!avatar mat', channel)
-	# await test.verify_message(lambda m: m['content'].startswith('https://cdn.discordapp.com/avatars/1/asdf.'))
-	await test.verify_message(lambda m: print(m) or True)
+	await test.verify_message(lambda m: m['content'].startswith('https://cdn.discordapp.com/avatars/1/asdf.'))
 
 
 @pytest.mark.asyncio
-async def test_b(test, channel):
+async def test_b(test: discordpytest.Tester, channel):
 	await test.message('!b', channel)
 	await test.verify_message('I like french bread')
 
 
 @pytest.mark.asyncio
-async def test_bleach(test, channel):
+async def test_bleach(test: discordpytest.Tester, channel):
 	await test.message('!bleach', channel)
 	await test.verify_message(
-		lambda m: m['embeds'][0]['title'] == 'Here\'s a Clorox bleach if you want to unsee something weird:'
+		lambda m: m['embeds'][0].get('title') == 'Here\'s a Clorox bleach if you want to unsee something weird:'
 	)
 
 
 # @pytest.mark.asyncio
-# async def test_bobux(test, channel):
+# async def test_bobux(test: discordpytest.Tester, channel):
 # 	await test.message('!bobux', channel)
 
 
 @pytest.mark.asyncio
-async def test_e(test, channel):
+async def test_e(test: discordpytest.Tester, channel):
 	await test.message('!e', channel)
 	await test.verify_message('e')
 
 
 @pytest.mark.asyncio
-async def test_forum(test, channel):
+async def test_forum(test: discordpytest.Tester, channel):
 	await test.message('!forum', channel)
 	await test.verify_message('Forum commands: **!forums user (username)**')
 
 
-# @pytest.mark.asyncio
-# async def test_forum_user(test, channel):
-# 	await test.message('!forum user matdoesdev', channel)
-# 	await test.verify_message(lambda m: m['embeds'][0]['title'] == 'matdoesdev\'s forum stats', timeout=15)
-
-
 @pytest.mark.asyncio
-async def test_debugmember(client, test, channel, guild):
-	user_1 = test.make_member(guild, test.make_user(1, 'mat', 1234))
-	user_2 = test.make_member(guild, test.make_user(2, 'matdoesdev', 4321))
-	user_3 = test.make_member(guild, test.make_user(3, 'gaming', 1234))
-	user_2 = test.make_member(guild, test.make_user(4, 'mat does dev', 4321))
+async def test_debugmember(client, test: discordpytest.Tester, channel, guild):
+	user_1 = test.make_member(guild, test.make_user(1, 'mat', '1234'))
+	user_2 = test.make_member(guild, test.make_user(2, 'matdoesdev', '4321'))
+	user_3 = test.make_member(guild, test.make_user(3, 'gaming', '1234'))
+	user_2 = test.make_member(guild, test.make_user(4, 'mat does dev', '4321'))
 
 	await test.message('!debugmember mat', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@1>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@1>')
 
 	await test.message('!debugmember matdoesdev', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@2>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@2>')
 
 	await test.message('!debugmember mat does dev', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@4>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@4>')
 
 	await test.message('!debugmember mat d', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@4>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@4>')
 
 	await test.message('!debugmember matd', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@2>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@2>')
 
 	await test.message('!debugmember mat#1234', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@1>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@1>')
 
 	await test.message('!debugmember m#1234', channel)
 	await test.verify_message('Unknown member')
 
 	await test.message('!debugmember Mat', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@1>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@1>')
 
 	await test.message('!debugmember MATDOESDE', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@2>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@2>')
 
 	await test.message('!debugmember g', channel)
-	await test.verify_message(lambda m: m['embeds'][0]['description'] == '<@3>')
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == '<@3>')
 
 
 @pytest.mark.asyncio
-async def test_debugtime(client, test, channel):
+async def test_debugtime(client, test: discordpytest.Tester, channel):
 	time_tests = {
 		'1 second': '1 second',
 		'2 seconds': '2 seconds',
@@ -185,8 +205,7 @@ async def test_debugtime(client, test, channel):
 async def test_duel_general_win(client, test):
 	guild = test.make_guild(id=config.main_guild)
 	general = test.make_channel(guild, id=config.channels['general'])
-	user = test.make_member(guild, test.make_user(1, 'mat', 6207))
-	print('doing message')
+	user = test.make_member(guild, test.make_user(1, 'mat', '6207'))
 	await test.message('!duel <@719348452491919401>', general, user)
 	await test.verify_message(
 		lambda m: m['content'].startswith('<@719348452491919401>, react to this message with :gun: to duel <@1>.')
@@ -204,6 +223,36 @@ async def test_duel_general_win(client, test):
 
 
 @pytest.mark.asyncio
-async def test_counter(client, test, channel):
+async def test_counter(client, test: discordpytest.Tester, channel):
 	await test.message('!counter', channel)
 	await test.verify_message('1')
+
+
+@pytest.mark.asyncio
+async def test_counting(client, test: discordpytest.Tester, guild, counting_channel):
+	new_member = test.make_member(guild, test.make_user(533502154191798273, 'Otty', '5345'))
+	other_new_member = test.make_member(guild, test.make_user(533502154191798274, 'alt', '9999'))
+
+	member = test.make_member(guild, test.make_user(999999999999999999, 'mat', '0001'))
+	other_member = test.make_member(guild, test.make_user(999999999999999999, 'duck', '0001'))
+
+	# make sure new members can count correct numbers
+	test.clear_queues()
+	m = await test.message('2', counting_channel, new_member)
+	await test.verify_reaction_added(lambda r: r['emoji'] == bot.COUNTING_CONFIRMATION_EMOJI and str(r['message_id']) == str(m['id']))
+
+	# make sure normal members can still count
+	test.clear_queues()
+	m = await test.message('3', counting_channel, member)
+	await test.verify_reaction_added(lambda r: r['emoji'] == bot.COUNTING_CONFIRMATION_EMOJI and str(r['message_id']) == str(m['id']))
+
+	# make sure new members can't count the wrong number
+	test.clear_queues()
+	m = await test.message('troll', counting_channel, other_new_member)
+	await test.verify_message_deleted(int(m['id']))
+
+
+	# make sure old members can still count the wrong number
+	test.clear_queues()
+	m = await test.message('troll', counting_channel, other_member)
+	await test.verify_message(lambda m: print(m) or m['content'].startswith(f'<@{other_member.id}> put an invalid number and ruined it for everyone'))
