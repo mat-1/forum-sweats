@@ -51,7 +51,7 @@ async def api_bobux(request):
 			'id': member['discord'],
 			'username': user.name if not isinstance(user, str) else 'Deleted user',
 			'discrim': user.discriminator if not isinstance(user, str) else '0000',
-			'avatar': str(user.avatar.with_format('png').with_size(128).url) if not isinstance(user, str) else None,
+			'avatar': str(user.display_avatar.with_format('png').with_size(128).url) if not isinstance(user, str) else None,
 			'color': str(user.color) if not isinstance(user, str) else '#e5f7f7'
 		})
 	return web.json_response(bobux_leaderboard)
@@ -75,7 +75,7 @@ async def api_activitybobux(request):
 			'id': member['discord'],
 			'username': user.name if not isinstance(user, str) else 'Deleted user',
 			'discrim': user.discriminator if not isinstance(user, str) else '0000',
-			'avatar': str(user.avatar.with_format('png').with_size(128).url) if not isinstance(user, str) else None,
+			'avatar': str(user.display_avatar.with_format('png').with_size(128).url) if not isinstance(user, str) else None,
 			'color': str(user.color) if not isinstance(user, str) else '#e5f7f7'
 		})
 	return web.json_response(bobux_leaderboard)

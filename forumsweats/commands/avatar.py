@@ -9,8 +9,8 @@ async def run(message, member: Member = None):
 		member = message.author
 		
 	await message.channel.send(str(
-		member.avatar.with_format('gif')
+		member.display_avatar.with_format('gif')
 		if member.avatar.is_animated()
-		else member.avatar.with_format('png')
+		else member.display_avatar.with_format('png')
 	))
 
