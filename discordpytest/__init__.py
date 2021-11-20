@@ -194,7 +194,7 @@ class Tester:
 		started_time = time.time()
 
 		# wait until a message with that id is deleted, or timeout
-		while any(m['message_id'] == message_id for m in self.client.http.get_queue('delete_message')) == 0:
+		while any(int(m['message_id']) == message_id for m in self.client.http.get_queue('delete_message')) == 0:
 			await asyncio.sleep(0)
 			elapsed_time = time.time() - started_time
 			if elapsed_time > timeout:
@@ -203,7 +203,7 @@ class Tester:
 		# remove the message from the queue
 		self.client.http.set_queue(
 			'delete_message',
-			[m for m in self.client.http.get_queue('delete_message') if m['message_id'] != message_id]
+			[m for m in self.client.http.get_queue('delete_message') if int(m['message_id']) != message_id]
 		)
 	
 	async def verify_reaction_added(self, checker: Union[str, Callable[[Dict], bool]], timeout=1):

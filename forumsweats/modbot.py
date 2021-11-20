@@ -139,7 +139,7 @@ async def check_spam(message) -> bool:
 invite_regex = re.compile(r'(discord\.gg|discordapp\.com\/invite|discord\.com\/invite|discord\.gg\/invite)\/(.{1,10})')
 
 
-async def process_messsage(message, warn=True) -> bool:
+async def process_message(message, warn=True) -> bool:
 	'''
 	Process the message, returns True if the message was deleted
 	'''
@@ -156,7 +156,7 @@ async def process_messsage(message, warn=True) -> bool:
 	if mute_remaining > 0:
 		return False
 
-	content = message.content
+	content = message.content or (message.embeds[0].description if message.embeds else '')
 	for letter, regional_indicator in zip(
 		'abcdefghijklmnopqrstuvwxyz',
 		'🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿'
@@ -168,7 +168,9 @@ async def process_messsage(message, warn=True) -> bool:
 		.replace('⭕', 'o')\
 		.replace('🅾', 'o')\
 		.replace('👁‍🗨', 'o')\
-		.replace('ʒ', '3')
+		.replace('ʒ', '3')\
+		.replace('Ʒ', '3')
+
 	content = unidecode.unidecode(content)\
 		.replace('Ⱡ', 'L')\
 		.replace('Ỻ', 'lL')\
@@ -293,11 +295,11 @@ async def process_messsage(message, warn=True) -> bool:
 		return True
 
 	if re.search(r'thiswordisblacklistedyouliterallycannotsayit', content, flags=re.IGNORECASE):
+		await message.delete()
 		try:
 			await message.author.send('troll')
 		except discord.errors.Forbidden:
 			pass
-		await message.delete()
 		return True
 
 	is_spam = await check_spam(message)

@@ -57,11 +57,12 @@ class FakeHTTPClient():
 		stickers=None,
 		components=None,
 	):
+		embeds_data = [embed] if embed else embeds or []
 		self.add_to_queue('send_message', {
 			'channel_id': channel_id,
 			'content': content,
 			'tts': tts,
-			'embeds': [embed] if embed else embeds,
+			'embeds': embeds_data,
 			'nonce': nonce,
 			'allowed_mentions': allowed_mentions,
 			'message_reference': message_reference,
@@ -90,15 +91,15 @@ class FakeHTTPClient():
 			'mention_roles': [],
 			'mention_channels': [],
 			'attachments': [],
-			'embeds': [],
+			'embeds': embeds_data,
 			'pinned': False,
 			'type': 0,
 		}
 	
 	async def delete_message(self, channel_id, message_id, *, reason = None):
 		self.add_to_queue('delete_message', {
-			'channel_id': channel_id,
-			'message_id': message_id,
+			'channel_id': str(channel_id),
+			'message_id': str(message_id),
 			'reason': reason
 		})
 	

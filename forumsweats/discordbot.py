@@ -513,7 +513,7 @@ async def on_message(message: discord.Message):
 			await message.delete()
 
 	# if the message was deleted, we don't want to do anything else
-	if await modbot.process_messsage(message):
+	if await modbot.process_message(message):
 		return
 
 	asyncio.ensure_future(db.add_message(message.author.id))
@@ -540,7 +540,7 @@ async def on_message_edit(before, after):
 		or after.channel.id == config.channels.get('infinite-counting')
 	):
 		await after.delete()
-	await modbot.process_messsage(after, warn=False)
+	await modbot.process_message(after, warn=False)
 
 
 async def mute_user(member, length, guild_id=None, gulag_message=True, rock_immune=False, replace=True):

@@ -256,5 +256,18 @@ async def test_counting(client, test: discordpytest.Tester, guild, counting_chan
 
 @pytest.mark.asyncio
 async def test_filter(client, test: discordpytest.Tester, channel):
-	m = await test.message('th¡swordisblacklistʒdyouliterallycannotsayit', channel)
+	m = await test.message('th¡swordisblacklistʒdyoulitƷrallycannotsayit', channel)
 	await test.verify_message_deleted(int(m['id']))
+
+@pytest.mark.asyncio
+async def test_morse(client, test: discordpytest.Tester, channel):
+	await test.message('!morse .... . .-.. .-.. ---', channel)
+	await test.verify_message(lambda m: m['embeds'][0].get('description') == 'hello')
+
+	await test.message('!morse hello', channel)
+	await test.verify_message(lambda m: m['embeds'][0].get('description', '').strip() == '.... . .-.. .-.. ---')
+
+	# thiswordisblacklistedyouliterallycannotsayit
+	m = await test.message('!morse - .... .. ... .-- --- .-. -.. .. ... -... .-.. .- -.-. -.- .-.. .. ... - . -.. -.-- --- ..- .-.. .. - . .-. .- .-.. .-.. -.-- -.-. .- -. -. --- - ... .- -.-- .. -', channel)
+	await test.verify_message_deleted(int(m['id']))
+
