@@ -225,7 +225,7 @@ async def process_message(message, warn=True) -> bool:
 		# 69.420.69.420
 		try:
 			await message.author.send('Don\'t post IP addresses in chat, nerd')
-		except discord.errors.Forbidden:
+		except:
 			pass
 		await message.delete()
 		await discordbot.mute_user(
@@ -240,7 +240,7 @@ async def process_message(message, warn=True) -> bool:
 	if re.search(r'(n+ *i+ *g+ *)g+ *(a+|e+ *r+)', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t say racial slurs in chat, nerd')
-		except discord.errors.Forbidden:
+		except:
 			pass
 		await message.delete()
 		await discordbot.mute_user(
@@ -255,7 +255,7 @@ async def process_message(message, warn=True) -> bool:
 	if re.search(r'retard', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t say slurs in chat, nerd')
-		except discord.errors.Forbidden:
+		except:
 			pass
 		await message.delete()
 		await discordbot.mute_user(
@@ -269,7 +269,7 @@ async def process_message(message, warn=True) -> bool:
 	if re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t talk about sexual stuff in chat, nerd')
-		except discord.errors.Forbidden:
+		except:
 			pass
 		await message.delete()
 		await discordbot.mute_user(
@@ -283,7 +283,7 @@ async def process_message(message, warn=True) -> bool:
 	if re.search(r'\b(f\W*a\W*g{1,2})(\W*o\W*t)?\b', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t say slurs in chat, nerd')
-		except discord.errors.Forbidden:
+		except:
 			pass
 		await message.delete()
 		await discordbot.mute_user(
@@ -298,7 +298,7 @@ async def process_message(message, warn=True) -> bool:
 		await message.delete()
 		try:
 			await message.author.send('troll')
-		except discord.errors.Forbidden:
+		except:
 			pass
 		return True
 
