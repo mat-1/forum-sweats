@@ -8,5 +8,5 @@ args = '[number]'
 
 async def run(message, number: str):
 	await message.channel.send(embed=discord.Embed(
-        description=str(numberparser.solve_expression(number))
-    ))
+		description=str(numberparser.solve_expression(number))
+	))

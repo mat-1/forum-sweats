@@ -1,6 +1,0 @@
-beautifulsoup4
-cloudscraper
-git+https://github.com/Rapptz/discord.py
-motor
-dnspython
-python-dotenv

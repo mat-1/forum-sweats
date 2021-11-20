@@ -27,6 +27,8 @@ class Member(discord.Member):
 			check_mention,  # Check mention
 			check_name_with_discrim,  # Name + discrim
 
+			check_name_without_discrim,
+
 			check_name_starts_with_recent,  # Name starts with
 			check_name_starts_with,  # Name starts with
 
@@ -47,6 +49,7 @@ class Member(discord.Member):
 		for checker in CHECKERS:
 			member = checker(ctx, arg)
 			if member is not None:
+				print('checker passed', member, checker)
 				return member
 
 		return None
@@ -77,7 +80,6 @@ class Context(discord.Message):  # very unfinished but its fine probably
 	client: discord.Client
 	attachments: List[Attachment]
 	command_name: Optional[str]
-	
 
 	async def send(self, *args, embed=None, **kwargs):
 		'Send a message to a channel'
@@ -105,7 +107,8 @@ class Context(discord.Message):  # very unfinished but its fine probably
 		self.client = discordbot.client
 
 
-class NothingFound(BaseException): pass
+class NothingFound(BaseException):
+	pass
 
 
 recent_members = {}
@@ -160,10 +163,12 @@ class CommandParser():
 						found = found.strip()
 					return_args.append(found)
 				else:
-					parsing_remaining = (parsing_remaining + ' ').split(' ', len(args) - argnum)[-1]
+					parsing_remaining = (
+						parsing_remaining + ' ').split(' ', len(args) - argnum)[-1]
 					return_args.append(None)
 			else:
-				cmd_arg, parsing_remaining = (parsing_remaining + ' ').split(' ', 1)
+				cmd_arg, parsing_remaining = (
+					parsing_remaining + ' ').split(' ', 1)
 				if cmd_arg:
 					if isinstance(cmd_arg, str):
 						cmd_arg = cmd_arg.strip()
@@ -187,9 +192,10 @@ class CommandParser():
 			if parsing_remaining.startswith(prefix):
 				found = True
 				break
-				
+
 		# if no suitable prefix was found, just return
-		if not found: return
+		if not found:
+			return
 		parsing_remaining = parsing_remaining[len(prefix):].strip()
 
 		# figure out the command name
@@ -202,12 +208,14 @@ class CommandParser():
 					matching_command = command_name
 
 		# if no matching command was found, return
-		if not matching_command: return
+		if not matching_command:
+			return
 		command_name = matching_command
 
 		parsing_remaining = parsing_remaining[len(command_name):].strip()
 		for function in self.functions:
-			if function[0] != command_name: continue
+			if function[0] != command_name:
+				continue
 			func, channels, pad_none, roles, on_no_perms = function[1]
 
 			ctx = Context(message, prefix=prefix, command_name=command_name)
@@ -230,15 +238,15 @@ class CommandParser():
 					return_args = await self.parse_args(parsing_remaining, func, ctx, ignore_extra=pad_none)
 				except Exception as e:
 					traceback.print_exc()
-					print('error parsing?', type(e), e, func.__code__.co_filename)
+					print('error parsing?', type(e),
+						e, func.__code__.co_filename)
 					continue
 			else:
 				return_args = []
-			
+
 			# try adding None as an argument
 			for attempt in range(10):
 				try:
-					print('doing function', func.__code__.co_filename)
 					return await func(ctx, *return_args)
 				except TypeError as e:
 					traceback.print_exc()
@@ -254,16 +262,17 @@ class CommandParser():
 	def command(
 		self,
 		name: str,
-		aliases: List[str]=[],
-		channels: List[str]=['bot-commands'],
-		pad_none: bool=True,
-		roles: List[str]=[],
-		on_no_perms: Callable[[Context], Awaitable]=None
+		aliases: List[str] = [],
+		channels: List[str] = ['bot-commands'],
+		pad_none: bool = True,
+		roles: List[str] = [],
+		on_no_perms: Callable[[Context], Awaitable] = None
 	):
 		def decorator(func):
 			command_names = [name] + list(aliases)
 			for command_name in command_names:
-				self.functions.append((command_name.lower(), (func, channels, pad_none, roles, on_no_perms)))
+				self.functions.append(
+					(command_name.lower(), (func, channels, pad_none, roles, on_no_perms)))
 			return func
 		return decorator
 
@@ -288,14 +297,14 @@ def get_channel_members(channel_id):
 	try:
 		return discordbot.client.get_channel(channel_id).members
 	except:
-		return [ discordbot.client.get_channel(channel_id).recipient ]
+		return [discordbot.client.get_channel(channel_id).recipient]
 
 
 def get_guild_members(channel_id):
 	try:
 		members = discordbot.client.get_guild(channel_id).members
 	except Exception as e:
-		members = [ discordbot.client.get_channel(channel_id).recipient ]
+		members = [discordbot.client.get_channel(channel_id).recipient]
 	return sorted(members, key=lambda m: len(m.name))
 
 
@@ -328,7 +337,7 @@ def check_mention(ctx, arg):
 			# doesnt happen i think
 			# but i dont want to break it
 			pass
-
+		
 
 def check_name_with_discrim(ctx, arg):
 	member = discord.utils.find(
@@ -427,11 +436,13 @@ def check_nickname_contains_recent(ctx, arg):
 	)
 	return member
 
+
 def check_fakemember_id(ctx, arg):
 	try:
 		return FakeMember(int(arg))
 	except ValueError:
 		pass
+
 
 class FakeMember():
 	def __init__(self, id):
@@ -449,7 +460,6 @@ class FakeMember():
 
 	async def remove_roles(self, *args, **kwargs):
 		pass
-
 
 
 '''
@@ -539,6 +549,7 @@ def check_time(ctx, arg: str):
 class Time(int):
 	def __init__(self, value=0):
 		self.value = value
+
 	def __gt__(self, other) -> bool: return float(self) > float(other)
 	def __lt__(self, other) -> bool: return float(self) < float(other)
 	def __int__(self) -> int: return int(self.value)

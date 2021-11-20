@@ -1,3 +1,4 @@
+from typing import Union
 from discord.member import Member
 from discord.user import User
 from discord.role import Role
@@ -11,6 +12,7 @@ class FakeClient(discord.Client):
 	def __init__(self, client):
 		self.ws = None
 		self.loop = asyncio.get_event_loop()
+		asyncio.set_event_loop(self.loop)
 		self._listeners = client._listeners
 
 		self.http = FakeHTTPClient(self)
@@ -29,18 +31,22 @@ class FakeClient(discord.Client):
 			if attr.startswith('on_'):
 				setattr(self, attr, getattr(client, attr))
 
-	def connect(self, *, reconnect=True):
-		pass
+	async def connect(self, *, reconnect=True, id: int):
+		self._connection.guild_ready_timeout = 0
+		self._connection.parse_ready({
+			'user': Tester.make_user_data(id),
+			'guilds': []
+		})
 
 	def login(self, token, *, bot=True):
-		self.http.static_login(token.strip(), bot=bot)
+		self.loop.run_until_complete(self.http.static_login(token.strip()))
 
-	def start(self, *args, **kwargs):
+	def start(self, *args, id: int, **kwargs):
 		bot = kwargs.pop('bot', True)
 		reconnect = kwargs.pop('reconnect', True)
 
 		self.login(*args, bot=bot)
-		self.connect(reconnect=reconnect)
+		self.loop.run_until_complete(self.connect(reconnect=reconnect, id=id))
 
 
 class FakeHTTPClient():
@@ -54,23 +60,37 @@ class FakeHTTPClient():
 	async def ws_connect(self, url, *, compress=0):
 		pass
 
-	def static_login(self, token, *, bot):
+	async def static_login(self, token):
 		self.token = token
-		self.bot_token = bot
 
 	async def get_gateway(self, *, encoding='json', v=6, zlib=True):
 		return 'https://discord.com'
 
-	async def send_message(self, channel_id, content, *, tts=False, embed=None, nonce=None, allowed_mentions=None):
+	async def send_message(
+			self,
+			channel_id,
+			content,
+			*,
+			tts=False,
+			embed=None,
+			embeds=None,
+			nonce=None,
+			allowed_mentions=None,
+			message_reference=None,
+			stickers=None,
+			components=None,
+	):
 		self.messages_queue.append({
 			'channel_id': channel_id,
 			'content': content,
 			'tts': tts,
-			'embed': embed,
+			'embeds': [embed] if embed else embeds,
 			'nonce': nonce,
-			'allowed_mentions': allowed_mentions
+			'allowed_mentions': allowed_mentions,
+			'message_reference': message_reference,
+			'components': components,
+			'sticker_ids': stickers
 		})
-		print('send message', content)
 		user_json = self.client._connection.user._to_minimal_user_json()
 		return {
 			'id': random.randint(100000, 99999999999999),
@@ -111,7 +131,7 @@ class Tester:
 	def __init__(self, client):
 		self.client = FakeClient(client)
 
-		self.client.start('-.-.-')
+		self.client.start('-.-.-', id=719348452491919401)
 
 		self.client._connection.user = self.make_user(719348452491919401)
 
@@ -156,12 +176,13 @@ class Tester:
 			'color': '000000',
 			'hoist': True,
 			'position': 0,
-			'permissions': '',
+			'permissions': 0,
 			'managed': False,
 			'mentionable': False
 		})
 		guild._roles[default_role.id] = default_role
-		self.make_member(guild, self.client._connection.user)  # the bot is always a member of the guild
+		# the bot is always a member of the guild
+		self.make_member(guild, self.client._connection.user)
 		return guild
 
 	def make_channel(self, guild, **kwargs):
@@ -177,15 +198,33 @@ class Tester:
 		self.client._connection.parse_channel_create(data)
 		return self.client._connection.get_channel(int(data['id']))
 
-	def make_user(self, user_id=1, username='user', discriminator='0001', avatar=''):
-		data = {
+	@staticmethod
+	def make_user_data(user_id: Union[int, str] = 1, username: str = 'user', discriminator: str = '0001', avatar: str = '') -> User:
+		return {
 			'id': str(user_id),
 			'username': username,
 			'discriminator': str(discriminator),
 			'avatar': avatar,
 			'bot': False,
 		}
-		return self.client._connection.store_user(data)
+
+	def make_user(self, user_id=1, username='user', discriminator='0001', avatar=''):
+		data = Tester.make_user_data(user_id, username, discriminator, avatar)
+		return self.client._connection.store_user({
+			'avatar': data['avatar'],
+			'bot': data['bot'],
+			'discriminator': data['discriminator'],
+			'email': None,
+			'flags': 0,
+			'id': data['id'],
+			'local': '',
+			'mfa_enabled': False,
+			'premium_type': 0,
+			'public_flags': 0,
+			'system': False,
+			'username': data['username'],
+			'verified': False,
+		})
 
 	def make_member(self, guild, user):
 		data = {
@@ -201,17 +240,19 @@ class Tester:
 
 	async def message(self, content, channel, author=None, **kwargs):
 		if not author:
-			author = self.make_member(channel.guild, self.make_user())
+			author = self.make_member(channel.guild, self.make_user(0))
 		author_data = {
 			'user': author._user._to_minimal_user_json(),
 			'nick': author.nick,
 			'roles': author._roles,
 			'joined_at': author.joined_at.isoformat(),
 		}
-		member = Member(state=self.client._connection, data=author_data, guild=channel.guild)
+		member = Member(state=self.client._connection,
+						data=author_data, guild=channel.guild)
 		data = {
 			'id': '0',
 			'channel_id': channel.id,
+			'guild_id': channel.guild.id,
 			'reactions': [],
 			'attachments': [],
 			'embeds': [],
@@ -226,7 +267,6 @@ class Tester:
 			'tts': False,
 			'content': content,
 			'nonce': None,
-			'message_reference': None,
 			'author': author._user._to_minimal_user_json(),
 			'member': author_data
 		}
@@ -249,5 +289,5 @@ class Tester:
 				raise TimeoutError()
 
 		message = self.client.http.messages_queue.pop(0)
-		print('GOOD', message)
+		print(message)
 		assert checker(message)
