@@ -174,6 +174,9 @@ async def on_ready():
 	try:
 		current_number = await db.get_counter(config.main_guild)
 		counting_channel = client.get_channel(config.channels['counting'])
+		if not counting_channel:
+			print('Counting channel not found')
+			return
 		most_recent_counting_message = (await counting_channel.history(limit=1).flatten())[0]
 		try:
 			most_recent_number = numberparser.solve_expression(most_recent_counting_message.content)
@@ -862,3 +865,4 @@ async def check_bobux_roles(member_id: int, bobux: Union[int, None]=None):
 	if remove_roles:
 		await member.remove_roles(*remove_roles)
 
+print('discordbot imported')
