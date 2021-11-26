@@ -296,10 +296,8 @@ async def process_message(message, warn=True) -> bool:
 
 	if re.search(r'thiswordisblacklistedyouliterallycannotsayit', content, flags=re.IGNORECASE):
 		await message.delete()
-		try:
-			await message.author.send('troll')
-		except:
-			pass
+		try: await message.author.send('troll')
+		except: pass
 		return True
 
 	is_spam = await check_spam(message)

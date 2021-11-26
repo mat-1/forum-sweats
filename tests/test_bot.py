@@ -6,6 +6,7 @@ import asyncio
 import pytest
 import config
 import time
+import json
 
 bobux_queue = []
 
@@ -270,4 +271,20 @@ async def test_morse(client, test: discordpytest.Tester, channel):
 	# thiswordisblacklistedyouliterallycannotsayit
 	m = await test.message('!morse - .... .. ... .-- --- .-. -.. .. ... -... .-.. .- -.-. -.- .-.. .. ... - . -.. -.-- --- ..- .-.. .. - . .-. .- .-.. .-.. -.-- -.-. .- -. -. --- - ... .- -.-- .. -', channel)
 	await test.verify_message_deleted(int(m['id']))
+
+@pytest.mark.asyncio
+async def test_help(client, test: discordpytest.Tester, channel):
+	await test.message('!help', channel)
+	await test.verify_message(
+		lambda m:
+			len(m['embeds']) > 0
+			and m['embeds'][0].get('footer', {}).get('text', '').startswith('(Page 1/')
+	)
+
+	await test.message('!help 2', channel)
+	await test.verify_message(
+		lambda m:
+			len(m['embeds']) > 0
+			and m['embeds'][0].get('footer', {}).get('text', '').startswith('(Page 2/')
+	)
 

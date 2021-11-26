@@ -1,7 +1,7 @@
 '''
 Very epic Discord embed GUI utility made by mat :)
 '''
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 import discord
 import asyncio
 import math
@@ -28,7 +28,7 @@ class GUI:
 	title: str
 	footer: str
 
-	message: discord.Message
+	message: Optional[discord.Message]
 
 	reactions: List[Union[discord.Emoji, str, None]]
 	ended: bool
@@ -40,6 +40,8 @@ class GUI:
 		self.title = title
 		self.footer = footer
 		self.ended = False
+
+		self.message = None
 	
 	async def make_message(self, client: discord.Client, user: discord.User, channel: discord.abc.Messageable):
 		self.client = client
@@ -349,10 +351,11 @@ class PaginationGUI(GUI):
 		self.empty = empty
 		self.selectable = selectable
 
-	async def from_message(self, message: discord.Message):
-		self.message = message
-		self.ended = False
+		self.message = None
 
+		self.init_pages()
+	
+	def init_pages(self):
 		pages: List[Page] = []
 		for page_number in range(self.page_count):
 			# create the page object and add it to the pages list
@@ -369,6 +372,14 @@ class PaginationGUI(GUI):
 
 		self.pages = pages
 
+
+	async def from_message(self, message: discord.Message):
+		self.message = message
+		self.ended = False
+
+		# we initialize the pages again just in case anything important changed
+		self.init_pages()
+
 		# if it has page_number then set the page to that, otherwise 0
 		if hasattr(self, 'page_number'):
 			await self.set_page(self.page_number)
@@ -380,10 +391,11 @@ class PaginationGUI(GUI):
 		self.page_number = page_number
 		self.page = self.pages[self.page_number]
 
-		# because of a discord.py bug, the message reactions dont update unless we do this
-		await self.refetch_message()
+		if self.message:
+			# because of a discord.py bug, the message reactions dont update unless we do this
+			await self.refetch_message()
 
-		await self.page.edit_message_to_page(self.message)
+			await self.page.edit_message_to_page(self.message)
 
 	async def wait_for_option(self) -> Any:
 		while True:

@@ -61,7 +61,7 @@ async def run(message, command: str=None):
 		command_desc = c['desc']
 		gui_options.append(GUIOption(make_text_gui(command_name, command_args, command_desc), command_name))
 
-	if command:
+	if command and not command.isdigit():
 		c = get_command_help(command, message.author)
 		if c:
 			command_name = c['name']
@@ -72,6 +72,9 @@ async def run(message, command: str=None):
 			return await message.send('That command doesn\'t exist. Do !help to see all the commands')
 	else:
 		gui = PaginationGUI('Commands', list(gui_options))
+		if command and command.isdigit():
+			await gui.set_page(int(command) - 1)
+
 
 	await gui.make_message(message.client, message.author, message.channel)
 

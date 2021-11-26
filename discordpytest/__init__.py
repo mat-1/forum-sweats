@@ -172,6 +172,22 @@ class Tester:
 		self.client._connection.parse_message_create(data)
 
 		return data
+	
+	async def verify_queue(self, queue_name: str, checker: Callable[[Dict], bool], timeout=1):
+		started_time = time.time()
+
+		# wait until something shows up in the queue that passes the check, or timeout
+		while not any(checker(m) for m in self.client.http.get_queue(queue_name)):
+			await asyncio.sleep(0)
+			elapsed_time = time.time() - started_time
+			if elapsed_time > timeout:
+				raise TimeoutError()
+
+		# remove the message from the queue
+		self.client.http.set_queue(
+			queue_name,
+			[m for m in self.client.http.get_queue(queue_name) if not checker(m)]
+		)
 
 	async def verify_message(self, checker: Union[str, Callable[[MessagePayload], bool]], timeout=1):
 		if isinstance(checker, str):
@@ -179,50 +195,15 @@ class Tester:
 
 			checker = lambda m: m['content'] == check_content
 
-		started_time = time.time()
-
-		while len(self.client.http.get_queue('send_message')) == 0:
-			await asyncio.sleep(0)
-			elapsed_time = time.time() - started_time
-			if elapsed_time > timeout:
-				raise TimeoutError()
-
-		message = self.client.http.pop_queue('send_message')
-		assert checker(message)
+		await self.verify_queue('send_message', checker, timeout)
 	
 	async def verify_message_deleted(self, message_id: int, timeout=1):
-		started_time = time.time()
-
-		# wait until a message with that id is deleted, or timeout
-		while any(int(m['message_id']) == message_id for m in self.client.http.get_queue('delete_message')) == 0:
-			await asyncio.sleep(0)
-			elapsed_time = time.time() - started_time
-			if elapsed_time > timeout:
-				raise TimeoutError()
-
-		# remove the message from the queue
-		self.client.http.set_queue(
-			'delete_message',
-			[m for m in self.client.http.get_queue('delete_message') if int(m['message_id']) != message_id]
-		)
+		await self.verify_queue('delete_message', lambda m: int(m['message_id']) == message_id, timeout)
 	
 	async def verify_reaction_added(self, checker: Union[str, Callable[[Dict], bool]], timeout=1):
 		if isinstance(checker, str) or isinstance(checker, int):
 			check_message_id = int(checker)
 
 			checker = lambda m: m['message_id'] == check_message_id
-
-		started_time = time.time()
-
-		# wait until the checker returns true, or timeout
-		while any(checker(m) for m in self.client.http.get_queue('add_reaction')) == 0:
-			await asyncio.sleep(0)
-			elapsed_time = time.time() - started_time
-			if elapsed_time > timeout:
-				raise TimeoutError()
-
-		# remove the message from the queue
-		self.client.http.set_queue(
-			'add_reaction',
-			[m for m in self.client.http.get_queue('add_reaction') if not checker(m)]
-		)
+		
+		await self.verify_queue('add_reaction', checker, timeout)

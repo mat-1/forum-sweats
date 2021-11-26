@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from discord.types.message import Message as MessagePayload
 from discord.types.snowflake import Snowflake
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from discord.types import channel
 import random
 
@@ -11,9 +12,14 @@ if TYPE_CHECKING:
 
 
 class FakeHTTPClient():
+	messages_cache: Dict[int, Dict[str, Any]] = {}
+	
 	def __init__(self, client: FakeClient):
 		self.queues: Dict[str, List[Any]] = {}
 		self.client = client
+
+		# we keep a cache of the messages sent so we can do get_message()
+		self.messages_cache = {}
 	
 	def add_to_queue(self, queue_name: str, value: Any):
 		if queue_name not in self.queues:
@@ -71,7 +77,7 @@ class FakeHTTPClient():
 		})
 		user_json = self.client._connection.user._to_minimal_user_json()
 		channel = self.client.get_channel(channel_id)
-		return {
+		message_data = {
 			'id': random.randint(100000, 99999999999999),
 			'channel_id': channel_id,
 			'guild_id': channel.guild.id if (channel is not None and hasattr(channel, 'guild')) else None,
@@ -95,6 +101,8 @@ class FakeHTTPClient():
 			'pinned': False,
 			'type': 0,
 		}
+		self.messages_cache[int(message_data['id'])] = message_data
+		return message_data
 	
 	async def delete_message(self, channel_id, message_id, *, reason = None):
 		self.add_to_queue('delete_message', {
@@ -102,6 +110,10 @@ class FakeHTTPClient():
 			'message_id': str(message_id),
 			'reason': reason
 		})
+
+		# remove the message from the cache
+		if int(message_id) in self.messages_cache:
+			del self.messages_cache[int(message_id)]
 	
 	async def start_private_message(self, user: Snowflake) -> channel.DMChannel:
 		self.add_to_queue('start_private_message', {
@@ -146,7 +158,27 @@ class FakeHTTPClient():
 			'emoji': emoji
 		}
 		self.add_to_queue('add_reaction', reaction)
-		print('added reaction!')
 
 	async def add_role(self, guild_id, user_id, role_id, *, reason=None):
-		print('add role!')
+		pass
+
+	async def get_message(self, channel_id: Snowflake, message_id: Snowflake) -> Optional[MessagePayload]:
+		return self.messages_cache.get(int(message_id))
+	
+	async def edit_message(self, channel_id: Snowflake, message_id: Snowflake, **fields: Any) -> MessagePayload:
+		print('edit message', message_id, fields)
+		self.messages_cache[int(message_id)].update(fields)
+
+		message_data = self.messages_cache[int(message_id)]
+
+		print('message_data', message_data)
+
+		# add the message to the send_message queue even though it's actually an edit
+		self.add_to_queue('send_message', message_data)
+		return message_data
+	
+	async def clear_reactions(self, channel_id: Snowflake, message_id: Snowflake) -> None:
+		pass
+
+
+

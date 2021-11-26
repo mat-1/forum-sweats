@@ -48,7 +48,8 @@ letter_to_morse = {
 	'/': '-..-.',
 	'-': '-....-',
 	'(': '-.--.',
-	')': '-.--.-'
+	')': '-.--.-',
+	' ': '  '
 }
 
 morse_to_letter = {v: k for k, v in letter_to_morse.items()}
@@ -84,8 +85,6 @@ async def run(message: discord.Message, content: str=None):
 				description=encoded
 			)
 		)
-	
-	print('reply', reply.embeds)
 
 	try:
 		if await modbot.process_message(reply, False):
