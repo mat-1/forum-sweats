@@ -59,7 +59,7 @@ def create_auction_embed(data: dict, bidder=None):
 
 async def update_auction_message(message: discord.Message, data: dict = None):
 	if not data:
-		data = await db.get_auction(message.id);
+		data = await db.get_auction(message.id)
 	embed = create_auction_embed(data)
 
 	if not message: return
@@ -80,12 +80,12 @@ async def end_auction(data: dict):
 	if not message: return  # the message was deleted
 
 	highest_bidder = data.get('highest_bidder')
-	highest_bid = -data.get('highest_bid', 0)
+	highest_bid = data.get('highest_bid', 0)
 	if not highest_bidder: return
 
 	#winner = await channel.guild.fetch_member(highest_bidder)
 
-	await db.change_bobux(highest_bidder, highest_bid)
+	await db.change_bobux(highest_bidder, -highest_bid)
 	
 
 
@@ -138,10 +138,12 @@ async def continue_auction(message_id: int):
 
 
 
-def handle_bids(message: Message, data):
+def handle_bids(message: Message):
 	@client.event
 	async def on_reaction_add(reaction: Reaction, user: User):
 		if user.bot or reaction.message.id != message.id: return
+
+		data = await db.get_auction(message.id)
 		await reaction.remove(user)
 
 		auction_info = await db.get_auction(message.id)
@@ -182,7 +184,7 @@ async def create_new_auction(creator_id: int, channel: discord.abc.GuildChannel,
 	auction_data = await db.create_new_auction(
 		message_id=auction_message.id,
 		creator_id=creator_id,
-		channel_id=channel.id, # type: ignore (the typings on discord.py are wrong)
+		channel_id=channel.id,
 		end=end,
 		item=item,
 	)
