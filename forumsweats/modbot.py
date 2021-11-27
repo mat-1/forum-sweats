@@ -186,7 +186,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			1,
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 
@@ -196,7 +195,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			15,
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 
@@ -206,7 +204,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			60 * 5,
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 
@@ -217,7 +214,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			15,
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 
@@ -232,7 +228,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			5,
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 
@@ -247,7 +242,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			86400, # one day
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 	
@@ -262,7 +256,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			21600, # 6 hours
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 
@@ -276,7 +269,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			60 * 10, # 10 minutes
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 
@@ -290,7 +282,6 @@ async def process_message(message, warn=True) -> bool:
 			message.author,
 			60 * 60 * 24,
 			message.guild.id if message.guild else None,
-			replace=False
 		)
 		return True
 

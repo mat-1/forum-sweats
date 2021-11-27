@@ -1,7 +1,9 @@
-from datetime import datetime, timedelta
+from forumsweats.discordbot import client
 from ..commandparser import Member, Time
+from forumsweats.logs import log_mute
 from utils import seconds_to_string
 from ..discordbot import mute_user
+from datetime import timedelta
 from forumsweats import db
 import discord
 
@@ -40,10 +42,19 @@ async def do_mute(message, member, length, reason, muted_by: int=0):
 		await mute_user(
 			member,
 			length,
-			message.guild.id if message.guild else None
+			guild_id=message.guild.id if message.guild else None,
+			staff_mute=True
 		)
 	except discord.errors.Forbidden:
 		await message.send("I don't have permission to do this")
+
+def create_mute_message(member: discord.Member, mute_time: int, reason: str = None):
+	mute_time_string = seconds_to_string(mute_time)
+
+	if reason:
+		return f'<@{member.id}> has been muted for {mute_time_string} for "**{reason}**".'
+	else:
+		return f'<@{member.id}> has been muted for {mute_time_string}.'
 
 
 async def run(message, member: Member, mute_length: Time = Time(0), reason: str = None):
@@ -57,15 +68,11 @@ async def run(message, member: Member, mute_length: Time = Time(0), reason: str 
 	if reason:
 		reason = reason.strip()
 
-	mute_length_string = seconds_to_string(mute_length)
-
-	if reason:
-		mute_message = f'<@{member.id}> has been muted for {mute_length_string} for "**{reason}**".'
-	else:
-		mute_message = f'<@{member.id}> has been muted for {mute_length_string}.'
+	mute_message = create_mute_message(member, mute_length, reason)
 
 	await message.send(embed=discord.Embed(
 		description=mute_message
 	))
 
 	await do_mute(message, member, mute_length, reason, muted_by=message.author.id)
+	await log_mute(client, member, message.author, mute_length, reason)

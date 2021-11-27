@@ -543,8 +543,26 @@ async def on_message_edit(before, after):
 	await modbot.process_message(after, warn=False)
 
 
-async def mute_user(member, length, guild_id=None, gulag_message=True, rock_immune=False, replace=True):
-	if not replace:
+async def mute_user(
+	member,
+	length,
+	guild_id=None,
+	gulag_message=True,
+	rock_immune=False,
+	staff_mute=False
+):
+	'''
+	Mutes a user for a certain amount of time.
+
+	:param member: The member to mute
+	:param length: The length of the mute in seconds
+	:param guild_id: The guild ID of the guild to mute in
+	:param gulag_message: Whether or not to send a message to the gulag channel
+	:param rock_immune: Whether the user is immune to !rock while they're muted
+	:param staff_mute: Whether the mute was done by a staff member
+	'''
+
+	if not staff_mute:
 		current_mute_length = time.time() - await db.get_mute_end(member.id)
 		if length < current_mute_length:
 			return

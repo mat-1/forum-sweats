@@ -12,37 +12,29 @@ roles = ('helper', 'trialhelper')
 args = '<member> <length> [reason]'
 
 
-async def do_mute(message, member, length, reason, muted_by: int=0):
+async def do_edit_mute(message, member, length):
 	try:
 		await mute_user(
 			member,
 			length,
 			message.guild.id if message.guild else None,
-			muted_by=muted_by
 		)
 	except discord.errors.Forbidden:
 		await message.send("I don't have permission to do this")
 
 
-async def run(message, member: Member, mute_length: Time = Time(0), reason: str = None):
+async def run(message, member: Member, mute_length: Time = Time(0)):
 	'Changes the mute length of a user without adding a new infraction'
 
 	if not member or not mute_length:
 		return await message.channel.send(
-			'Invalid command usage. Example: **!editmute gogourt 10 years accidentally entered a length that was too short**'
+			'Invalid command usage. Example: **!editmute gogourt 10 years**'
 		)
-
-	if reason:
-		reason = reason.strip()
 
 	mute_length_string = seconds_to_string(mute_length)
 
-	if reason:
-		changed_message = f'<@{member.id}>\'s mute has been changed to {mute_length_string} for "**{reason}**"'
-		dm_changed_message = f'Your mute has been changed to {mute_length_string} for "**{reason}**"'
-	else:
-		changed_message = f'<@{member.id}>\'s mute has been changed to {mute_length_string}'
-		dm_changed_message = f'Your mute has been changed to {mute_length_string}'
+	changed_message = f'<@{member.id}>\'s mute has been changed to {mute_length_string}'
+	dm_changed_message = f'Your mute has been changed to {mute_length_string}'
 
 	mute_remaining = int((await db.get_mute_end(member.id)) - time.time())
 
@@ -58,4 +50,4 @@ async def run(message, member: Member, mute_length: Time = Time(0), reason: str 
 			description=changed_message
 		))
 
-		await do_mute(message, member, mute_length, reason, muted_by=message.author.id)
+		await do_edit_mute(message, member, mute_length)

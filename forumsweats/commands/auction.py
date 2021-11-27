@@ -1,16 +1,14 @@
-from discord.user import User
-from discord.message import Message
-from discord.reaction import Reaction
 from forumsweats.commandparser import Context, Member, Time
 from forumsweats.discordbot import client
+from discord.reaction import Reaction
+from discord.message import Message
 from utils import seconds_to_string
-from typing import Any, Callable, Optional, Tuple, Union
+from typing import Any, Callable
+from discord.user import User
 from datetime import datetime
 from forumsweats import db
 import discord
 import asyncio
-import config
-import random
 import time
 
 name = 'auction'

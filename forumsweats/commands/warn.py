@@ -1,3 +1,5 @@
+from forumsweats.discordbot import client
+from forumsweats.logs import log_warn
 from ..commandparser import Member
 from forumsweats import db
 import discord
@@ -14,6 +16,9 @@ USAGE_EXAMPLES = [
 	'!warn rito being really dumb'
 ]
 
+def create_warn_message(member: discord.Member, reason: str):
+	return f'<@{member.id}> has been warned for **{reason}**.'
+
 async def run(message, member: Member, reason: str):
 	'Warns a member. If a member is warned 3 times in a week, they are muted for 45 minutes.'
 
@@ -29,7 +34,7 @@ async def run(message, member: Member, reason: str):
 	await db.add_infraction(member.id, 'warn', reason, muted_by=message.author.id)
 
 
-	description = f'<@{member.id}> has been warned for "**{reason}**".'
+	description = create_warn_message(member, reason)
 	if len(weekly_warns) + 1 >= 3:
 		past_warn_reasons_joined = '\n'.join(map(lambda w: '- ' + w, weekly_warns))
 		description += f'\nThey have been warned **{len(weekly_warns) + 1}** times in the past week, you should mute them for at least 45 minutes.\n\n**Past warn reasons**:\n{past_warn_reasons_joined}'
@@ -40,6 +45,8 @@ async def run(message, member: Member, reason: str):
 	try:
 		await member.send(f'You have been warned for **{reason}** by <@{message.author.id}> ({message.author})')
 	except: pass
+
+	await log_warn(client, member, message.author, reason)
 
 
 
