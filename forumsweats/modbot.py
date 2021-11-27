@@ -157,6 +157,10 @@ async def process_message(message, warn=True) -> bool:
 		return False
 
 	content = message.content or (message.embeds[0].description if message.embeds else '')
+
+	if not isinstance(content, str):
+		return False
+
 	for letter, regional_indicator in zip(
 		'abcdefghijklmnopqrstuvwxyz',
 		'🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿'
