@@ -35,7 +35,7 @@ async def do_mute(message, member, length, reason, muted_by: int=0):
 			await member.send(f'You were muted for {mute_length_string} for "**{reason}**"')
 		else:
 			await member.send(f'You were muted for {mute_length_string}')
-	except discord.errors.Forbidden:
+	except:
 		pass
 
 	try:
