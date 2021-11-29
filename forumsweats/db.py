@@ -319,6 +319,8 @@ async def get_counter(guild_id: int):
 	})
 	if data:
 		return data.get('counter', 0)
+	else:
+		return 0
 
 async def set_infinite_counter(guild_id: int, number: int):
 	if not connection_url: return
