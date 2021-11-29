@@ -13,13 +13,18 @@ class DiscordNotFound(Exception):
 	pass
 
 
-async def get_user_data(ign: str):
+async def get_user_data(uuid: str):
 	'Returns the Discord username of a Hypixel IGN'
 
-	async with s.get(f'https://api.slothpixel.me/api/players/{ign}') as r:
+	if len(uuid) != 32:
+		# get the uuid from https://api.mojang.com/users/profiles/minecraft/<ign>
+		async with s.get(f'https://api.mojang.com/users/profiles/minecraft/{uuid}') as r:
+			uuid = (await r.json())['id']
+
+	async with s.get(f'https://api.slothpixel.me/api/players/{uuid}') as r:
 		data = await r.json()
 	if not data or data.get('error'):
-		raise PlayerNotFound(f'Invalid Hypixel player: {ign}')
+		raise PlayerNotFound(f'Invalid Hypixel player: {uuid}')
 	return data
 
 
