@@ -195,7 +195,7 @@ async def process_message(message, warn=True) -> bool:
 		return True
 
 	# roger filters
-	if message.author.id == 621164650058219533 and re.match(r'[\w\W]*((w\W*h\W*(oa)\W*r\W*e)|(h\W*e\W*n\W*t\W*a\W*i))[\w\W]*', content, flags=re.IGNORECASE):
+	if message.author.id == 621164650058219533 and re.match(r'[\w\W]*((w\W*h\W*(o|a)\W*r\W*e)|(h\W*e\W*n\W*t\W*a\W*i))[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
