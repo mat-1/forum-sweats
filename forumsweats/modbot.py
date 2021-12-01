@@ -193,6 +193,16 @@ async def process_message(message, warn=True) -> bool:
 		)
 		return True
 
+	# roger filters
+	if message.author.id == 621164650058219533 and re.match(r'[\w\W]((w\W*h\W*o\W*r\W*e)|(h\W*e\W*n\W*t\W*a\W*i))[\w\W]*', content, flags=re.IGNORECASE):
+		await message.delete()
+		await discordbot.mute_user(
+			message.author,
+			1,
+			message.guild.id if message.guild else None,
+		)
+		return True
+
 	if re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
 		await message.delete()
 		await discordbot.mute_user(
