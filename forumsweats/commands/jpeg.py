@@ -8,8 +8,6 @@ name = 'jpeg'
 args = '[member]'
 aliases = ('jpg',)
 
-s: Optional[aiohttp.ClientSession] = None
-
 async def upload(im_bytes, content_type):
 	data = aiohttp.FormData()
 	data.add_field(

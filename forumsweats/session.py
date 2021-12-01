@@ -1,7 +1,7 @@
 import aiohttp
 import asyncio
 
-s = None
+s: Optional[aiohttp.ClientSession] = None
 
 
 async def init():
