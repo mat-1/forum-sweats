@@ -181,7 +181,8 @@ async def process_message(message, warn=True) -> bool:
 		.replace('と', 'c')\
 		.replace('€', 'c')\
 		.replace('!', 'i')\
-		.replace('3', 'e')
+		.replace('3', 'e')\
+		.replace('@', 'a')
 
 	# antihoe for runic
 	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
@@ -194,7 +195,7 @@ async def process_message(message, warn=True) -> bool:
 		return True
 
 	# roger filters
-	if message.author.id == 621164650058219533 and re.match(r'[\w\W]*((w\W*h\W*o\W*r\W*e)|(h\W*e\W*n\W*t\W*a\W*i))[\w\W]*', content, flags=re.IGNORECASE):
+	if message.author.id == 621164650058219533 and re.match(r'[\w\W]*((w\W*h\W*(oa)\W*r\W*e)|(h\W*e\W*n\W*t\W*a\W*i))[\w\W]*', content, flags=re.IGNORECASE):
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
