@@ -1,3 +1,4 @@
+import config
 from forumsweats import discordbot
 from datetime import timedelta
 from typing import Dict, List
@@ -183,6 +184,8 @@ async def process_message(message, warn=True) -> bool:
 		.replace('!', 'i')\
 		.replace('3', 'e')\
 		.replace('@', 'a')
+	
+	is_serious_talk = message.channel.id == config.channels.get('counting');
 
 	# antihoe for runic
 	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
@@ -204,7 +207,7 @@ async def process_message(message, warn=True) -> bool:
 		)
 		return True
 
-	if re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
+	if not is_serious_talk and re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
@@ -213,7 +216,7 @@ async def process_message(message, warn=True) -> bool:
 		)
 		return True
 
-	if re.match(r'[\w\W]*\bc\W*u\W*m\b[\w\W]*', content, flags=re.IGNORECASE) or re.match(r'[\w\W]*\bs\W*p\W*e\W*r\W*m\b[\w\W]*', content, flags=re.IGNORECASE):
+	if re.match(r'[\w\W]*\bc\W*u\W*m\b[\w\W]*', content, flags=re.IGNORECASE) or (not is_serious_talk and re.match(r'[\w\W]*\bs\W*p\W*e\W*r\W*m\b[\w\W]*', content, flags=re.IGNORECASE)):
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
@@ -274,7 +277,7 @@ async def process_message(message, warn=True) -> bool:
 		)
 		return True
 
-	if re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
+	if not is_serious_talk and re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t talk about sexual stuff in chat, nerd')
 		except:
