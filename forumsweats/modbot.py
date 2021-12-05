@@ -185,7 +185,7 @@ async def process_message(message, warn=True) -> bool:
 		.replace('3', 'e')\
 		.replace('@', 'a')
 	
-	is_serious_talk = message.channel.id == config.channels.get('counting');
+	is_serious_talk = message.channel.id == config.channels.get('serious-talk')
 
 	# antihoe for runic
 	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
