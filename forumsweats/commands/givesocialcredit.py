@@ -3,7 +3,7 @@ from forumsweats import db
 
 name = 'givesocialcredit'
 aliases = ('addsocialcredit', 'givesocialcredits', 'addsocialcredits')
-roles = ('mod', 'admin')
+roles = ('mod', 'admin', 'xijinping')
 args = '[member]'
 channels = None
 
