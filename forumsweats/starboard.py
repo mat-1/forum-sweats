@@ -50,7 +50,7 @@ async def add_message_to_starboard(message: discord.Message):
 	)
 	embed.set_author(
 		name=str(message.author),
-		icon_url=message.author.avatar.url,
+		icon_url=message.author.display_avatar.url,
 		url=message.jump_url
 	)
 	if len(message.attachments) > 0:
