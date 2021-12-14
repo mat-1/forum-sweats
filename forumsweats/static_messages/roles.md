@@ -2,7 +2,7 @@ Welcome to Forum Sweats, here you will find most roles currently on the server, 
 <!-- the role names here are in comments so you can tell what they are -->
 
 <!-- owner -->
-🔷 <@&&717906079572295750> - Given to the owner of the server (mat)
+🔷 <@&717906079572295750> - Given to the owner of the server (mat)
 
 <!-- staff manager -->
 🔷 <@&733686380835766293> - Given to the current head of staff. Right now, it's @I love mat 😍.
