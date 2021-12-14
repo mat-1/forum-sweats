@@ -83,6 +83,7 @@ async def init(client: discord.Client):
 			old_message_contents.append(message.content)
 
 		# if the message hasn't actually changed, we don't need to do anything
+		print(new_message_contents, old_message_contents)
 		if new_message_contents == old_message_contents:
 			continue
 
