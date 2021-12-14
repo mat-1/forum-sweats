@@ -73,7 +73,6 @@ async def init(client: discord.Client):
 
 		# get the old content of the message
 		old_messages = []
-		old_message_ids = []
 		old_message_contents = []
 		for old_message_id in old_message_ids:
 			try:
@@ -82,25 +81,25 @@ async def init(client: discord.Client):
 				print('Warning: Could not fetch message', old_message_id, 'in channel', static_message_channel_id)
 				continue
 			old_messages.append(message)
-			old_message_ids.append(message.id)
 			old_message_contents.append(message.content)
 
 		# if the message hasn't actually changed, we don't need to do anything
+		print(new_message_contents, old_message_contents)
+		print(new_message_contents == old_message_contents)
 		if new_message_contents == old_message_contents:
 			new_message_ids_dict[str(static_message_channel_id)] = old_message_ids
 			continue
 
 		# delete the old messages
-		for old_message_id in old_message_ids:
-			try:
-				await channel.delete_messages(old_message_contents)
-			# if deleting the messages failed for whatever reason, delete them one by one
-			except:
-				for old_message in old_messages:
-					try:
-						await old_message.delete()
-					except:
-						pass
+		try:
+			await channel.delete_messages(old_messages)
+		# if deleting the messages failed for whatever reason, delete them one by one
+		except:
+			for old_message in old_messages:
+				try:
+					await old_message.delete()
+				except:
+					pass
 
 		# send the new messages
 		new_message_ids = []
