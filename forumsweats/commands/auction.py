@@ -14,6 +14,7 @@ import time
 name = 'auction'
 roles = ('mod', 'helper')
 channels = None
+args = '<member> <amount>'
 
 
 AUCTION_EMOJI = '💸'
@@ -219,7 +220,6 @@ async def prompt_input(client: discord.Client, user: Member, channel: discord.ab
 
 
 async def run(message: Context):
-	message.author
 	async def check_channel(content: str):
 		if not (content.startswith('<#') and content.endswith('>')):
 			return

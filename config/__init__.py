@@ -48,8 +48,8 @@ channels_raw = read_config_file('channels')
 channels: Dict[str, Any] = {
 	channel_name: AnyListMatcher(channels_raw[channel_name]) for channel_name in channels_raw
 }
-prefix = bot_data.get('prefix', '!')
-main_guild = bot_data.get('main_guild')
+prefix: str = bot_data.get('prefix', '!')
+main_guild: int = bot_data.get('main_guild')
 
 if not main_guild:
 	raise ValueError('No main guild specified in bot.json.')

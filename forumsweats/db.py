@@ -908,3 +908,30 @@ async def end_reminder(reminder_id: int):
 		{ 'id': reminder_id },
 		{ '$set': { 'ended': True } }
 	)
+
+
+'''
+Static messages
+'''
+
+
+async def get_static_messages(guild_id: int):
+	if not connection_url: return {}
+	data = await servers_data.find_one({
+		'id': guild_id,
+	})
+	if data:
+		return data.get('static_messages', {})
+	else:
+		return {}
+
+
+async def set_static_messages(guild_id: int, static_messages):
+	if not connection_url: return
+	await servers_data.update_one(
+		{ 'id': guild_id },
+		{
+			'$set': { 'static_messages': static_messages }
+		},
+		upsert=True
+	)
