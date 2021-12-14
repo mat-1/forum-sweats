@@ -57,12 +57,12 @@ Welcome to Forum Sweats, here you will find most roles currently on the server, 
 
 <!-- 100 bobux -->
 🔷 <@&812169005091520523> - Given to anyone with 100 or more Bobux.
-  
+
 <!-- super sweat -->
-🔷 <@&719533109191770173> - given out to any member with over 10k messages on the forums 
+🔷 <@&719533109191770173> - given out to any member with over 10k messages on the forums.
 
 <!-- popular -->
-🔷 <@&719532925653352450> - Given to anyone with 10,000 or more reactions on the Hypixel Forums 
+🔷 <@&719532925653352450> - Given to anyone with 10,000 or more reactions on the Hypixel Forums
 
 <!-- sweat -->
 🔷 <@&718090575856795651> - Given to any member with around 1.5k messages and reactions, or 2.5k of one

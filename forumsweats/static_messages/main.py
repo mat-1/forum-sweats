@@ -23,6 +23,18 @@ def get_static_messages_in_folder() -> List[Tuple[int, str]]:
 			messages.append((channel_id, f.read()))
 	return messages
 
+def convert_message_to_discord_formatted(message):
+	# replace newlines on theor own line at the beginning and end with `_ _`
+	beginning_newlines_count = 0
+	while message[beginning_newlines_count] == '\n':
+		beginning_newlines_count += 1
+	end_newlines_count = 0
+	while message[-1 - end_newlines_count] == '\n':
+		end_newlines_count += 1
+	message = '_ _\n' * beginning_newlines_count + message.strip()
+	message = message.strip() + '\n_ _' * max(0, end_newlines_count - 1)
+	return message
+
 def split_discord_message(message: str):
 	# Putting a `---` on a line will signify a separate message.
 	# Putting text inside a comment `<!-- -->` won't make it show up in the actual Discord message.
@@ -30,18 +42,19 @@ def split_discord_message(message: str):
 	# If adding a new line would make the message over 2000 characters, it will be split.
 	split_messages = []
 	current_message = ''
-	message_without_comments = re.sub(r'(\n<!--.*?-->(?=\n))|(<!--.*?-->)', '', message)
+	message_without_comments = re.sub(r'(\n<!--.*?-->(?=\n))|(<!--.*?-->)', '', message).strip()
 	for line in message_without_comments.split('\n'):
 		if line == '---':
-			split_messages.append(current_message.strip())
+			split_messages.append(convert_message_to_discord_formatted(current_message))
 			current_message = ''
 		else:
-			if len(current_message) + len(line) > 2000:
-				split_messages.append(current_message.strip())
-				current_message = line
+			# i decided to make it 1800 because sometimes it's over 2000 chars when we do convert_message_to_discord_formatted
+			if len(current_message) + len(line) > 1800:
+				split_messages.append(convert_message_to_discord_formatted(current_message))
+				current_message = line + '\n'
 			else:
 				current_message += line + '\n'
-	split_messages.append(current_message.strip())
+	split_messages.append(convert_message_to_discord_formatted(current_message))
 	return split_messages
 
 
