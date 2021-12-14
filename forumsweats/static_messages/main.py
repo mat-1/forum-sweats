@@ -5,15 +5,22 @@ import config
 import os
 import re
 
+base_dir = 'forumsweats/static_messages'
+
 def get_static_messages_in_folder() -> List[Tuple[int, str]]:
-	files = os.listdir('.')
+	files = os.listdir(base_dir)
 	# remove all the files that aren't markdown or are the README
 	relevant_files = [f for f in files if f.endswith('.md') and f != 'README.md']
 
 	messages = []
-	for f in relevant_files:
-		with open(f, 'r') as f:
-			messages.append((f, f.read()))
+	for file_name in relevant_files:
+		with open(os.path.join(base_dir, file_name), 'r', encoding='utf8') as f:
+			# get the channel id from config.channels
+			channel_id = config.channels.get(file_name.split('.')[0])
+			if not channel_id:
+				print('No channel id found for file', file_name)
+				continue
+			messages.append((channel_id, f.read()))
 	return messages
 
 def split_discord_message(message: str):
@@ -26,15 +33,15 @@ def split_discord_message(message: str):
 	message_without_comments = re.sub(r'(\n<!--.*?-->(?=\n))|(<!--.*?-->)', '', message)
 	for line in message_without_comments.split('\n'):
 		if line == '---':
-			split_messages.append(current_message)
+			split_messages.append(current_message.strip())
 			current_message = ''
 		else:
 			if len(current_message) + len(line) > 2000:
-				split_messages.append(current_message)
+				split_messages.append(current_message.strip())
 				current_message = line
 			else:
 				current_message += line + '\n'
-	split_messages.append(current_message)
+	split_messages.append(current_message.strip())
 	return split_messages
 
 
@@ -61,13 +68,17 @@ async def init(client: discord.Client):
 		new_message_contents = split_discord_message(static_message_contents)
 
 		# get the old ids of the message
-		old_message_ids = old_message_ids_dict.get(static_message_channel_id, [])
+		old_message_ids = old_message_ids_dict.get(str(static_message_channel_id), [])
 
 		# get the old content of the message
 		old_messages = []
 		old_message_contents = []
 		for old_message_id in old_message_ids:
-			message = await channel.fetch_message(old_message_id)
+			try:
+				message = await channel.fetch_message(old_message_id)
+			except:
+				print('Warning: Could not fetch message', old_message_id, 'in channel', static_message_channel_id)
+				continue
 			old_messages.append(message)
 			old_message_contents.append(message.content)
 
@@ -82,14 +93,17 @@ async def init(client: discord.Client):
 			# if deleting the messages failed for whatever reason, delete them one by one
 			except:
 				for old_message in old_messages:
-					await old_message.delete()
+					try:
+						await old_message.delete()
+					except:
+						pass
 
 		# send the new messages
 		new_message_ids = []
 		for new_message_content in new_message_contents:
 			new_message = await channel.send(new_message_content, allowed_mentions=discord.AllowedMentions.none())
 			new_message_ids.append(new_message.id)
-		new_message_ids_dict[static_message_channel_id] = new_message_ids
+		new_message_ids_dict[str(static_message_channel_id)] = new_message_ids
 		
 	# update them in the database
 	await db.set_static_messages(config.main_guild, new_message_ids_dict)

@@ -7,6 +7,7 @@ from . import uwuify
 from . import modbot
 from . import w2n
 from . import db
+from .static_messages import main as static_messages
 import importlib
 import discord
 import asyncio
@@ -161,6 +162,8 @@ async def on_ready():
 	try:
 		await forums.login(os.getenv('forumemail'), os.getenv('forumpassword'))
 	except: pass
+
+	asyncio.ensure_future(static_messages.init(client), loop=client.loop)
 
 	for module in command_modules:
 		if hasattr(module, 'init'):
