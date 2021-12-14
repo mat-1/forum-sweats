@@ -53,6 +53,7 @@ async def get_existing_static_message_ids():
 
 async def init(client: discord.Client):
 	old_message_ids_dict = await get_existing_static_message_ids()
+	print('old_message_ids_dict', old_message_ids_dict)
 	new_message_ids_dict = {}
 
 	messages = get_static_messages_in_folder()
@@ -72,6 +73,7 @@ async def init(client: discord.Client):
 
 		# get the old content of the message
 		old_messages = []
+		old_message_ids = []
 		old_message_contents = []
 		for old_message_id in old_message_ids:
 			try:
@@ -80,11 +82,12 @@ async def init(client: discord.Client):
 				print('Warning: Could not fetch message', old_message_id, 'in channel', static_message_channel_id)
 				continue
 			old_messages.append(message)
+			old_message_ids.append(message.id)
 			old_message_contents.append(message.content)
 
 		# if the message hasn't actually changed, we don't need to do anything
-		print(new_message_contents, old_message_contents)
 		if new_message_contents == old_message_contents:
+			new_message_ids_dict[str(static_message_channel_id)] = old_message_ids
 			continue
 
 		# delete the old messages
@@ -107,4 +110,5 @@ async def init(client: discord.Client):
 		new_message_ids_dict[str(static_message_channel_id)] = new_message_ids
 		
 	# update them in the database
+	print('new_message_ids_dict', new_message_ids_dict)
 	await db.set_static_messages(config.main_guild, new_message_ids_dict)
