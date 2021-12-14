@@ -5,7 +5,7 @@
 🔷 We allow swearing, but any use of slurs is not allowed. Please refrain from any forms of racism, sexism, or any other type of bigotry.
 
 🔷 No spamming. This includes sending many unwanted or unnecessary messages, or a few extremely long and "spammy" messages. This includes spamming images, videos, and all forms of messages. If you intend to send many memes or videos, do it in the shitposting channel.
-        🔹  This includes spamming reactions
+        🔹 This includes spamming reactions
 
 🔷 Please refrain from spam pinging other members, unless specifically told by that user that you may.
 
