@@ -157,7 +157,9 @@ async def process_message(message, warn=True) -> bool:
 	if mute_remaining > 0:
 		return False
 
-	content = message.content or (message.embeds[0].description if message.embeds else '')
+	content = message.content
+	if not content and message.embeds and message.embeds[0].description and discordbot.client.user and message.author.id == discordbot.client.user.id:
+		content = message.embeds[0].description
 
 	if not isinstance(content, str):
 		return False
