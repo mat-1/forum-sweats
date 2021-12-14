@@ -566,7 +566,7 @@ async def mute_user(
 	'''
 
 	if not staff_mute:
-		current_mute_length = time.time() - await db.get_mute_end(member.id)
+		current_mute_length = int((await db.get_mute_end(member.id)) - time.time())
 		if length < current_mute_length:
 			return
 
