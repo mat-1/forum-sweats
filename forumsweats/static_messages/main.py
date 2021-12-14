@@ -53,7 +53,6 @@ async def get_existing_static_message_ids():
 
 async def init(client: discord.Client):
 	old_message_ids_dict = await get_existing_static_message_ids()
-	print('old_message_ids_dict', old_message_ids_dict)
 	new_message_ids_dict = {}
 
 	messages = get_static_messages_in_folder()
@@ -84,8 +83,6 @@ async def init(client: discord.Client):
 			old_message_contents.append(message.content)
 
 		# if the message hasn't actually changed, we don't need to do anything
-		print(new_message_contents, old_message_contents)
-		print(new_message_contents == old_message_contents)
 		if new_message_contents == old_message_contents:
 			new_message_ids_dict[str(static_message_channel_id)] = old_message_ids
 			continue
@@ -109,5 +106,4 @@ async def init(client: discord.Client):
 		new_message_ids_dict[str(static_message_channel_id)] = new_message_ids
 		
 	# update them in the database
-	print('new_message_ids_dict', new_message_ids_dict)
 	await db.set_static_messages(config.main_guild, new_message_ids_dict)
