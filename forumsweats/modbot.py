@@ -309,7 +309,7 @@ async def process_message(message, warn=True) -> bool:
 		# delete, dm, and mute for a minute
 		await message.delete()
 		try:
-			await message.author.send('Don\'t spam pings, nerd')
+			await message.author.send('Don\'t ping a lot of people at once, nerd')
 		except:
 			pass
 		await discordbot.mute_user(
