@@ -1,3 +1,4 @@
+from discord import client
 import config
 from forumsweats import discordbot
 from datetime import timedelta
@@ -304,8 +305,14 @@ async def process_message(message, warn=True) -> bool:
 		except: pass
 		return True
 	
+
 	# spam ping check
-	if len(message.mentions) >= 8:
+	mentioned_ids_unchecked = re.findall(r'<@[!&]?(\d{17,19})>', content)
+	mentioned_ids = set()
+	for id in mentioned_ids_unchecked:
+		if message.guild.get_member(int(id)) or message.guild.get_role(int(id)):
+			mentioned_ids.add(id)
+	if len(mentioned_ids) >= 8:
 		# delete, dm, and mute for a minute
 		await message.delete()
 		try:
