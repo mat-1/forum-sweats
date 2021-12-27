@@ -261,6 +261,22 @@ async def test_filter(client, test: discordpytest.Tester, channel):
 	await test.verify_message_deleted(int(m['id']))
 
 @pytest.mark.asyncio
+async def test_spamping(client, test: discordpytest.Tester, guild, channel):
+	test.make_member(guild, test.make_user(11, 'one', '0001'))
+	test.make_member(guild, test.make_user(12, 'two', '0002'))
+	test.make_member(guild, test.make_user(13, 'three', '0003'))
+	test.make_member(guild, test.make_user(14, 'four', '0004'))
+	test.make_member(guild, test.make_user(15, 'five', '0005'))
+	test.make_member(guild, test.make_user(16, 'six', '0006'))
+	test.make_member(guild, test.make_user(17, 'seven', '0007'))
+	test.make_member(guild, test.make_user(18, 'eight', '0008'))
+	test.make_member(guild, test.make_user(19, 'nine', '0009'))
+	test.make_member(guild, test.make_user(110, 'ten', '0010'))
+
+	m = await test.message('<@11> <@12> <@13> <@14> <@15> <@16> <@17> <@18> <@19> <@110>', channel)
+	await test.verify_message_deleted(int(m['id']))
+
+@pytest.mark.asyncio
 async def test_morse(client, test: discordpytest.Tester, channel):
 	await test.message('!morse .... . .-.. .-.. ---', channel)
 	await test.verify_message(lambda m: m['embeds'][0].get('description') == 'hello')
