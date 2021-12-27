@@ -312,7 +312,6 @@ async def process_message(message, warn=True) -> bool:
 	for id in mentioned_ids_unchecked:
 		if message.guild.get_member(int(id)) or message.guild.get_role(int(id)):
 			mentioned_ids.add(id)
-	print(content, mentioned_ids_unchecked, mentioned_ids)
 	if len(mentioned_ids) >= 8:
 		# delete, dm, and mute for a minute
 		await message.delete()
