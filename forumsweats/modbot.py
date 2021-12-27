@@ -144,13 +144,6 @@ async def process_message(message, warn=True) -> bool:
 	'''
 	Process the message, returns True if the message was deleted
 	'''
-	# await process_for_invites(message)
-	if message.channel.id == 719570596005937152:
-		# Ignore spam channel
-		return False
-	if message.channel.id == 735470150681100350:
-		# Ignore skyblock threads
-		return False
 
 	# Ignore your messages if you're already muted
 	mute_remaining = int((await db.get_mute_end(message.author.id)) - time.time())
@@ -310,6 +303,22 @@ async def process_message(message, warn=True) -> bool:
 		try: await message.author.send('troll')
 		except: pass
 		return True
+	
+	# spam ping check
+	if len(message.mentions) >= 8:
+		# delete, dm, and mute for a minute
+		await message.delete()
+		try:
+			await message.author.send('Don\'t spam pings, nerd')
+		except:
+			pass
+		await discordbot.mute_user(
+			message.author,
+			60,
+			message.guild.id if message.guild else None,
+		)
+		return True
+
 
 	is_spam = await check_spam(message)
 
