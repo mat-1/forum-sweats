@@ -146,11 +146,6 @@ async def process_message(message, warn=True) -> bool:
 	Process the message, returns True if the message was deleted
 	'''
 
-	# Ignore your messages if you're already muted
-	mute_remaining = int((await db.get_mute_end(message.author.id)) - time.time())
-	if mute_remaining > 0:
-		return False
-
 	content = message.content
 	if not content and message.embeds and message.embeds[0].description and discordbot.client.user and message.author.id == discordbot.client.user.id:
 		content = message.embeds[0].description
