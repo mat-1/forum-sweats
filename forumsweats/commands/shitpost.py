@@ -5,7 +5,7 @@ import json
 import time
 
 name = 'shitpost'
-aliases = ['markovshitpost']
+aliases = ('markovshitpost', 'pooppost')
 args = '[title]'
 
 forums_data = []

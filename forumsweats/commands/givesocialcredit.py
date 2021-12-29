@@ -2,7 +2,10 @@ from ..commandparser import Member
 from forumsweats import db
 
 name = 'givesocialcredit'
-aliases = ('addsocialcredit', 'givesocialcredits', 'addsocialcredits')
+aliases = (
+	'addsocialcredit', 'givesocialcredits', 'addsocialcredits',
+	'addsc', 'givesc'
+)
 roles = ('mod', 'admin', 'xijinping')
 args = '[member]'
 channels = None

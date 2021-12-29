@@ -5,6 +5,7 @@ from forumsweats import db
 
 name = 'socialcredit'
 args = '[member]'
+aliases = ('sc',)
 
 
 async def run(message, member: Member = None):
