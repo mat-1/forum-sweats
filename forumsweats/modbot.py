@@ -294,7 +294,7 @@ async def process_message(message, warn=True) -> bool:
 		)
 		return True
 
-	if re.search(r'f\d*r\d*e\d*e*m\d*o\d*n\d*e\d*y\d*h\d*u\d*b', content, flags=re.IGNORECASE):
+	if not is_serious_talk and re.search(r'f\W*r\W*e\W*e\W*m\W*[o0]\W*n\W*e\W*y\W*h\W*u\W*b', content, flags=re.IGNORECASE):
 		await message.delete()
 		return True
 
