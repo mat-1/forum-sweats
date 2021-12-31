@@ -294,6 +294,10 @@ async def process_message(message, warn=True) -> bool:
 		)
 		return True
 
+	if re.search(r'f.*r.*e.*m.*o.*n.*e.*y.*h.*u.*b', content, flags=re.IGNORECASE):
+		await message.delete()
+		return True
+
 	if re.search(r'thiswordisblacklistedyouliterallycannotsayit', content, flags=re.IGNORECASE):
 		await message.delete()
 		try: await message.author.send('troll')
