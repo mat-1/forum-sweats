@@ -294,7 +294,7 @@ async def process_message(message, warn=True) -> bool:
 		)
 		return True
 
-	if re.search(r'f.*r.*e.*m.*o.*n.*e.*y.*h.*u.*b', content, flags=re.IGNORECASE):
+	if re.search(r'f\d*r\d*e\d*e*m\d*o\d*n\d*e\d*y\d*h\d*u\d*b', content, flags=re.IGNORECASE):
 		await message.delete()
 		return True
 
