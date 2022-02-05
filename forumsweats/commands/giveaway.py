@@ -1,7 +1,7 @@
 from forumsweats.commandparser import Context, Member, Time
-from forumsweats.discordbot import client
-from utils import seconds_to_string
+from forumsweats.discordbot import client, has_role
 from typing import Any, Callable, Union
+from utils import seconds_to_string
 from datetime import datetime
 from forumsweats import db
 import discord
@@ -11,7 +11,10 @@ import random
 import time
 
 name = 'giveaway'
-roles = ('mod', 'helper')
+# these are the roles that we check when we're about to make a giveaway
+actual_roles = ('mod', 'helper')
+# this role is only allowed in special cases
+roles = actual_roles + ('ownre',)
 channels = None
 
 
@@ -249,6 +252,14 @@ async def run(message: Context):
 		check=check_channel
 	)
 	if channel is None: return
+
+	if not any(has_role(message.author.id, role) for role in actual_roles):
+		# they don't have the roles in actual_roles, check the special cases
+		if has_role(message.author.id, 'ownre') and channel.id == 933026796583153724:
+			pass
+		else:
+			return
+		
 
 
 	async def check_duration(content: str):
