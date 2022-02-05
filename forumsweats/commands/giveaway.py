@@ -322,4 +322,5 @@ async def run(message: Context):
 
 	giveaway_message = await create_new_giveaway(message.author.id, channel, length, winners, bobux_requirement, prize)
 
-	await message.send(f'Ok, created giveaway {giveaway_message.jump_url}')
+	if giveaway_message.channel.id != message.channel.id:
+		await message.send(f'Ok, created giveaway {giveaway_message.jump_url}')

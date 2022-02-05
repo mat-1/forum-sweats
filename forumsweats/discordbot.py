@@ -417,10 +417,24 @@ async def process_counting_channel(message):
 		asyncio.ensure_future(mute_user(message.author, 60 * 60))
 
 
-		if new_number == 0 or new_number is None:
-			await message.author.send(f'You put "{message.content}" in counting which isn\'t a valid number.')
-		else:
-			await message.author.send(f'You put "{message.content}" ({new_number}) in counting which isn\'t the right number, you should\'ve put {old_number + 1}')
+		try:
+			if new_number == 0 or new_number is None:
+				await message.author.send(f'You put "{message.content}" in counting which isn\'t a valid number.')
+			else:
+				await message.author.send(f'You put "{message.content}" ({new_number}) in counting which isn\'t the right number, you should\'ve put {old_number + 1}')
+		except:
+			pass
+		
+		previous_record = await db.get_counting_record(message.guild.id)
+		if old_number > previous_record:
+			await db.set_counting_record(message.guild.id, old_number)
+			await message.channel.edit(
+				topic='Count upwards! Sending something that isn\'t a digit '
+				'higher than the previous message will result in the chain '
+				'being ended, and you being muted for one hour. Current record: ' + str(old_number),
+				reason='New counting record'
+			)
+
 
 
 

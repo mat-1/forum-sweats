@@ -322,6 +322,27 @@ async def get_counter(guild_id: int):
 	else:
 		return 0
 
+
+async def set_counting_record(guild_id: int, number: int):
+	if not connection_url: return
+	await servers_data.update_one(
+		{ 'id': guild_id },
+		{
+			'$set': { 'counting_record': number }
+		},
+		upsert=True
+	)
+
+async def get_counting_record(guild_id: int):
+	if not connection_url: return 0
+	data = await servers_data.find_one({
+		'id': guild_id,
+	})
+	if data:
+		return data.get('counting_record', 0)
+	else:
+		return 0
+
 async def set_infinite_counter(guild_id: int, number: int):
 	if not connection_url: return
 	await servers_data.update_one(
