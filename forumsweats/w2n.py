@@ -11,6 +11,8 @@ num_names = {
 	'two': 2,
 	'three': 3,
 	'four': 4,
+	# joke
+	'fart': 4,
 	'five': 5,
 	'six': 6,
 	'seven': 7,
