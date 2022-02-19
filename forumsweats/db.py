@@ -231,6 +231,15 @@ async def clear_infraction_by_partial_id(infraction_partial_id):
 	await infractions_data.delete_one({'_id': infraction_data['_id']})
 	return infraction_data
 
+async def transfer_infractions(old_member_id: int, new_member_id: int):
+	if not connection_url: return
+	await infractions_data.update_many({
+		'user': old_member_id
+	}, {
+		'$set': {
+			'user': new_member_id
+		}
+	})
 
 async def set_rock(user_id: int):
 	if not connection_url: return
@@ -434,6 +443,14 @@ async def change_bobux(user_id: int, amount: int, is_activity_bobux: bool=False)
 	data_inc = { 'bobux': amount }
 	if is_activity_bobux:
 		data_inc['activity_bobux'] = amount
+	await modify_member(user_id, 
+		{ '$inc': data_inc }
+	)
+
+
+async def change_activity_bobux(user_id: int, amount: int):
+	if not connection_url: return
+	data_inc = { 'activity_bobux': amount }
 	await modify_member(user_id, 
 		{ '$inc': data_inc }
 	)
@@ -644,6 +661,59 @@ async def bobux_unsubscribe_to(user_id, unsubbing_to_id):
 		},
 		upsert=True
 	)
+
+async def transfer_bobux_subscriptions(old_member_id: int, new_member_id: int):
+	if not connection_url: return
+	async for member in member_data.find(
+		{ 'subs': { '$ne': None } }
+	):
+		subs_raw = member.get('subs', [])
+		new_subs_raw = subs_raw
+		for member_id in subs_raw:
+			if int(old_member_id) != int(member_id):
+				continue
+			del new_subs_raw[member_id]
+			if str(new_member_id) not in new_subs_raw:
+				new_subs_raw[str(new_member_id)] = subs_raw[member_id]
+			break
+		await member_data.update_one(
+			{ 'discord': member['discord'] },
+			{
+				'$set': {
+					'subs': new_subs_raw
+				}
+			}
+		)
+	
+	# now transfer the subs the old member made to the new member
+	old_data = await member_data.find_one({ 'discord': old_member_id })
+	new_data = await member_data.find_one({ 'discord': new_member_id })
+	if 'subs' in old_data:
+		new_subs = new_data.get('subs', {})
+		for sub in old_data['subs']:
+			if sub not in new_subs:
+				new_subs[sub] = old_data['subs'][sub]
+		await member_data.update_one(
+			{ 'discord': new_member_id },
+			{
+				'$set': {
+					'subs': new_subs
+				}
+			},
+			upsert=True
+		)
+		# unset old subs
+		await member_data.update_one(
+			{ 'discord': old_member_id },
+			{
+				'$unset': {
+					'subs': ''
+				}
+			}
+		)
+
+
+
 
 '''
 Pets
