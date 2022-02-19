@@ -668,7 +668,7 @@ async def transfer_bobux_subscriptions(old_member_id: int, new_member_id: int):
 		{ 'subs': { '$ne': None } }
 	):
 		subs_raw = member.get('subs', [])
-		new_subs_raw = subs_raw
+		new_subs_raw = dict(subs_raw)
 		for member_id in subs_raw:
 			if int(old_member_id) != int(member_id):
 				continue
