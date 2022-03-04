@@ -6,7 +6,7 @@ authors = ["mat <github@matdoes.dev>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 beautifulsoup4 = "^4.10.0"
 cloudscraper = "^1.2.58"
 "discord.py" = {git = "https://github.com/Rapptz/discord.py"}
