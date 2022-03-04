@@ -14,7 +14,7 @@ import time
 name = 'auction'
 roles = ('mod', 'helper')
 channels = None
-args = '<member> <amount>'
+args = ''
 
 
 AUCTION_EMOJI = '💸'
@@ -141,11 +141,20 @@ async def continue_auction(message_id: int):
 
 def handle_bids(message: Message):
 	@client.event
-	async def on_reaction_add(reaction: Reaction, user: User):
-		if user.bot or reaction.message.id != message.id: return
+	async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+		if not payload.member or payload.member.bot or payload.message_id != message.id: return
 
+		# re-fetch the message so we can remove other reactions
+		new_message = await message.channel.fetch_message(payload.message_id)
+		assert new_message.guild is not None
+		member = await new_message.guild.fetch_member(payload.user_id)
 		data = await db.get_auction(message.id)
-		await reaction.remove(user)
+
+		# iterate over reactions and remove the ones that weren't made by a bot
+		for reaction in new_message.reactions:
+			async for reacted_user in reaction.users():
+				if not reacted_user.bot:
+					await new_message.remove_reaction(reaction.emoji, reacted_user)
 
 		auction_info = await db.get_auction(message.id)
 		highest_bid = auction_info['highest_bid'] or 0
@@ -154,17 +163,17 @@ def handle_bids(message: Message):
 		if auction_info['ended']: return
 
 		# Check if the person has enough bobux
-		if not await db.get_bobux(user.id) > highest_bid + 100:
-			await user.send('You do not have enough bobux to bid')
+		if not await db.get_bobux(member.id) > highest_bid + 100:
+			await member.send('You do not have enough bobux to bid')
 			return
 
-		await db.set_highest_bidder(message.id, highest_bid + 100, user.id)
+		await db.set_highest_bidder(message.id, highest_bid + 100, member.id)
 		data['highest_bid'] += 100
 
 		if data.get('end') - int(time.time()) < 30:
 			await db.extend_auction(message.id, 100)
 
-		embed = create_auction_embed(data, bidder=user.id)
+		embed = create_auction_embed(data, bidder=member.id)
 		await message.edit(embed=embed)
 
 async def create_new_auction(creator_id: int, channel: discord.abc.GuildChannel, length: int, item: str):
@@ -233,7 +242,7 @@ async def run(message: Context):
 		message.client,
 		message.author,
 		message.channel,
-		prompt_message='Please mention the channel to do the auction in.',
+		prompt_message='Please mention the channel to start the auction in.',
 		invalid_message='Invalid channel.',
 		check=check_channel
 	)
