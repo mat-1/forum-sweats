@@ -141,7 +141,7 @@ async def check_spam(message) -> bool:
 invite_regex = re.compile(r'(discord\.gg|discordapp\.com\/invite|discord\.com\/invite|discord\.gg\/invite)\/(.{1,10})')
 
 
-async def process_message(message, warn=True) -> bool:
+async def process_message(message, warn=True, is_edit=False) -> bool:
 	'''
 	Process the message, returns True if the message was deleted
 	'''
@@ -325,9 +325,10 @@ async def process_message(message, warn=True) -> bool:
 		)
 		return True
 
+	if not is_edit:
+		is_spam = await check_spam(message)
 
-	is_spam = await check_spam(message)
+		add_previous_message(message)
 
-	add_previous_message(message)
-
-	return is_spam
+		return is_spam
+	return False

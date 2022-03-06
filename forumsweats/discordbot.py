@@ -242,14 +242,18 @@ async def on_member_join(member):
 
 	try:
 		bot_logs_channel = client.get_channel(718107452960145519)
+		if not bot_logs_channel:
+			return
+		embed: discord.Embed
 		if used_invite:
-			await bot_logs_channel.send(embed=discord.Embed(
+			embed = discord.Embed(
 				description=f'<@{member.id}> joined using discord.gg/{used_invite.code} (created by <@{used_invite.inviter.id}>, {used_invite.uses} uses)'
-			))
+			)
 		else:
-			await bot_logs_channel.send(embed=discord.Embed(
+			embed = discord.Embed(
 				description=f'<@{member.id}> joined using an unknown invite'
-			))
+			)
+		await bot_logs_channel.send(embed=embed)
 	except:
 		# if theres an error, the channel probably just doesnt exist
 		pass
@@ -606,7 +610,7 @@ async def on_message_edit(before, after):
 		or after.channel.id == config.channels.get('infinite-counting')
 	):
 		await after.delete()
-	await modbot.process_message(after, warn=False)
+	await modbot.process_message(after, warn=False, is_edit=True)
 
 
 async def mute_user(
