@@ -20,4 +20,3 @@ async def welcome_user(member):
 
 	
 	await channel.send(f'Welcome to Forum Sweats, {member.mention}!', embed=embed)
-	
