@@ -1,7 +1,7 @@
 from .static_messages import main as static_messages
 from . import commands as commands_module
 from .commandparser import CommandParser
-from forumsweats import numberparser, welcomemessages
+from forumsweats import logger, numberparser, welcomemessages
 from typing import Any, List, Union
 from datetime import datetime
 from . import uwuify
@@ -549,6 +549,7 @@ async def on_message(message: discord.Message):
 
 @client.event
 async def on_message_delete(message):
+	await logger.log_message_deletion(message)
 	print('deleted:', message.author, message.content)
 	if message.id == most_recent_counting_message_id:
 		counter = await db.get_counter(message.guild.id)
@@ -557,9 +558,53 @@ async def on_message_delete(message):
 		counter = await db.get_infinite_counter(message.guild.id)
 		await message.channel.send(str(counter))
 
+@client.event
+async def on_guild_update(before, after):
+	return
+
+@client.event
+async def on_member_join(member):
+	logger.log_member_join(member)
+
+@client.event
+async def on_member_remove(member):
+	logger.log_member_leave(member)
+
+@client.event
+async def on_user_update(before, after):
+	await logger.log_user_update(before, after)
+
+@client.event
+async def on_member_update(before, after):
+	await logger.log_member_update(before, after)
+
+@client.event
+async def on_guild_channel_update(before, after):
+	await logger.log_guild_channel_changes(before, after)
+
+@client.event
+async def on_guild_role_update(before, after):
+	await logger.log_role_update(before, after)
+
+@client.event
+async def on_guild_role_create(role):
+	await logger.log_role_create(role)
+
+@client.event
+async def on_guild_role_delete(role):
+	await logger.log_role_delete(role)
+
+@client.event
+async def on_guild_channel_create(channel):
+	await logger.log_channel_creation(channel)
+
+@client.event
+async def on_guild_channel_delete(channel):
+	await logger.log_channel_deletion(channel)
 
 @client.event
 async def on_message_edit(before, after):
+	await logger.log_message_edition(before, after)
 	if (
 		after.channel.id == config.channels.get('counting')
 		or after.channel.id == config.channels.get('infinite-counting')
