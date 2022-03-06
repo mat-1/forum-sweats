@@ -1,20 +1,21 @@
-from distutils.command.config import config
-
 import discord
 from forumsweats.commandparser import Member
 import config
 
-# BAN MEE6
 async def welcome_user(member):
-    guild = member.guild
-    channel = guild.get_channel(config.channels.get('welcome'))
+    channel = member.guild.get_channel(config.channels.get('welcome'))
+    rules_channel_id = config.channels.get('rules')
     avatar = member.avatar or member.default_avatar
-    name = member.name
 
     if channel is None:
         return
 
-    embed = discord.Embed(title=f'{name} just joined Forum Sweats!', description=f'Member #{guild.member_count}')
+    embed = discord.Embed(
+        title=f'{member} just joined Forum Sweats.',
+        description=f'Please make sure to read the rules at <#{rules_channel_id}>.',
+        color=0xA40985
+    )
+    embed.set_footer(text=f'Member #{member.guild.member_count}')
     embed.set_thumbnail(url=avatar)
 
     
