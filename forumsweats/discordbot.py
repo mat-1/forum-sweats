@@ -1,7 +1,7 @@
 from .static_messages import main as static_messages
 from . import commands as commands_module
 from .commandparser import CommandParser
-from forumsweats import numberparser
+from forumsweats import numberparser, welcomemessages
 from typing import Any, List, Union
 from datetime import datetime
 from . import uwuify
@@ -223,6 +223,9 @@ async def on_ready():
 @client.event
 async def on_member_join(member):
 	if is_dev: return
+
+	await welcomemessages.welcome_user(member)
+
 	global cached_invites
 	cached_invites_dict = {invite.code: invite for invite in cached_invites}
 	guild = client.get_guild(config.main_guild)
