@@ -1,6 +1,6 @@
 from .static_messages import main as static_messages
 from . import commands as commands_module
-from .commandparser import CommandParser
+from .commandparser import CommandParser, Member
 from forumsweats import numberparser, welcomemessages
 from typing import Any, List, Union
 from datetime import datetime
@@ -58,7 +58,7 @@ from . import starboard
 
 
 async def start_bot():
-	print('starting bot pog')
+	print('starting bot!')
 	await client.start(token)
 
 cached_invites = []
@@ -567,6 +567,25 @@ async def on_message_edit(before, after):
 		await after.delete()
 	await modbot.process_message(after, warn=False, is_edit=True)
 
+async def ensure_muted_roles(member: Union[Member, discord.member.Member], muted=True):
+	muted_role_id = get_role_id(member.guild.id, 'muted')
+	if muted_role_id:
+		muted_role = member.guild.get_role(muted_role_id)
+		if not muted_role: return print('muted role not found')
+		if muted:
+			await member.add_roles(muted_role)
+		else:
+			await member.remove_roles(muted_role)
+
+	member_role_id = get_role_id(member.guild.id, 'member')
+	if member_role_id:
+		member_role = member.guild.get_role(member_role_id)
+		if member_role:
+			if muted:
+				await member.remove_roles(member_role)
+			else:
+				await member.add_roles(member_role)
+
 
 async def mute_user(
 	member,
@@ -593,52 +612,21 @@ async def mute_user(
 			return
 
 
-	guild_id = guild_id if guild_id else config.main_guild
-	guild = client.get_guild(guild_id)
-
-	muted_role_id = get_role_id(guild_id, 'muted')
-	muted_role = guild.get_role(muted_role_id)
-
-	if not muted_role: return print('muted role not found')
-
-	member_role_id = get_role_id(guild_id, 'member')
-	member_role = guild.get_role(member_role_id)
-
-	sweat_role_id = get_role_id(guild_id, 'sweat')
-	sweat_role = guild.get_role(sweat_role_id)
-
-	og_role_id = get_role_id(guild_id, 'og')
-	og_role = guild.get_role(og_role_id)
-
-	await member.add_roles(muted_role)
-	await member.remove_roles(member_role)
+	await ensure_muted_roles(member)
 
 	unmute_time = await db.get_mute_end(member.id)
 	unmute_in = unmute_time - time.time()
 
 	muted_before = False
 
-	if unmute_in < 0:
-		extra_data = {
-			'sweat': sweat_role in member.roles,
-			'og': og_role in member.roles,
-		}
-	else:
-		extra_data = await db.get_mute_data(member.id)
+	if unmute_in > 0:
 		muted_before = True
 
 	await db.set_mute_end(
 		member.id,
 		time.time() + length,
-		extra_data
 	)
 	await db.set_rock_immune(member.id, rock_immune)
-
-	if sweat_role in member.roles:
-		await member.remove_roles(sweat_role)
-
-	if og_role in member.roles:
-		await member.remove_roles(og_role)
 
 	gulag = client.get_channel(config.channels['gulag'])
 	if gulag_message and gulag:
@@ -681,26 +669,7 @@ async def unmute_user(user_id, wait=False, gulag_message=True, reason=None):
 		member = guild.get_member(user_id)
 		if not member: continue
 
-		muted_role_id = get_role_id(guild.id, 'muted')
-		muted_role = guild.get_role(muted_role_id)
-
-		member_role_id = get_role_id(guild.id, 'member')
-		member_role = guild.get_role(member_role_id)
-
-		await member.add_roles(member_role, reason=reason)
-		await member.remove_roles(muted_role, reason=reason)
-
-		sweat_role_id = get_role_id(guild.id, 'sweat')
-		sweat_role = guild.get_role(sweat_role_id)
-
-		og_role_id = get_role_id(guild.id, 'og')
-		og_role = guild.get_role(og_role_id)
-
-		if mute_data.get('sweat'):
-			await member.add_roles(sweat_role)
-
-		if mute_data.get('og'):
-			await member.add_roles(og_role)
+		await ensure_muted_roles(member, muted=False)
 
 	await db.set_mute_end(user_id, time.time())
 
@@ -728,15 +697,9 @@ async def moot_user(member, length, guild_id=None, gulag_message=True):
 	unmoot_time = await db.get_mooted_end(member.id)
 	unmoot_in = unmoot_time - time.time()
 
-	if unmoot_in < 0:
-		extra_data = {}
-	else:
-		extra_data = await db.get_moot_data(member.id)
-
 	await db.set_moot_end(
 		member.id,
 		time.time() + length,
-		extra_data
 	)
 
 

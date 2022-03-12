@@ -72,13 +72,11 @@ async def get_hypixel_rank(user_id):
 	return await fetch_member(user_id, 'hypixel_rank')
 
 
-async def set_mute_end(user_id, end_time, extra_data={}):
+async def set_mute_end(user_id, end_time):
 	if not connection_url: return
 	set_data = {
 		'muted_until': end_time
 	}
-	for data in extra_data:
-		set_data[f'muted_data.{data}'] = extra_data[data]
 	set_data['muted'] = end_time > time.time()
 	return await modify_member(user_id, { '$set': set_data })
 
@@ -503,13 +501,11 @@ async def lose_shop_item(user_id: int, shop_item_id: str):
 	)
 
 
-async def set_moot_end(user_id, end_time, extra_data={}):
+async def set_moot_end(user_id, end_time):
 	if not connection_url: return
 	set_data = {
 		'mooted_until': end_time
 	}
-	for data in extra_data:
-		set_data[f'mooted_data.{data}'] = extra_data[data]
 	set_data['mooted'] = end_time > time.time()
 	await member_data.update_one(
 		{ 'discord': user_id },
