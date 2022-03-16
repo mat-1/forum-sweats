@@ -177,6 +177,7 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		.replace('@', 'a')
 	
 	is_serious_talk = message.channel.id == config.channels.get('serious-talk')
+	is_politics = message.channel.id == config.channels.get('politics')
 
 	# antihoe for runic
 	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
@@ -198,7 +199,7 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		)
 		return True
 
-	if not is_serious_talk and re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
+	if not is_serious_talk and not is_politics and re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
 		await message.delete()
 		await discordbot.mute_user(
 			message.author,
