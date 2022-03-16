@@ -269,7 +269,7 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		)
 		return True
 
-	if not is_serious_talk and re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
+	if not is_serious_talk and not is_politics and re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
 		try:
 			await message.author.send('Don\'t talk about sexual stuff in chat, nerd')
 		except:
@@ -295,7 +295,7 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		)
 		return True
 
-	if not is_serious_talk and re.search(r'f\W*r\W*e\W*e\W*m\W*[o0]\W*n\W*e\W*y\W*h\W*u\W*b', content, flags=re.IGNORECASE):
+	if not is_serious_talk and not is_politics and re.search(r'f\W*r\W*e\W*e\W*m\W*[o0]\W*n\W*e\W*y\W*h\W*u\W*b', content, flags=re.IGNORECASE):
 		await message.delete()
 		return True
 
