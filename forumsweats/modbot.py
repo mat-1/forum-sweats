@@ -198,23 +198,23 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		)
 		return True
 
-	if not is_serious_talk and re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
-		await message.delete()
-		await discordbot.mute_user(
-			message.author,
-			15,
-			message.guild.id if message.guild else None,
-		)
-		return True
+	#if not is_serious_talk and re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
+		#await message.delete()
+		#await discordbot.mute_user(
+			#message.author,
+			#15,
+			#message.guild.id if message.guild else None,
+		#)
+		#return True
 
-	if re.match(r'[\w\W]*\bc\W*u\W*m\b[\w\W]*', content, flags=re.IGNORECASE) or (not is_serious_talk and re.match(r'[\w\W]*\bs\W*p\W*e\W*r\W*m\b[\w\W]*', content, flags=re.IGNORECASE)):
-		await message.delete()
-		await discordbot.mute_user(
-			message.author,
-			60 * 5,
-			message.guild.id if message.guild else None,
-		)
-		return True
+	#if re.match(r'[\w\W]*\bc\W*u\W*m\b[\w\W]*', content, flags=re.IGNORECASE) or (not is_serious_talk and re.match(r'[\w\W]*\bs\W*p\W*e\W*r\W*m\b[\w\W]*', content, flags=re.IGNORECASE)):
+		#await message.delete()
+		#await discordbot.mute_user(
+			#message.author,
+			#60 * 5,
+			#message.guild.id if message.guild else None,
+		#)
+		#return True
 
 	# antichilynn for someblanket
 	if message.author.id in {750815961942065252} and re.match(r'[\w\W]*c+[^a-z]*h+[^a-z]*[i1y][\w\W]*', content, flags=re.IGNORECASE):
@@ -268,18 +268,18 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		)
 		return True
 
-	if not is_serious_talk and re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
-		try:
-			await message.author.send('Don\'t talk about sexual stuff in chat, nerd')
-		except:
-			pass
-		await message.delete()
-		await discordbot.mute_user(
-			message.author,
-			60 * 10, # 10 minutes
-			message.guild.id if message.guild else None,
-		)
-		return True
+	#if not is_serious_talk and re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
+		#try:
+			#await message.author.send('Don\'t talk about sexual stuff in chat, nerd')
+		#except:
+			#pass
+		#await message.delete()
+		#await discordbot.mute_user(
+			#message.author,
+			#60 * 10, # 10 minutes
+			#message.guild.id if message.guild else None,
+		#)
+		#return True
 
 	if re.search(r'\b(f\W*a\W*g{1,2})(\W*o\W*t)?\b', content, flags=re.IGNORECASE):
 		try:
@@ -294,9 +294,9 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		)
 		return True
 
-	if not is_serious_talk and re.search(r'f\W*r\W*e\W*e\W*m\W*[o0]\W*n\W*e\W*y\W*h\W*u\W*b', content, flags=re.IGNORECASE):
-		await message.delete()
-		return True
+	#if not is_serious_talk and re.search(r'f\W*r\W*e\W*e\W*m\W*[o0]\W*n\W*e\W*y\W*h\W*u\W*b', content, flags=re.IGNORECASE):
+		#await message.delete()
+		#return True
 
 	if re.search(r'thiswordisblacklistedyouliterallycannotsayit', content, flags=re.IGNORECASE):
 		await message.delete()
