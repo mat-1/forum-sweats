@@ -24,7 +24,6 @@ intents = discord.Intents.default()
 intents.members = True
 intents.presences = True
 
-
 token = os.getenv('token')
 is_dev = os.getenv('dev', 'false').lower() == 'true'
 commandparser = CommandParser(
@@ -549,7 +548,8 @@ async def on_message(message: discord.Message):
 
 @client.event
 async def on_message_delete(message):
-	await logger.log_message_deletion(message)
+	if message.author.id != client.user.id:
+		await logger.log_message_deletion(message)
 	print('deleted:', message.author, message.content)
 	if message.id == most_recent_counting_message_id:
 		counter = await db.get_counter(message.guild.id)
@@ -604,7 +604,8 @@ async def on_guild_channel_delete(channel):
 
 @client.event
 async def on_message_edit(before, after):
-	await logger.log_message_edition(before, after)
+	if before.author.id != client.user.id:
+		await logger.log_message_edition(before, after)
 	if (
 		after.channel.id == config.channels.get('counting')
 		or after.channel.id == config.channels.get('infinite-counting')
