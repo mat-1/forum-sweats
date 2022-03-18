@@ -146,6 +146,9 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 	Process the message, returns True if the message was deleted
 	'''
 
+	if message.author.id == discordbot.client.user.id:
+		return False
+
 	content = message.content
 	if not content and message.embeds and message.embeds[0].description and discordbot.client.user and message.author.id == discordbot.client.user.id:
 		content = message.embeds[0].description

@@ -158,7 +158,7 @@ def match_role(role, list):
     return False
 
 async def log_member_update(before, after):
-    content = f'**Member updated {after.mention}**\n'
+    content = ''
     if not before.nick == after.nick:
         content += f'\nNick: {before.nick} -> {after.nick}'
     if not before.roles == after.roles:
@@ -170,7 +170,10 @@ async def log_member_update(before, after):
             exits = match_role(role_after, after.roles)
             if not exits:
                 content += f'\nRemoved role {role_after.mention}'
+    if not content == '':
+        return
 
+    content = f'**Member updated {after.mention}**\n{content}'
     log_channel = before.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
