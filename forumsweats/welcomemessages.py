@@ -6,6 +6,9 @@ async def welcome_user(member):
 	channel = member.guild.get_channel(config.channels.get('welcome'))
 	rules_channel_id = config.channels.get('rules')
 	avatar = member.avatar or member.default_avatar
+	member_role_id = config.roles.get('member')
+	member_role = member.guild.get_role(member_role_id)
+	await member.add_roles(member_role)
 
 	if channel is None:
 		return

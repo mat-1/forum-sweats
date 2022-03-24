@@ -223,8 +223,6 @@ async def on_ready():
 async def on_member_join(member):
 	if is_dev: return
 
-	await welcomemessages.welcome_user(member)
-
 	global cached_invites
 	cached_invites_dict = {invite.code: invite for invite in cached_invites}
 	guild = client.get_guild(config.main_guild)
@@ -564,11 +562,12 @@ async def on_guild_update(before, after):
 
 @client.event
 async def on_member_join(member):
-	logger.log_member_join(member)
+	await logger.log_member_join(member)
+	await welcomemessages.welcome_user(member)
 
 @client.event
 async def on_member_remove(member):
-	logger.log_member_leave(member)
+	await logger.log_member_leave(member)
 
 @client.event
 async def on_user_update(before, after):
