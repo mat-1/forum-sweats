@@ -182,24 +182,24 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 	is_serious_talk = message.channel.id == config.channels.get('serious-talk')
 
 	# antihoe for runic
-	if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
-		await message.delete()
-		await discordbot.mute_user(
-			message.author,
-			1,
-			message.guild.id if message.guild else None,
-		)
-		return True
+	#if message.author.id == 617193050178977812 and re.match(r'[\w\W]*h(oe|œ|Œ)[\w\W]*', content, flags=re.IGNORECASE):
+	#	await message.delete()
+	#	await discordbot.mute_user(
+	#		message.author,
+	#		1,
+	#		message.guild.id if message.guild else None,
+	#	)
+	#	return True
 
 	# roger filters
-	if message.author.id == 621164650058219533 and re.match(r'[\w\W]*((w\W*h\W*(o|a)\W*r\W*e)|(h\W*e\W*n\W*t\W*a\W*i))[\w\W]*', content, flags=re.IGNORECASE):
-		await message.delete()
-		await discordbot.mute_user(
-			message.author,
-			1,
-			message.guild.id if message.guild else None,
-		)
-		return True
+	#if message.author.id == 621164650058219533 and re.match(r'[\w\W]*((w\W*h\W*(o|a)\W*r\W*e)|(h\W*e\W*n\W*t\W*a\W*i))[\w\W]*', content, flags=re.IGNORECASE):
+	#	await message.delete()
+	#	await discordbot.mute_user(
+	#		message.author,
+	#		1,
+	#		message.guild.id if message.guild else None,
+	#	)
+	#	return True
 
 	#if not is_serious_talk and re.search(r'\b[mM]+\W*[oO0Ⲟ⚪]+\W*[aA@]+\W*[nN]+([^a]|\b)', content, flags=re.IGNORECASE):
 		#await message.delete()
