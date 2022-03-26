@@ -121,7 +121,7 @@ async def close_ticket(interaction: discord.Interaction):
     file = io.StringIO(finale)
     log_channel = message.guild.get_channel(config.channels['logs'])
     await log_channel.send(file=discord.File(file, filename=f'{interaction.channel.name}.html'))
-    interaction.channel.delete()
+    await interaction.channel.delete()
 
     '''
     channel = interaction.channel
