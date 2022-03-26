@@ -149,6 +149,7 @@ async def create_ticket(user: User, guild: discord.Guild, name: str, id: int):
             return category
 
         category = await guild.create_category(category_name)
+        category.edit(position=3)
         await category.set_permissions(guild.default_role, view_channel=False)
         return category
     async def create_channel(category: discord.CategoryChannel):
