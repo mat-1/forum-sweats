@@ -86,7 +86,6 @@ async def start_server(loop, background_task, client):
 	# asyncio.set_event_loop(loop)
 	app = web.Application(
 	)
-	discordbot.client.loop = loop
 	app.discord = client
 	app.add_routes(routes)
 	asyncio.ensure_future(

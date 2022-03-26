@@ -48,6 +48,7 @@ def has_role(member_id: int, role_name: str, guild_id=None):
 
 
 client = discord.Client(intents=intents)
+client.loop = asyncio.get_event_loop()
 
 
 # this has to be here for there to not be an error
