@@ -1,4 +1,6 @@
+import asyncio
 from discord.user import User
+from forumsweats import discordbot
 from utils import convert_datetime_to_tz_aware
 from forumsweats.commands.pets import Pet
 from typing import Any, List, Set, Union
@@ -15,6 +17,7 @@ if not connection_url:
 	print('WARNING: dburi not found in env')
 
 client = motor.motor_asyncio.AsyncIOMotorClient(connection_url)
+client.get_io_loop = asyncio.get_event_loop
 
 db = client.discord
 

@@ -12,8 +12,8 @@ cloudscraper = "^1.2.58"
 "discord.py" = {git = "https://github.com/Rapptz/discord.py"}
 python-dotenv = "^0.19.2"
 pytest = "^6.2.5"
-motor = "^2.5.1"
 dnspython = "^2.1.0"
+motor = "^2.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest-asyncio = "^0.16.0"

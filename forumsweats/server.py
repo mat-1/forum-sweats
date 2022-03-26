@@ -81,15 +81,15 @@ async def api_activitybobux(request):
 	return web.json_response(bobux_leaderboard)
 
 
-def start_server(loop, background_task, client):
+async def start_server(loop, background_task, client):
 	global app
-	asyncio.set_event_loop(loop)
+	# asyncio.set_event_loop(loop)
 	app = web.Application(
 	)
 	app.discord = client
 	app.add_routes(routes)
 	asyncio.ensure_future(
-		background_task,
+		await background_task(),
 		loop=loop
 	)
 	web.run_app(

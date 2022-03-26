@@ -20,9 +20,7 @@ import os
 
 commands: Any = commands_module
 
-intents = discord.Intents.default()
-intents.members = True
-intents.presences = True
+intents = discord.Intents.all()
 
 token = os.getenv('token')
 is_dev = os.getenv('dev', 'false').lower() == 'true'
