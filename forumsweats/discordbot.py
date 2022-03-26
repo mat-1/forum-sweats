@@ -2,7 +2,7 @@ from .static_messages import main as static_messages
 from . import commands as commands_module
 from .commandparser import CommandParser
 from forumsweats import logger, numberparser, welcomemessages
-from typing import Any, List, Union
+from typing import Any, Callable, List, Union
 from datetime import datetime
 from . import uwuify
 from . import modbot
@@ -508,6 +508,10 @@ async def process_suggestion(message):
 	await message.add_reaction(agree_emoji)
 	await message.add_reaction(disagree_emoji)
 
+@client.event
+async def on_interaction(interaction: discord.Interaction):
+	#print("Interaction!!")
+	pass
 
 @client.event
 async def on_message(message: discord.Message):
@@ -912,7 +916,6 @@ for module_filename in os.listdir('./forumsweats/commands'):
 		roles=getattr(module, 'roles', []),
 		on_no_perms=getattr(module, 'on_no_perms', None),
 	)(module.run)
-
 
 async def check_bobux_roles(member_id: int, bobux: Union[int, None]=None):
 	if bobux is None:

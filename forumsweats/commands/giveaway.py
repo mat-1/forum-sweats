@@ -1,6 +1,7 @@
 from forumsweats.commandparser import Context, Member, Time
 from forumsweats.discordbot import client, has_role
 from typing import Any, Callable, Union
+from forumsweats.setuptour import prompt_input
 from utils import seconds_to_string
 from datetime import datetime
 from forumsweats import db
@@ -207,30 +208,6 @@ async def create_new_giveaway(creator_id: int, channel: discord.abc.GuildChannel
 	asyncio.ensure_future(continue_giveaway(giveaway_data), loop=client.loop)
 
 	return giveaway_message
-
-
-async def prompt_input(client: discord.Client, user: Member, channel: discord.abc.Messageable, prompt_message: str, invalid_message: str, check: Callable[[str], Any]) -> Any:
-	user_response = None
-
-	await channel.send(prompt_message)
-
-	while user_response is None:
-		m: discord.Message = await client.wait_for(
-			'message',
-			check=lambda m:
-				m.author.id == user.id
-				and channel.id == channel.id, # type: ignore (the typings on discord.py are wrong)
-			timeout=60
-		)
-
-		if m.content.lower() == 'cancel':
-			return await m.add_reaction('👍')
-		
-		user_response = await check(m.content)
-
-		if user_response is None:
-			await channel.send(invalid_message + ' (Type "cancel" to cancel the giveaway creation)')
-	return user_response
 
 
 async def run(message: Context):
