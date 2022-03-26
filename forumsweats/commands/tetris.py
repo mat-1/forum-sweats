@@ -281,6 +281,7 @@ async def run(message: Context):
 
 	async def on_interact(interaction: discord.interactions.Interaction):
 		# this prevents other people from interacting with the game
+		await interaction.response.defer()
 		return interaction.user == message.author
 
 	async def button_click_left(interaction: discord.interactions.Interaction):
