@@ -28,6 +28,41 @@ starboard_data = db['starboard']
 giveaways_data = db['giveaways']
 auctions_data = db['auctions']
 reminders_data = db['reminders']
+ticket_data = db['tickets']
+
+
+async def create_ticket(name: str, channel_id: str, user_id: int):
+	await ticket_data.update_one(
+		{ 'name': name },
+		{ '$push': { 'tickets': {
+			'channel_id': channel_id,
+			'user_id': user_id
+		} } }
+	)
+
+async def create_new_ticket_type(name: str, message_id: str):
+	await ticket_data.insert_one({
+		'name': name,
+		'message_id': message_id,
+		'tickets': [],
+		'id': 0
+	})
+
+async def incerase_ticket_id(ticket_id: str):
+	await ticket_data.update_one(
+		{ 'name': ticket_id },
+		{ '$inc': { 'id': 1 } }
+	)
+
+async def remove_ticket_type(name: str):
+	await ticket_data.delete_one({'name': name})
+
+async def get_ticket_types():
+	if not connection_url: return []
+	ticket_types = []
+	async for ticket_type in ticket_data.find():
+		ticket_types.append(ticket_type)
+	return ticket_types
 
 async def modify_member(user_id: int, data: dict):
 	if not connection_url: return

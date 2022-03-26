@@ -58,5 +58,5 @@ async def prompt_input(client: discord.Client, user: discord.Member, channel: di
         return user_response
     except asyncio.TimeoutError:
         if message is not None:
-            await message.edit(content='Timed out.')
+            await message.edit(content='Timed out.', embed=None)
         return

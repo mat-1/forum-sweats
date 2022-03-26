@@ -1,3 +1,4 @@
+from forumsweats.commands.ticket import close_ticket, create_ticket
 from .static_messages import main as static_messages
 from . import commands as commands_module
 from .commandparser import CommandParser
@@ -50,6 +51,7 @@ def has_role(member_id: int, role_name: str, guild_id=None):
 client = discord.Client(intents=intents)
 client.loop = asyncio.get_event_loop()
 
+ticket_types = []
 
 # this has to be here for there to not be an error
 from . import starboard
@@ -511,8 +513,15 @@ async def process_suggestion(message):
 
 @client.event
 async def on_interaction(interaction: discord.Interaction):
-	#print("Interaction!!")
-	pass
+	if not interaction.type == discord.InteractionType.component:
+		return
+	custom_id = interaction.data['custom_id']
+	if custom_id == 'close':
+		await close_ticket(interaction)
+	for ticket_type in ticket_types:
+		if interaction.message.id == ticket_type['message_id']:
+			await db.incerase_ticket_id(ticket_type['name'])
+			await create_ticket(interaction.user, interaction.guild, ticket_type['name'], ticket_type['id'])
 
 @client.event
 async def on_message(message: discord.Message):
