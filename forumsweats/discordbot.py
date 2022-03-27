@@ -542,6 +542,11 @@ async def on_message(message: discord.Message):
 	global last_general_message
 	global is_chat_dead
 
+	if message.channel.id == config.channels.get('piglegs-reviews'):
+		try:
+			await message.create_thread(name=message.content[:100], reason='Creating a thread for a review')
+		except:
+			pass
 	if message.channel.id == config.channels.get('skyblock-updates'):  # skyblock-updates
 		await message.publish()
 	if message.channel.id == config.channels.get('general'):  # general
