@@ -5,7 +5,8 @@ from forumsweats import discordbot
 from forumsweats.commandparser import Context, Member, Time
 from discord.reaction import Reaction
 from discord.message import Message
-from forumsweats.setuptour import check_channel, check_content, prompt_input
+from forumsweats.logger import send_log_message
+from forumsweats.setuptour import check_channel, check_content, prompt_input, quick_prompt
 from utils import seconds_to_string
 from typing import Any, Callable
 from discord.user import User
@@ -82,7 +83,7 @@ async def run(message: Context):
         description='Press the corresponding button to change the configuration.',
         timestamp=datetime.fromtimestamp(time.time())
     )
-    view = discord.ui.View(timeout=None)
+    view = discord.ui.View(timeout=30)
     add_ticket = discord.ui.Button(
 		custom_id='new_ticket',
         label='New ticket type',
@@ -97,14 +98,20 @@ async def run(message: Context):
 		emoji='🗑️',
 		row=1
 	)
+    
     add_ticket.callback = lambda _: create_new(message)
     view.interaction_check = on_interact
     view.add_item(add_ticket)
     view.add_item(remove_ticket)
 
-    await message.send(embed=embed, view=view)
+    setting_message = await message.send(embed=embed, view=view)
 
-async def close_ticket(interaction: discord.Interaction):
+    async def timeout():
+        await setting_message.edit(content='Timed out.', embed=None, view=None)
+
+    view.on_timeout = timeout
+
+async def create_html_from_channel(interaction: discord.Interaction):
     messages = interaction.channel.history(limit=200, oldest_first=True)
 
     posts = ''
@@ -117,29 +124,135 @@ async def close_ticket(interaction: discord.Interaction):
             attachments += image_template % (image.url)
 
         posts += post_template % (avatar, name, content, attachments)
-    finale = html_template.replace('posts', posts)
-    file = io.StringIO(finale)
-    log_channel = message.guild.get_channel(config.channels['logs'])
-    await log_channel.send(file=discord.File(file, filename=f'{interaction.channel.name}.html'))
-    await interaction.channel.delete()
 
-    '''
-    channel = interaction.channel
-    await channel.edit(name=f'closed-{channel.name.rsplit("-", 1)[1]}')
-    await channel.send(f'This ticket has been closed by { interaction.user.mention }.')
-    ticket_types = await db.get_ticket_types()
-    for _tickets in ticket_types: # Ugly, but it works.
-        for tickets in _tickets:
-            for ticket in tickets:
-                print(ticket)
-                user = discordbot.client.get_user(ticket['user_id'])
-                if ticket['channel_id'] == interaction.channel_id:
-                    await channel.set_permissions(user, read_messages=False, send_messages=False, view_channel=False)
-    await interaction.response.defer()
-    await interaction.delete_original_message()
-    '''
+    return html_template.replace('posts', posts)
+
+def get_ticket_from_ticket_data(ticket_data, interaction):
+    tickets = ticket_data['tickets']
+    for ticket in tickets:
+        if ticket['channel_id'] == interaction.channel.id: return ticket
+
+async def delete_ticket(interaction: discord.Interaction):
+    ticket_info_data = await db.get_ticket_by_channel(interaction.channel.id)
+    if ticket_info_data is None: return
+
+    ticket_data = get_ticket_from_ticket_data(ticket_info_data, interaction)
+    if ticket_data is None: return
+    ticket_id = get_text_id(ticket_data['id'])
+
+    html = await create_html_from_channel(interaction);
+    file = io.StringIO(html)
+    ticket_name = ticket_info_data['name']
+    discord_file = discord.File(file, filename=f'{ticket_name}-{ticket_id}.html')
+    embed = discord.Embed(
+        description=f'Ticket {ticket_name}-{ticket_id} deleted by {interaction.user.mention}',
+    )
+    await interaction.channel.delete()
+    await send_log_message(file=discord_file, embed=embed)
+
+async def reopen_ticket(interaction: discord.Interaction):
+    ticket_info_data = await db.get_ticket_by_channel(interaction.channel.id)
+    if ticket_info_data is None: return
+
+    ticket_data = get_ticket_from_ticket_data(ticket_info_data, interaction)
+    if ticket_data is None: return
+
+    ticket_id = get_text_id(ticket_data['id'])
+    user_id = ticket_data['user_id']
+    user = discordbot.client.get_user(user_id)
+    controller_message_id = ticket_data['controller_message']
+    controller_message: discord.PartialMessage = interaction.channel.get_partial_message(controller_message_id)
+    embed = discord.Embed(
+        title=f'Welcome to { name }',
+         description=f'Please use the reactions to interact with the ticket.',
+    )
+    ticket_name = ticket_info_data['name']
+    await interaction.channel.edit(name=f"{ticket_name}-{ticket_id}")
+    close_button = discord.ui.Button(
+        custom_id='close',
+        label='Close',
+        style=discord.ButtonStyle.red,
+        emoji='🗑️',
+        row=1
+    )
+    view = discord.ui.View(timeout=None)
+    view.add_item(close_button)
+
+    await interaction.channel.set_permissions(user, read_messages=True, send_messages=True, view_channel=True)
+
+    reopen_embed = discord.Embed(
+        description=f'Ticket reopened by { interaction.user.mention }',
+        color=discord.Color.green()
+    )
+    try:
+        await controller_message.edit(embed=embed, view=view, content=f'Welcome { user.mention }!')
+        await controller_message.reply(embed=reopen_embed)
+    except discord.errors.NotFound:
+        controller_message = await interaction.channel.send(embed=embed, view=view, content=f'Welcome { user.mention }!')
+        await controller_message.reply(embed=reopen_embed)
+
+
+async def close_ticket(interaction: discord.Interaction):
+    ticket_info_data = await db.get_ticket_by_channel(interaction.channel.id)
+    if ticket_info_data is None: return
+
+    ticket_data = get_ticket_from_ticket_data(ticket_info_data, interaction)
+    if ticket_data is None: return
+
+    ticket_id = get_text_id(ticket_data['id'])
+    user_id = ticket_data['user_id']
+    user = discordbot.client.get_user(user_id)
+    controller_message_id = ticket_data['controller_message']
+    controller_message: discord.PartialMessage = interaction.channel.get_partial_message(controller_message_id)
+    
+    embed = discord.Embed(
+        title=f'Ticket closed',
+        description=f'Please use the reactions to interact with the ticket.',
+    )
+    reopen_button = discord.ui.Button(
+        custom_id='reopen',
+        label='Reopen',
+        style=discord.ButtonStyle.green,
+        emoji='🔓',
+        row=1
+    )
+    delete_channel = discord.ui.Button(
+        custom_id='delete_ticket',
+        label='Delete channel',
+        style=discord.ButtonStyle.red,
+        emoji='🗑️',
+        row=1
+    )
+    view = discord.ui.View(timeout=None)
+    view.add_item(reopen_button)
+    view.add_item(delete_channel)
+    ticket_closed_embed = discord.Embed(
+            description=f'Ticket closed by {interaction.user.mention}',
+            color=discord.Color.red()
+    )
+
+    try:
+        await controller_message.edit(content='Ticket closed.', embed=embed, view=view)
+        await controller_message.reply(embed=ticket_closed_embed)
+    except discord.errors.NotFound:
+        ticket_closed_message = await interaction.channel.send(content='Ticket closed.', embed=embed, view=view)
+        await ticket_closed_message.reply(embed=ticket_closed_embed)
+
+    await db.close_ticket(ticket_id)
+
+    # html = await create_html_from_channel(interaction);
+    # file = io.StringIO(html)
+
+    #interaction.channel.edit(name='Closed')
+    # await send_log_message(file=discord.File(file, filename=f'{interaction.channel.name}.html'))
+    await interaction.channel.edit(name=f"closed-{ticket_id}")
+    await interaction.channel.set_permissions(user, read_messages=False, send_messages=False, view_channel=False)
+
+def get_text_id(id: int):
+    return '0' * (4 - len(str(id))) + str(id)
 
 async def create_ticket(user: User, guild: discord.Guild, name: str, id: int):
+
     async def create_category():
         category_name = f'📩 ⼁ { name }s ⼁ 📩'
         categoires = guild.categories
@@ -152,11 +265,14 @@ async def create_ticket(user: User, guild: discord.Guild, name: str, id: int):
         await category.edit(position=3)
         await category.set_permissions(guild.default_role, view_channel=False)
         return category
+
     async def create_channel(category: discord.CategoryChannel):
-        text_id = '0' * (4 - len(str(id))) + str(id)
+        text_id = get_text_id(id)
         channel = await category.create_text_channel(f'{name}-{text_id}')
+
         await channel.set_permissions(user, read_messages=True, send_messages=True, view_channel=True)
         return channel
+        
     async def send_welcome_message(channel: discord.TextChannel):
         embed = discord.Embed(
             title=f'Welcome to { name }',
@@ -172,19 +288,18 @@ async def create_ticket(user: User, guild: discord.Guild, name: str, id: int):
         view = discord.ui.View(timeout=None)
         view.add_item(close_button)
         
-        await channel.send(embed=embed, view=view, content=f'Welcome { user.mention }!')
+        return await channel.send(embed=embed, view=view, content=f'Welcome { user.mention }!')
 
     category = await create_category()
     channel = await create_channel(category)
-    await send_welcome_message(channel)
+    controller_message = await send_welcome_message(channel)
+    await db.create_ticket(name, channel.id, user.id, id, controller_message.id)
 
 
 async def create_new(message: Context):
 
-    title: int = await prompt_input(
-        message.client,
-        message.author,
-        message.channel,
+    title: int = await quick_prompt(
+        message,
         prompt_message='Creating the embed for the ticket type.\nPlease enter the title you want to use.',
         invalid_message='Invalid name',
         check=check_content,
@@ -197,10 +312,8 @@ async def create_new(message: Context):
     if title is None:
         return
     
-    description: int = await prompt_input(
-        message.client,
-        message.author,
-        message.channel,
+    description: int = await quick_prompt(
+        message,
         prompt_message='Enter Description',
         invalid_message='Invalid name',
         check=check_content,
@@ -213,10 +326,8 @@ async def create_new(message: Context):
     if description is None:
         return
     
-    ticket_name: int = await prompt_input(
-        message.client,
-        message.author,
-        message.channel,
+    ticket_name: int = await quick_prompt(
+        message,
         prompt_message='Please enter the ticket type name.',
         invalid_message='Invalid name',
         check=check_content
@@ -225,10 +336,8 @@ async def create_new(message: Context):
     if ticket_name is None:
         return
 
-    channel: int = await prompt_input(
-        message.client,
-        message.author,
-        message.channel,
+    channel: int = await quick_prompt(
+        message,
         prompt_message='Please enter the channel to post the message in.',
         invalid_message='Invalid channel',
         check=check_channel

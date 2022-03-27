@@ -1,10 +1,19 @@
+from typing import Optional
 from attr import attr
 import config
 import discord
 import io
 
+from forumsweats import discordbot
+
+async def send_log_message(embed: Optional[discord.Embed] = None, content: Optional[str] = None, file: Optional[discord.File] = None):
+    try:
+        log_channel = discordbot.client.get_channel(config.channels['logs'])
+        await log_channel.send(embed=embed, content=content, file=file)
+    except:
+        print('Failed to log')
+
 async def log_message_deletion(message):
-    log_channel = message.guild.get_channel(config.channels['logs'])
     content = message.content
     attachments = message.attachments
     member = message.author
@@ -31,7 +40,7 @@ async def log_message_deletion(message):
     embed.set_author(name=f'{message.author}', icon_url=avatar)
     embed.set_footer(text=f'Message #{message.id}')
 
-    await log_channel.send(embed=embed, content=additional_content, file=message_file)
+    await send_log_message(embed=embed, content=additional_content, file=message_file)
 
 async def log_message_edition(before_message, after_message):
     content_before = before_message.content
@@ -55,7 +64,6 @@ async def log_message_edition(before_message, after_message):
         content_after = content_after[:250] + '...'
 
     
-    log_channel = before_message.guild.get_channel(config.channels['logs'])
     member = before_message.author
     avatar = member.avatar or member.default_avatar
     embed = discord.Embed(
@@ -65,36 +73,10 @@ async def log_message_edition(before_message, after_message):
     embed.set_author(name=f'{before_message.author}', icon_url=avatar)
     embed.set_footer(text=f'Message #{before_message.id}')
 
-    await log_channel.send(embed=embed, content=additional_content, files=files)
-
-# Work on this later
-"""
-def get_permissions_from_override(override):
-    for role_before_raw in override:
-        permissions = override[role_before_raw]
-        return permissions
-
-async def get_changes_from_overrides(before, after):
-    changes = ''
-    permissions_before = get_permissions_from_override(before)
-    permissions_after = get_permissions_from_override(after)
-    for key_before, value_before in permissions_before:
-        for key_after, value_after in permissions_after:
-            if key_after == key_before:
-                print("KEY MATCHES", value_before, value_after)
-                if value_after != value_before:
-                    changes += f'{key_after} changed from {value_before} to {value_after}\n'
-    for key_before, value_before in permissions_before:
-        print(key_before, value_before)
-                        
-            
-    print(changes)
-    return changes
-"""
+    await send_log_message(embed=embed, content=additional_content, files=files)
 
 async def log_role_update(before, after):
     content = f'**{after.mention} updated**'
-    log_channel = after.guild.get_channel(config.channels['logs'])
 
     if(before.name != after.name):
         content += f'\nName: {before.name} -> {after.name}'
@@ -123,7 +105,7 @@ async def log_role_update(before, after):
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 
 async def log_guild_channel_changes(before, after):
@@ -144,12 +126,11 @@ async def log_guild_channel_changes(before, after):
     if not before.nsfw == after.nsfw:
         content += f'\nNSFW: {before.nsfw} -> {after.nsfw}'
     
-    log_channel = before.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 def match_role(role, list):
     for item in list:
@@ -174,12 +155,11 @@ async def log_member_update(before, after):
         return
 
     content = f'**Member updated {after.mention}**\n{content}'
-    log_channel = before.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 async def log_user_update(before, after):
     content = f'**User updated {after.mention}**\n'
@@ -190,59 +170,52 @@ async def log_user_update(before, after):
         color=0xA40985,
     )
     embed.set_image(url=after.avatar)
-    log_channel = before.guild.get_channel(config.channels['logs'])
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 async def log_member_join(member):
     content = f'**{member.mention} joined**'
-    log_channel = member.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 async def log_member_leave(member):
     content = f'**{member.mention} left**'
-    log_channel = member.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 async def log_role_create(role):
     content = f'**{role.mention} created**\n {role.mention}'
-    log_channel = role.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 async def log_role_delete(role):
     content = f'**{role.mention} deleted**\n {role.name}'
-    log_channel = role.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 async def log_channel_creation(channel):
     content = f'**{channel.mention} created**'
-    log_channel = channel.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)
 
 async def log_channel_deletion(channel):
     content = f'**{channel.name} ({channel.id}) deleted**'
-    log_channel = channel.guild.get_channel(config.channels['logs'])
     embed = discord.Embed(
         description=content,
         color=0xA40985,
     )
-    await log_channel.send(embed=embed)
+    await send_log_message(embed=embed)

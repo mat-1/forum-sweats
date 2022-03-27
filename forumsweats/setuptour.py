@@ -1,4 +1,5 @@
 import asyncio
+from email.message import Message
 import inspect
 from typing import Any, Callable, Optional, TypeVar, Union
 import discord
@@ -19,6 +20,17 @@ async def check_channel(content: str) -> discord.TextChannel:
     if not isinstance(channel, discord.TextChannel):
         return
     return channel
+
+async def quick_prompt(message: Message, prompt_message: str, invalid_message: str, check: Callable[[Any], Any], preview: Optional[discord.Embed] = None):
+    return await prompt_input(
+        message.client,
+        message.author,
+        message.channel,
+        prompt_message=prompt_message,
+        invalid_message=invalid_message,
+        check=check,
+        preview=preview
+    )
 
 async def prompt_input(client: discord.Client, user: discord.Member, channel: discord.abc.Messageable, prompt_message: str, invalid_message: str, check: Callable[[Any], Any], **kwargs) -> Any:
     message = None

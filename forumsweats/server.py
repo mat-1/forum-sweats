@@ -87,7 +87,6 @@ async def start_server(loop, background_task, client):
 	app = web.Application(
 	)
 	discordbot.ticket_types = await discordbot.db.get_ticket_types()
-	print(discordbot.ticket_types)
 	app.discord = client
 	app.add_routes(routes)
 	asyncio.ensure_future(

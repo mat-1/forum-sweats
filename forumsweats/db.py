@@ -1,6 +1,7 @@
 import asyncio
 from discord.user import User
 from forumsweats import discordbot
+from forumsweats.commands import ticket
 from utils import convert_datetime_to_tz_aware
 from forumsweats.commands.pets import Pet
 from typing import Any, List, Set, Union
@@ -30,14 +31,26 @@ auctions_data = db['auctions']
 reminders_data = db['reminders']
 ticket_data = db['tickets']
 
+async def get_ticket_by_channel(channel_id: int):
+	return await ticket_data.find_one({ 'tickets': { '$elemMatch': { 'channel_id': channel_id } } })
 
-async def create_ticket(name: str, channel_id: str, user_id: int):
+async def create_ticket(name: str, channel_id: str, user_id: int, id: int, controller_message: int):
 	await ticket_data.update_one(
 		{ 'name': name },
 		{ '$push': { 'tickets': {
 			'channel_id': channel_id,
-			'user_id': user_id
-		} } }
+			'user_id': user_id,
+			'created_at': time.time(),
+			'id': id,
+			'controller_message': controller_message,
+			'open': True
+		} }, '$inc': { 'id': 1 } }
+	)
+
+async def close_ticket(ticket_id: int):
+	await ticket_data.update_one(
+		{ '_id': ticket_id },
+		{ '$set': { 'open': False } }
 	)
 
 async def create_new_ticket_type(name: str, message_id: str):
@@ -47,12 +60,6 @@ async def create_new_ticket_type(name: str, message_id: str):
 		'tickets': [],
 		'id': 0
 	})
-
-async def incerase_ticket_id(ticket_id: str):
-	await ticket_data.update_one(
-		{ 'name': ticket_id },
-		{ '$inc': { 'id': 1 } }
-	)
 
 async def remove_ticket_type(name: str):
 	await ticket_data.delete_one({'name': name})

@@ -1,4 +1,4 @@
-from forumsweats.commands.ticket import close_ticket, create_ticket
+from forumsweats.commands.ticket import close_ticket, create_ticket, delete_ticket, reopen_ticket
 from .static_messages import main as static_messages
 from . import commands as commands_module
 from .commandparser import CommandParser
@@ -515,12 +515,22 @@ async def process_suggestion(message):
 async def on_interaction(interaction: discord.Interaction):
 	if not interaction.type == discord.InteractionType.component:
 		return
+	
 	custom_id = interaction.data['custom_id']
 	if custom_id == 'close':
+		await interaction.response.defer()
 		await close_ticket(interaction)
+	if custom_id == 'reopen':
+		await interaction.response.defer()
+		await reopen_ticket(interaction)
+	if custom_id == 'delete_ticket':
+		await interaction.response.defer()
+		await delete_ticket(interaction)
+	
+	ticket_types = await db.get_ticket_types()
 	for ticket_type in ticket_types:
 		if interaction.message.id == ticket_type['message_id']:
-			await db.incerase_ticket_id(ticket_type['name'])
+			await interaction.response.defer()
 			await create_ticket(interaction.user, interaction.guild, ticket_type['name'], ticket_type['id'])
 
 @client.event
