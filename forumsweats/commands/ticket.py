@@ -240,11 +240,6 @@ async def close_ticket(interaction: discord.Interaction):
 
     await db.close_ticket(ticket_id)
 
-    # html = await create_html_from_channel(interaction);
-    # file = io.StringIO(html)
-
-    #interaction.channel.edit(name='Closed')
-    # await send_log_message(file=discord.File(file, filename=f'{interaction.channel.name}.html'))
     await interaction.channel.edit(name=f"closed-{ticket_id}")
     await interaction.channel.set_permissions(user, read_messages=False, send_messages=False, view_channel=False)
 
@@ -269,7 +264,12 @@ async def create_ticket(user: User, guild: discord.Guild, name: str, id: int):
     async def create_channel(category: discord.CategoryChannel):
         text_id = get_text_id(id)
         channel = await category.create_text_channel(f'{name}-{text_id}')
-
+        try:
+            ticket_support_id = config.roles.get('tickets_support')
+            ticket_support = guild.get_role(ticket_support_id)
+            await channel.set_permissions(ticket_support, read_messages=True, send_messages=True, view_channel=True)
+        except:
+            pass
         await channel.set_permissions(user, read_messages=True, send_messages=True, view_channel=True)
         return channel
         
@@ -289,7 +289,7 @@ async def create_ticket(user: User, guild: discord.Guild, name: str, id: int):
         view.add_item(close_button)
         
         return await channel.send(embed=embed, view=view, content=f'Welcome { user.mention }!')
-
+    await db.set_cooldown('ticket', user.id)
     category = await create_category()
     channel = await create_channel(category)
     controller_message = await send_welcome_message(channel)

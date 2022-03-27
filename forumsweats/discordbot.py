@@ -530,6 +530,10 @@ async def on_interaction(interaction: discord.Interaction):
 	ticket_types = await db.get_ticket_types()
 	for ticket_type in ticket_types:
 		if interaction.message.id == ticket_type['message_id']:
+			last_ticket_use = (await db.get_cooldown(interaction.user.id, 'ticket') + (60 * 15)) or 0
+			cooldown_over = last_ticket_use < time.time()
+			if not cooldown_over:
+				return await interaction.response.send_message(content=f'You\'re trying to create a ticket too fast. Please try later.', ephemeral=True)
 			await interaction.response.defer()
 			await create_ticket(interaction.user, interaction.guild, ticket_type['name'], ticket_type['id'])
 

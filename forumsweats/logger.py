@@ -5,6 +5,7 @@ import discord
 import io
 
 from forumsweats import discordbot
+from forumsweats.commandparser import Member
 
 async def send_log_message(embed: Optional[discord.Embed] = None, content: Optional[str] = None, file: Optional[discord.File] = None):
     try:
@@ -109,7 +110,7 @@ async def log_role_update(before, after):
 
 
 async def log_guild_channel_changes(before, after):
-    content = f'**Changes to {after.mention} channel**'
+    content = ''
     if(not isinstance(before, discord.TextChannel)):
         return
     
@@ -126,6 +127,10 @@ async def log_guild_channel_changes(before, after):
     if not before.nsfw == after.nsfw:
         content += f'\nNSFW: {before.nsfw} -> {after.nsfw}'
     
+    if content == '':
+        return
+    content = f'**{after.mention} updated**\n{content}'
+
     embed = discord.Embed(
         description=content,
         color=0xA40985,
@@ -138,8 +143,13 @@ def match_role(role, list):
             return True
     return False
 
-async def log_member_update(before, after):
+async def log_member_update(before: Member, after: Member):
     content = ''
+    embed = discord.Embed(
+        color=0xA40985,
+    )
+    before_avatar = before.avatar or before.default_avatar
+    after_avatar = after.avatar or after.default_avatar
     if not before.nick == after.nick:
         content += f'\nNick: {before.nick} -> {after.nick}'
     if not before.roles == after.roles:
@@ -151,14 +161,14 @@ async def log_member_update(before, after):
             exits = match_role(role_after, after.roles)
             if not exits:
                 content += f'\nRemoved role {role_after.mention}'
-    if not content == '':
-        return
+    if before_avatar != after_avatar:
+        before_avatar = before.avatar or before.default_avatar
+        after_avatar = after.avatar or after.default_avatar
+        content += f'\nAvatar updated.'
+        embed.set_thumbnail(after_avatar)
 
     content = f'**Member updated {after.mention}**\n{content}'
-    embed = discord.Embed(
-        description=content,
-        color=0xA40985,
-    )
+    embed.description = content
     await send_log_message(embed=embed)
 
 async def log_user_update(before, after):

@@ -30,9 +30,28 @@ giveaways_data = db['giveaways']
 auctions_data = db['auctions']
 reminders_data = db['reminders']
 ticket_data = db['tickets']
+cooldowns = db['cooldowns']
 
 async def get_ticket_by_channel(channel_id: int):
 	return await ticket_data.find_one({ 'tickets': { '$elemMatch': { 'channel_id': channel_id } } })
+
+async def get_cooldown(user_id: int, cooldown_name: str):
+	if not connection_url: return
+	result = await cooldowns.find_one({ 'user_id': str(user_id) })
+	if not result: return 0
+	return result[cooldown_name]['last_used'] or 0
+
+
+async def set_cooldown(cooldown_name: str, user_id: int):
+	if not connection_url: return
+	await cooldowns.update_one(
+		{ 'user_id': str(user_id) },
+		{ '$set': {
+			cooldown_name: {
+			'last_used': time.time(),
+		} } },
+		upsert=True
+	)
 
 async def create_ticket(name: str, channel_id: str, user_id: int, id: int, controller_message: int):
 	await ticket_data.update_one(
