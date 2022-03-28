@@ -545,6 +545,8 @@ async def on_message(message: discord.Message):
 	if message.channel.id == config.channels.get('piglegs-reviews'):
 		try:
 			await message.create_thread(name=message.content[:100], reason='Creating a thread for a review')
+			if message.author.id == '877748810275754004':
+				await message.add_reaction('👍')
 		except:
 			pass
 	if message.channel.id == config.channels.get('skyblock-updates'):  # skyblock-updates
