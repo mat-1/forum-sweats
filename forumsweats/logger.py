@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from attr import attr
 import config
 import discord
@@ -7,10 +7,10 @@ import io
 from forumsweats import discordbot
 from forumsweats.commandparser import Member
 
-async def send_log_message(embed: Optional[discord.Embed] = None, content: Optional[str] = None, file: Optional[discord.File] = None):
+async def send_log_message(embed: Optional[discord.Embed] = None, content: Optional[str] = None, file: Optional[discord.File] = None, files: Optional[List[discord.File]] = None):
     try:
         log_channel = discordbot.client.get_channel(config.channels['logs'])
-        await log_channel.send(embed=embed, content=content, file=file)
+        await log_channel.send(embed=embed, content=content, file=file, files=files)
     except:
         print('Failed to log')
 
