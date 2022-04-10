@@ -21,7 +21,9 @@ client = motor.motor_asyncio.AsyncIOMotorClient(connection_url)
 client.get_io_loop = asyncio.get_event_loop
 
 db = client.discord
+db2 = client.myFirstDatabase
 
+user_data = db2['User']
 member_data = db['members']
 infractions_data = db['infractions']
 servers_data = db['servers']
@@ -31,6 +33,17 @@ auctions_data = db['auctions']
 reminders_data = db['reminders']
 ticket_data = db['tickets']
 cooldowns = db['cooldowns']
+
+async def create_access_code(user_id: int, user_name: str, code: str):
+	if not connection_url: return
+	await user_data.insert_one({
+		'discord_id': str(user_id),
+		'name': user_name,
+		'access_code': code,
+	})
+async def get_place_user_by_id(user_id: int):
+	if not connection_url: return
+	return await user_data.find_one({ 'discord_id': str(user_id) })
 
 async def get_ticket_by_channel(channel_id: int):
 	return await ticket_data.find_one({ 'tickets': { '$elemMatch': { 'channel_id': channel_id } } })
