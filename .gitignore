@@ -12,3 +12,4 @@ pytest_cache
 .vscode/settings.json
 aiohttp/
 motor/
+dev_config

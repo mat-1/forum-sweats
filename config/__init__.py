@@ -1,10 +1,13 @@
+import os
 from typing import Any, Dict
 import json
 
+use_dev_config = os.getenv('use_dev_config')
+config_file_name = 'dev_config' if use_dev_config else 'config'
 
 def read_config_file(name):
 	'Reads a json file from config/{name}.json'
-	with open(f'config/{name}.json', 'r') as f:
+	with open(f'{config_file_name}/{name}.json', 'r') as f:
 		config_data = json.loads(f.read())
 	return config_data
 
