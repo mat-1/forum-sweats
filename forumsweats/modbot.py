@@ -229,6 +229,10 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		)
 		return True
 
+	if message.author.id in {617360871253082158} and re.match(r'\*', content, flags=re.IGNORECASE):
+		await message.delete()
+		return True
+
 	if re.search(r'\b((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d))\.((?:2[0-4]\d)|(?:25[0-5])|(?:1?\d?\d))\b', content):
 		# 69.420.69.420
 		try:
