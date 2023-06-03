@@ -262,18 +262,18 @@ async def process_message(message, warn=True, is_edit=False) -> bool:
 		return True
 	
 	# anti r-word filter
-	if re.search(r'retard', content, flags=re.IGNORECASE):
-		try:
-			await message.author.send('Don\'t say slurs in chat, nerd')
-		except:
-			pass
-		await message.delete()
-		await discordbot.mute_user(
-			message.author,
-			21600, # 6 hours
-			message.guild.id if message.guild else None,
-		)
-		return True
+	#if re.search(r'retard', content, flags=re.IGNORECASE):
+	#	try:
+	#		await message.author.send('Don\'t say slurs in chat, nerd')
+	#	except:
+	#		pass
+	#	await message.delete()
+	#	await discordbot.mute_user(
+	#		message.author,
+	#		21600, # 6 hours
+	#		message.guild.id if message.guild else None,
+	#	)
+	#	return True
 
 	#if not is_serious_talk and re.search(r'(^|[ \n])s\W*_*[e3]\W*_*x_*o?\b', content, flags=re.IGNORECASE):
 		#try:
